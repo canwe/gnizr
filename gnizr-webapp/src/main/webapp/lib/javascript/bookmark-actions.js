@@ -118,7 +118,7 @@ function getBookmarkId(checkBoxId){
 function getBookmarkInFolders(bmarkId){
 	var bmark_fldr_cls = 'f_'+bmarkId;
 	var bmarkInFldrs = MochiKit.DOM.getElementsByTagAndClassName('A',bmark_fldr_cls,bookmarkActionFormId);	
-	var fds = new Array();
+	var fds = [];
 	for(var i = 0; i < bmarkInFldrs.length; i++){	
 		fds.push(bmarkInFldrs[i].innerHTML);
 	}

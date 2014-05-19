@@ -9,7 +9,7 @@ var editTagsTextAreaId='editValue';
 var tags = {};
 
 /** An array of tags currently present in the INPUT text area of 'editTagsTextAreaid' */
-var inputTags = new Array();
+var inputTags = [];
 
 function loadUserTags(data){
 	tags = data;
@@ -68,7 +68,7 @@ function doReadTagline(){
 	// removes the leading and trailing white spaces
 	var tagline = strip(tagsInput.value);	
 	var ltags = tagline.split(' ');
-	inputTags = new Array();			
+	inputTags = [];
 	for(var i = 0; i < ltags.length; i++){
 		if(getInCurrentInputTagsPos(ltags[i]) == -1){
 			inputTags.push(ltags[i]);

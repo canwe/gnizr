@@ -171,7 +171,7 @@ public class GeometryMarkerDBDao implements GeometryMarkerDao{
 		if(rs == null) return null;
 		PointMarker pm = new PointMarker();
 		pm.setId(rs.getInt(PointMarkerSchema.ID));
-		pm.setNotes(rs.getString(PointMarkerSchema.NOTES));
+		pm.setNotes(rs.getString(PointMarkerSchema.NOTES).replaceAll("\\r\\n", ""));
 		pm.setMarkerIconId(rs.getInt(PointMarkerSchema.ICON_ID));
 		
 		byte[] buf = rs.getBytes(PointMarkerSchema.GEOM_WKB);
