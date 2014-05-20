@@ -46,10 +46,7 @@ function bmShwPlcmkId(id){
 
 function isPlcmkJsonLoaded(bmId){
 	var obj = gmapObjectMap[bmId];
-	if(MochiKit.Base.isUndefinedOrNull(obj)){
-		return false;
-	}
-	return true;
+	return !MochiKit.Base.isUndefinedOrNull(obj);
 }
 
 function getBookmark(bmId){
@@ -172,7 +169,7 @@ function toggleShowPlacemark(bmId){
 	var callback = function(){		
 		gmapMrkMgr.refresh();
 		hideLoadingImg();
-	}
+	};
 	showLoadingImg();
 	doShowHidePlacemarks(bmId,callback);
 }
@@ -224,13 +221,13 @@ function doShowHidePlacemarks(bmId, onFinishedCallback){
 					onFinishedCallback();
 				}
 				alert('Error: ' + err);
-			}
+			};
 			d.addCallbacks(gotData,dataFetchFailed);
 		}else{
 			for(var type in myGObjectMap){
 				var markers = myGObjectMap[type];
 				MochiKit.Logging.log('# of markers of type: ' + type + ' = ' + markers.length);
-				gmapMrkMgr.addMarkers(markers,0);
+				gmapMrkMgr.addMarkers(markers, 0);
 			}
 			//gmapMrkMgr.refresh();	
 			if(MochiKit.Base.isUndefinedOrNull(onFinishedCallback) == false){
@@ -349,7 +346,7 @@ function zoomToPlacemark(bmId,type,markerIdx){
 	var markers = getMyMakersOfType(bmId,type);
 	var gMarker = markers[markerIdx]; 
 		
-	var gLatLng = gMarker.getLatLng();
+	var gLatLng = gMarker.getPosition();
 	MochiKit.Logging.log('zoomToPlacemark: panTo ' + gLatLng);
 	gmap.panTo(gLatLng);
 		
@@ -357,8 +354,8 @@ function zoomToPlacemark(bmId,type,markerIdx){
 	MochiKit.Logging.log('zoomToPlacemark: getBookmark of bmId='+bmId + ', bm='+bm);	
 	var content = createPlacemarkerNotesHtml(bm,gMarker.pm);
 	MochiKit.Logging.log('zoomToPlacemark: content created: ' + toHTML(content));
-	MochiKit.Logging.log('gMarker isHidden():  ' + gMarker.isHidden());
-	if(gMarker.isHidden() == false){
+	MochiKit.Logging.log('gMarker getVisible():  ' + gMarker.getVisible());
+	if(gMarker.getVisible() == false){
 		var infoWindow = new google.maps.InfoWindow({content: content});
 		infoWindow.open(map, gMarker);
 	}
@@ -409,16 +406,14 @@ function setMenuOptionHref(){
 function showAllPlacemarks(){	
 	showLoadingImg();
 	var bmarkIds = [];
-	var shwPlcMrkInputElms = 
-	  	 MochiKit.DOM.getElementsByTagAndClassName('INPUT',
-	      shwPlcMrkInputClass,bookmarkListTBODYId);
+	var shwPlcMrkInputElms = MochiKit.DOM.getElementsByTagAndClassName('INPUT', shwPlcMrkInputClass,bookmarkListTBODYId);
 	MochiKit.Logging.log('inputElm length: ' + shwPlcMrkInputElms.length);
 	for(var i = 0; i < shwPlcMrkInputElms.length; i++){
 		var elm = shwPlcMrkInputElms[i];
 		if(elm.checked == false){
 			elm.checked = true;
 			var bmId = parseBookmarkId(elm.id);
-			log(i + ': elm.id: ' + elm.id + ', parsed bmid: ' + bmId);
+			MochiKit.Logging.log(i + ': elm.id: ' + elm.id + ', parsed bmid: ' + bmId);
 			bmarkIds.push(bmId);
 		}
 	}      	      	      
@@ -501,18 +496,18 @@ function fetchBookmarksOnPage(pgnum){
 function setPagingControls(){
 	var pgShwElm = MochiKit.DOM.DIV({'id':'pageShowing'},
 	   'page ' + curPageNumber + ' of ' + maxPageNumber);
-    log('showing page: ' + curPageNumber + ', max page #: ' + maxPageNumber);	   
+	MochiKit.Logging.log('showing page: ' + curPageNumber + ', max page #: ' + maxPageNumber);
 	var prvElm = '';
     if(curPageNumber > 1){	   
     	var n = curPageNumber - 1;
-      	prvElm = MochiKit.DOM.A({'class':'system-link','href':'javascript:fetchBookmarksOnPage('+n+')'},'previous'); 	   
-      	log('preElm set to ' + n);
+      	prvElm = MochiKit.DOM.A({'class':'system-link','href':'javascript:fetchBookmarksOnPage('+n+')'},'previous');
+	    MochiKit.Logging.log('preElm set to ' + n);
     }
     var nxtElm = '';
     if(curPageNumber < maxPageNumber){
     	var n = curPageNumber + 1;
-    	nxtElm = MochiKit.DOM.A({'class':'system-link','href':'javascript:fetchBookmarksOnPage('+n+')'},'next'); 
-    	log('nxtElm set to ' + n);
+    	nxtElm = MochiKit.DOM.A({'class':'system-link','href':'javascript:fetchBookmarksOnPage('+n+')'},'next');
+	    MochiKit.Logging.log('nxtElm set to ' + n);
     }
     var pgngElm = MochiKit.DOM.DIV({'id':'pagingControl'},prvElm,' | ',nxtElm);     
     MochiKit.DOM.replaceChildNodes(leftFtDIVId,pgShwElm,pgngElm);             	   

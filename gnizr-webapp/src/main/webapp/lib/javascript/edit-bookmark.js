@@ -273,7 +273,7 @@ function fitGmapToData() {
 	if(gmapMarkers.length > 0){
 		var bounds = new google.maps.LatLngBounds();
 		for(var i = 0; i < gmapMarkers.length; i++){
-			var latlng = gmapMarkers[i].getLatLng();
+			var latlng = gmapMarkers[i].getPosition();
 			bounds.extend(latlng);
 		}
 		gmap.setZoom(7);
@@ -286,16 +286,16 @@ function findPlaceAndZoom(){
 	var placename = zoomToInputElm.value;
 	if(MochiKit.Base.isUndefinedOrNull(placename) == false){
 		if(gmapGeocoder == null){
-			gmapGeocoder = new GClientGeocoder();	
+			gmapGeocoder = new google.maps.Geocoder();
 		}
-		gmapGeocoder.getLatLng(
-			placename,
-			function(point){
-				if(MochiKit.Base.isUndefinedOrNull(point) == true){
+		gmapGeocoder.getLatLng({'address': placename},
+			function(results, status){
+				if (status == google.maps.GeocoderStatus.OK) {
+					gmap.setCenter(results[0].geometry.location);
+					gmap.setZoom(13);
+				} else {
 					alert(placename + ' not found.');
-				}else{
-					gmap.setCenter(point,13);					
-				}	
+				}
 			});
 	}
 }
@@ -307,7 +307,7 @@ function createUserSelection(userStats){
 	var slctHeaderElm = userSlctElm[0].cloneNode(true);
 	// clears all current selection OPTION
 	userSlctElm.innerHTML = '';
-	MochiKit.DOM.appendChildNodes(userSlctElm,slctHeaderElm);
+	MochiKit.DOM.appendChildNodes(userSlctElm, slctHeaderElm);
 	for(var uname in userStats){
 		if(uname.length > 0 && userStats[uname] > 0){
 			var userOptElm = MochiKit.DOM.OPTION({'value':uname,'class':'select-option'},uname);
@@ -348,7 +348,7 @@ function addGeonamesMT(){
       }else if(regexp.test(inputTag) == true){
           alert("Place name must not contain these special characters: & ? / \\ :");
       }else{
-          var safeInputTag = inputTag.trim()
+          var safeInputTag = inputTag.trim();
           safeInputTag = safeInputTag.replace(/\s+/g,'_');
           addMachineTagToTagline('gn','geonames',safeInputTag);      
       }
@@ -364,7 +364,7 @@ function addFolderMT(){
       }else if(regexp.test(inputTag) == true){
           alert("Folder name must not contain these special characters: * ? & / \\ ; ' \" * % ^ + _");
       }else{
-          var safeInputTag = inputTag.trim()
+          var safeInputTag = inputTag.trim();
           safeInputTag = safeInputTag.replace(/\s+/g,'_');
           addMachineTagToTagline('gn','folder',safeInputTag);      
       }
@@ -380,7 +380,7 @@ function addForUserMT(){
       }else if(regexp.test(inputTag) == true){
           alert("Invalid user name!");
       }else{
-          var safeInputTag = inputTag.trim()
+          var safeInputTag = inputTag.trim();
           safeInputTag = safeInputTag.replace(/\s+/g,'');
           addMachineTagToTagline('gn','for',safeInputTag);      
       }
@@ -508,7 +508,7 @@ function fetchTags(category){
 function doLoadRecommendedTags(){
 	var url = MochiKit.DOM.getElement(bmarkUrlInputFieldId).value;
 	if(url != null && url.length > 0){		
-		var qs = MochiKit.Base.queryString(['url'],[url])		
+		var qs = MochiKit.Base.queryString(['url'],[url]);
 		var d = MochiKit.Async.loadJSONDoc(getRecommendedTagsUrl+'?'+qs);
 		var gotData = function (rcmdTags) {
 			if(MochiKit.Base.keys(rcmdTags).length > 0){
@@ -539,7 +539,7 @@ function doLoadUserTagCloud(username){
 	};
 	var dataFetchFailed = function(err){
 		alert('Error: ' + err);
-	}
+	};
 	d.addCallbacks(gotData,dataFetchFailed);
 }
 
@@ -551,7 +551,7 @@ function doLoadUserTagGroup(username){
 	};
 	var dataFetchFailed = function(err){
 		alert('Error: ' + err);
-	}
+	};
 	d.addCallbacks(gotData,dataFetchFailed);
 }
 
@@ -597,7 +597,7 @@ function monitorZoomInputSubmit(){
 		if(e.key().code == 13){
 			findPlaceAndZoom();
 		}
-	}
+	};
 	MochiKit.Signal.connect(zoomToInputId,'onkeydown',changed);
 }
 
@@ -625,14 +625,14 @@ function monitorTaglineChanges(){
 	        MochiKit.Logging.log('SPACE-like key pressed: ' + e.key().string);
 	        clearSuggestedTags();
 	    }
-	}
+	};
 	var changed3 = function(e){
 	    var caretPos = getSelectionStart(e.src());
 	    MochiKit.Logging.log("caret start: " + caretPos);
        	if(suggestTagsToComplete(caretPos) == false){
        	   clearSuggestedTags();
         }
-	}
+	};
 	MochiKit.Signal.connect(tagsInputFieldId,'onkeyup',changed1);
 	if(BO.ie == false){
   	   MochiKit.Signal.connect(tagsInputFieldId,'onkeyup',changed2);
@@ -669,7 +669,7 @@ function monitorUserSelectionChanges(){
 			}	
 		}
 		});		
-	}
+	};
 	MochiKit.Signal.connect(userSelectionId,'onchange',switchTagCloud);
 }
 
@@ -769,7 +769,7 @@ function delMarker(pmId){
 }
 
 function isValidUrl(s){
-	var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+	var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
 	return regexp.test(s);
 }
 
