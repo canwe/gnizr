@@ -391,6 +391,10 @@ OUTPUT: returns 'yes', 'no' that maps 'true', 'false' respectively
 <#return toUrl/>
 </#function>
 
+<#--<#function googleMapKeyUrl key>-->
+  <#--<#return "http://maps.google.com/maps?file=api&amp;v=2&amp;key="+key/>-->
+<#--</#function>-->
+
 <#function googleMapKeyUrl key>
-  <#return "http://maps.google.com/maps?file=api&amp;v=2&amp;key="+key/>
+  <#return "http://maps.googleapis.com/maps/api/js?key="+key/>
 </#function>

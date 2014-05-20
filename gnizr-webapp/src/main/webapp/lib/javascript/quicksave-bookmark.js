@@ -47,7 +47,7 @@ function drawQuickSaveProgressMessage(postId,message,imgSrc){
 	var postElm = MochiKit.DOM.getElement(postId);
 	var postActionsElm = MochiKit.DOM.getFirstElementByTagAndClassName('DIV',postActionsClass,postElm);		
 	if(postActionsElm != null){		
-		var msgContent = new Array();
+		var msgContent = [];
 		if(message != null){
 			msgContent.push(message);
 		}
@@ -80,10 +80,10 @@ function checkOkayToSaveAndDoSave(bmark, doSaveFunction){
 			}else{
 				doSaveFunction(bmark);				
 			}
-		}
+		};
 		var fetchBmrkFailed = function(err){
 			alert('get bookmark failed: ' + err);
-		}
+		};
 		d.addCallbacks(fetchBmrkOkay,fetchBmrkFailed);
 	}	
 }

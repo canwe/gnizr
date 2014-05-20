@@ -48,8 +48,7 @@
 		<property name="webApplicationUrl" value="http://localhost:8080/gnizr"/>
 
 		<!-- Define the Google Maps API Key to be used for this gnizr installation -->
-		<property name="googleMapsKey"
-		          value="ABQIAAAA5UsQFqmHpHln5pC8nyp05RTwM0brOpm-All5BF6PoaKBxRWWERS_Vpbx966CLXx9tDQthE6QI_9_bg"/>
+		<property name="googleMapsKey" value="AIzaSyDIEYEywGGj7BfS4ZjRXtGqeK9r_LvpCss"/>
 		<!-- Define Snap Shots configuration paramaters -->
 		<property name="snapShotsKey" value=""/>
 		<!--

@@ -64,7 +64,7 @@ var tags = {};
 var userTagGroups = {};
 
 /* tags used to label the current bookmark*/
-var bookmarkTags = new Array();
+var bookmarkTags = [];
 
 var users = {};
 
@@ -78,7 +78,7 @@ var gmapMrkMgr = null;
  * Keys are PointMarker Id and values are PointMarker objects in JSON.
  */
 var pointMarkers = {};
-var gmapMarkers = new Array();
+var gmapMarkers = [];
 
 var newPlacemarkCount = 1;
 
@@ -145,11 +145,11 @@ function doChangeTagColor(tag){
 
 function doReadTagline(){
 	// reads existing bookmark tags into bookmarkTags
-	var tagsInput = getElement(tagsInputFieldId)
+	var tagsInput = getElement(tagsInputFieldId);
 	// removes the leading and trailing white spaces
 	var tagline = strip(tagsInput.value);	
 	var ltags = tagline.split(/\s+/);
-	bookmarkTags = new Array();			
+	bookmarkTags = [];
 	for(var i = 0; i < ltags.length; i++){
 		if(getInCurrentBookmarkTagsPos(ltags[i]) == -1){
 			bookmarkTags.push(ltags[i]);
@@ -247,30 +247,33 @@ function showAddPlacemarksPane(){
 	}
 }
 
-function initMap(){
-	if (GBrowserIsCompatible()) {
-        gmap = new GMap2(MochiKit.DOM.getElement(mapId));       
-        gmap.addControl(new GLargeMapControl());
-        gmap.addControl(new GMapTypeControl());
-        gmap.enableContinuousZoom();
-		gmap.enableDoubleClickZoom();	
-  	    gmap.setCenter(new GLatLng(38.95,77.46),1,G_HYBRID_MAP);
-  	    gmapMrkMgr = new MarkerManager(gmap,{trackMarkers:true, maxZoom:18});  	   
-        for(var k in pointMarkers){
-        	var pm = pointMarkers[k];
-        	var v = pm.point.split(",");
-        	var gLatLng = new GLatLng(v[1],v[0]);
-        	pointMarkers[k].gmapMakerIdx = createGmapPointMarker(pm,gLatLng);
-        }       	   
-       fitGmapToData();
-    }
+function initMap() {
+	var mapOptions = {
+		zoom: 1,
+		center: new google.maps.LatLng(38.95, 77.46),
+		scaleControl: true,
+		overviewMapControl: true,
+		overviewMapControlOptions: {opened: true},
+		mapTypeId: google.maps.MapTypeId.ROADMAP
+	};
+	gmap = new google.maps.Map(MochiKit.DOM.getElement(mapId), mapOptions);
+	google.maps.event.addListener(gmap, "idle", function() {
+		gmapMrkMgr = gmapMrkMgr || new MarkerManager(gmap, {trackMarkers: true, maxZoom: 18});
+		for (var k in pointMarkers) {
+			var pm = pointMarkers[k];
+			var v = pm.point.split(",");
+			var gLatLng = new google.maps.LatLng(v[1], v[0]);
+			pointMarkers[k].gmapMakerIdx = createGmapPointMarker(pm, gLatLng);
+		}
+		fitGmapToData();
+	});
 }
 
 function fitGmapToData() {
 	if(gmapMarkers.length > 0){
-		var bounds = new GLatLngBounds();
+		var bounds = new google.maps.LatLngBounds();
 		for(var i = 0; i < gmapMarkers.length; i++){
-			var latlng = gmapMarkers[i].getLatLng();
+			var latlng = gmapMarkers[i].getPosition();
 			bounds.extend(latlng);
 		}
 		gmap.setZoom(7);
@@ -283,16 +286,16 @@ function findPlaceAndZoom(){
 	var placename = zoomToInputElm.value;
 	if(MochiKit.Base.isUndefinedOrNull(placename) == false){
 		if(gmapGeocoder == null){
-			gmapGeocoder = new GClientGeocoder();	
+			gmapGeocoder = new google.maps.Geocoder();
 		}
-		gmapGeocoder.getLatLng(
-			placename,
-			function(point){
-				if(MochiKit.Base.isUndefinedOrNull(point) == true){
+		gmapGeocoder.getLatLng({'address': placename},
+			function(results, status){
+				if (status == google.maps.GeocoderStatus.OK) {
+					gmap.setCenter(results[0].geometry.location);
+					gmap.setZoom(13);
+				} else {
 					alert(placename + ' not found.');
-				}else{
-					gmap.setCenter(point,13);					
-				}	
+				}
 			});
 	}
 }
@@ -304,7 +307,7 @@ function createUserSelection(userStats){
 	var slctHeaderElm = userSlctElm[0].cloneNode(true);
 	// clears all current selection OPTION
 	userSlctElm.innerHTML = '';
-	MochiKit.DOM.appendChildNodes(userSlctElm,slctHeaderElm);
+	MochiKit.DOM.appendChildNodes(userSlctElm, slctHeaderElm);
 	for(var uname in userStats){
 		if(uname.length > 0 && userStats[uname] > 0){
 			var userOptElm = MochiKit.DOM.OPTION({'value':uname,'class':'select-option'},uname);
@@ -345,7 +348,7 @@ function addGeonamesMT(){
       }else if(regexp.test(inputTag) == true){
           alert("Place name must not contain these special characters: & ? / \\ :");
       }else{
-          var safeInputTag = inputTag.trim()
+          var safeInputTag = inputTag.trim();
           safeInputTag = safeInputTag.replace(/\s+/g,'_');
           addMachineTagToTagline('gn','geonames',safeInputTag);      
       }
@@ -361,7 +364,7 @@ function addFolderMT(){
       }else if(regexp.test(inputTag) == true){
           alert("Folder name must not contain these special characters: * ? & / \\ ; ' \" * % ^ + _");
       }else{
-          var safeInputTag = inputTag.trim()
+          var safeInputTag = inputTag.trim();
           safeInputTag = safeInputTag.replace(/\s+/g,'_');
           addMachineTagToTagline('gn','folder',safeInputTag);      
       }
@@ -377,7 +380,7 @@ function addForUserMT(){
       }else if(regexp.test(inputTag) == true){
           alert("Invalid user name!");
       }else{
-          var safeInputTag = inputTag.trim()
+          var safeInputTag = inputTag.trim();
           safeInputTag = safeInputTag.replace(/\s+/g,'');
           addMachineTagToTagline('gn','for',safeInputTag);      
       }
@@ -446,7 +449,7 @@ function clearTagline(){
 */
 
 function unselectTagCloud(){
-	var tagline = new Array();
+	var tagline = [];
 	doReadTagline();
 	for(var i = 0 ; i < bookmarkTags.length; i++){
 		var t = bookmarkTags[i];
@@ -505,7 +508,7 @@ function fetchTags(category){
 function doLoadRecommendedTags(){
 	var url = MochiKit.DOM.getElement(bmarkUrlInputFieldId).value;
 	if(url != null && url.length > 0){		
-		var qs = MochiKit.Base.queryString(['url'],[url])		
+		var qs = MochiKit.Base.queryString(['url'],[url]);
 		var d = MochiKit.Async.loadJSONDoc(getRecommendedTagsUrl+'?'+qs);
 		var gotData = function (rcmdTags) {
 			if(MochiKit.Base.keys(rcmdTags).length > 0){
@@ -536,7 +539,7 @@ function doLoadUserTagCloud(username){
 	};
 	var dataFetchFailed = function(err){
 		alert('Error: ' + err);
-	}
+	};
 	d.addCallbacks(gotData,dataFetchFailed);
 }
 
@@ -548,7 +551,7 @@ function doLoadUserTagGroup(username){
 	};
 	var dataFetchFailed = function(err){
 		alert('Error: ' + err);
-	}
+	};
 	d.addCallbacks(gotData,dataFetchFailed);
 }
 
@@ -594,7 +597,7 @@ function monitorZoomInputSubmit(){
 		if(e.key().code == 13){
 			findPlaceAndZoom();
 		}
-	}
+	};
 	MochiKit.Signal.connect(zoomToInputId,'onkeydown',changed);
 }
 
@@ -622,14 +625,14 @@ function monitorTaglineChanges(){
 	        MochiKit.Logging.log('SPACE-like key pressed: ' + e.key().string);
 	        clearSuggestedTags();
 	    }
-	}
+	};
 	var changed3 = function(e){
 	    var caretPos = getSelectionStart(e.src());
 	    MochiKit.Logging.log("caret start: " + caretPos);
        	if(suggestTagsToComplete(caretPos) == false){
        	   clearSuggestedTags();
         }
-	}
+	};
 	MochiKit.Signal.connect(tagsInputFieldId,'onkeyup',changed1);
 	if(BO.ie == false){
   	   MochiKit.Signal.connect(tagsInputFieldId,'onkeyup',changed2);
@@ -666,7 +669,7 @@ function monitorUserSelectionChanges(){
 			}	
 		}
 		});		
-	}
+	};
 	MochiKit.Signal.connect(userSelectionId,'onchange',switchTagCloud);
 }
 
@@ -698,36 +701,36 @@ function addNewPlacemark(){
 }
 
 function createGmapPointMarker(p,gLatLng){
-	var markerD = new GMarker(gLatLng, {icon:G_DEFAULT_ICON, draggable: true}); 
+	var markerD = new google.maps.Marker({
+		position: gLatLng,
+		draggable: true
+	});
 	markerD.pmId = p.id;	
 	gmapMarkers.push(markerD);
 	//gmap.addOverlay(markerD);
 	gmapMrkMgr.addMarker(markerD,0);
-	markerD.enableDragging();
-	GEvent.addListener(markerD, 'drag', 
+	google.maps.event.addListener(markerD, 'drag',
 		function(){
-			var cLatLng = this.getPoint();
+			var cLatLng = this.getPosition();
 			var cv = cLatLng.lng() + ',' + cLatLng.lat();
 			var ptmrkId = this.pmId;
 			pointMarkers['pm_'+ptmrkId].point = cv;			
 			MochiKit.Logging.log('id: ' + ptmrkId + ' has new location: ' + cv);
 		}
 	);
-	markerD.bindInfoWindowHtml(createViewNotesElm(p.id));
-	markerD.openInfoWindowHtml(
-	  MochiKit.DOM.DIV({'class':'editMarkerNotesPopup'},
-	    MochiKit.DOM.P(null,'This is a new placemark. Drag it to a desired location.')
-	  ));
-	return gmapMarkers.length-1;
+	var infoWindow = new google.maps.InfoWindow();
+	infoWindow.setContent(createViewNotesElm(p.id));
+	infoWindow.open(map, markerD);
+	//markerD.openInfoWindowHtml(MochiKit.DOM.DIV({'class':'editMarkerNotesPopup'}, MochiKit.DOM.P(null,'This is a new placemark. Drag it to a desired location.')));
+	return gmapMarkers.length - 1;
 }
 
 function createViewNotesElm(pmId){
 	var notes = pointMarkers['pm_'+pmId].notes;
 	var notesElm = MochiKit.DOM.P({'id':'mn_'+pmId},notes);
 	var editNotesElm = MochiKit.DOM.A({'class':'system-link align-right','href':'javascript:editNotes('+pmId+')'},'edit notes');
-	var delMarkerElm = MochiKit.DOM.A({'class':'system-link align-right','href':'javascript:delMarker('+pmId+')'},'remove from the map')
-	var contentElm = MochiKit.DOM.DIV({'id':'ed_mn_'+pmId,'class':'editMarkerNotesPopup'},
-	   notesElm, editNotesElm, MochiKit.DOM.BR(null),delMarkerElm);
+	var delMarkerElm = MochiKit.DOM.A({'class':'system-link align-right','href':'javascript:delMarker('+pmId+')'},'remove from the map');
+	var contentElm = MochiKit.DOM.DIV({'id':'ed_mn_'+pmId,'class':'editMarkerNotesPopup'}, notesElm, editNotesElm, MochiKit.DOM.BR(null),delMarkerElm);
 	return contentElm;
 }
 
@@ -736,8 +739,10 @@ function editNotes(pmId){
 	var marker = gmapMarkers[pm.gmapMakerIdx];
 	var editAreaElm = MochiKit.DOM.TEXTAREA({'id':'mn_ta_'+pmId,'class':'textInput'},pm.notes);
 	var doneEditElm = MochiKit.DOM.A({'class':'system-link align-right','href':'javascript:doneEditNotes('+pmId+')'},'done');
-	var contentElm = MochiKit.DOM.DIV({'id':'ed_mn_'+pmId,'class':'editMarkerNotesPopup'},editAreaElm,MochiKit.DOM.BR(null),doneEditElm);	
-	marker.openInfoWindowHtml(contentElm);
+	var contentElm = MochiKit.DOM.DIV({'id':'ed_mn_'+pmId,'class':'editMarkerNotesPopup'},editAreaElm,MochiKit.DOM.BR(null),doneEditElm);
+	var infoWindow = new google.maps.InfoWindow();
+	infoWindow.setContent(contentElm);
+	infoWindow.open(map, marker);
 }
 
 function doneEditNotes(pmId){
@@ -747,7 +752,9 @@ function doneEditNotes(pmId){
 	var newNotes = editAreaElm.value;
 	pm.notes = newNotes;
 	var contentElm = createViewNotesElm(pmId);
-	marker.openInfoWindowHtml(contentElm);
+	var infoWindow = new google.maps.InfoWindow();
+	infoWindow.setContent(contentElm);
+	infoWindow.open(map, marker);
 }
 
 function delMarker(pmId){
@@ -762,7 +769,7 @@ function delMarker(pmId){
 }
 
 function isValidUrl(s){
-	var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+	var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
 	return regexp.test(s);
 }
 
@@ -849,7 +856,7 @@ function getTaglineString() {
 
 function getParsedTagline(){
    var tagline = getTaglineString();
-   var ltags = new Array();
+   var ltags = [];
    if(tagline.length > 0){  
      ltags = tagline.split(/\s+/);    
      MochiKit.Logging.log("parsed tagline: " + ltags);
@@ -912,7 +919,7 @@ function existsInCurrentTagline(t){
 }
 
 function getPartiallyMatchedTags(ps,maxCount){
-    var matchedTags = new Array();   
+    var matchedTags = [];
     var cnt = 0;
     var candidateTags = MochiKit.Base.keys(tags);
     if(MochiKit.Base.isUndefinedOrNull(ps) == false){

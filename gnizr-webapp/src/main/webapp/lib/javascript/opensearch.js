@@ -6,14 +6,14 @@ var selectSearchServicesULID = 'selectSearchServices';
 var entryFocusedClass = 'resultEntryFocused';
 var saveResultLinkClass = 'saveLink';
 var linkActionClass = 'linkAction';
-var viewDetailClass = 'viewDetail'
+var viewDetailClass = 'viewDetail';
 var viewDetailLinkClass = 'viewDetailLink';
 
 /* Cookie related global variables */
 var chckSrvCookieName = 'rememberCheckedServices';
 
 /** OpenSearch service objects */
-var services = new Array();
+var services = [];
 
 var imagePathUrl = '';
 var searchManager = null;
@@ -272,7 +272,7 @@ SearchExecutor.prototype.fetchMoreData = function(){
     var onFailed = function(result){
        resultTile.hideLoadingDialog();  
        MochiKit.Logging.log('fetch data failed. ' + result);
-    }    
+    };
     MochiKit.Logging.log('try to fetchMoreData from : ' + this.searchDataUrl);        
       
     if(MochiKit.Base.isUndefinedOrNull(this.searchDataUrl) == false){
@@ -297,14 +297,14 @@ SearchExecutor.prototype.fetchMoreData = function(){
     }else{
     	MochiKit.Logging.log('No more results in the searh stream. Halt.');
     }
-}
+};
 
 SearchExecutor.prototype.terminate = function(){
     if(MochiKit.Base.isUndefinedOrNull(this.fetch) == false){
         MochiKit.Signal.disconnect(this.fetch);
         MochiKit.Logging.log('SearchExecutor: terminate: Disconnected the fetch signal of service ID:' + this.service.id);
     }   
-}
+};
 
 SearchExecutor.prototype.getNextSearchQuery = function(){
     var pStr = decodeURIComponent(this.service.serviceUrl).split('?');
@@ -361,7 +361,7 @@ SearchExecutor.prototype.getNextSearchQuery = function(){
     var nxtQuery = baseUrl + '?' +MochiKit.Base.queryString(qTerms2);
     MochiKit.Logging.log('Return from getNextSearchQuery=' + nxtQuery);
     return nxtQuery;
-}
+};
 
 function getResultTilesTableDim(){
     return MochiKit.Style.getElementDimensions('resultTiles');
@@ -420,11 +420,11 @@ function QuickSave(linkEntryElement){
 	       		 }else{
 					saveLnkElm.innerHTML = 'save';								
 			     } 			     
-			     qs.connectOnClick(saveLnkElm,saveLnkElm.innerHTML);			    
-              }
+			     qs.connectOnClick(saveLnkElm,saveLnkElm.innerHTML);
+              };
               var fetchBmarkFailed = function(err){
         	       MochiKit.Logging.log('get bookmark failed: ' + err);
-		      }
+		      };
            	  d.addCallbacks(fetchBmarkOkay,fetchBmarkFailed);
           }
        }       
@@ -436,7 +436,7 @@ QuickSave.prototype.destroy = function(){
         MochiKit.Signal.disconnect(this.callback);
         MochiKit.Logging.log('QuickSave: destroy: disconnected onclick callback');
     }
-}
+};
 
 QuickSave.prototype.connectOnClick = function (saveOrEditNode, actionLabel){ 
      MochiKit.Logging.log('actionlabel: ' + actionLabel + ', saveOrEditNode: ' + saveOrEditNode + ', linkEntry: ' + this.linkEntry);
@@ -472,7 +472,7 @@ QuickSave.prototype.connectOnClick = function (saveOrEditNode, actionLabel){
             MochiKit.Logging.log('QuickSave: connectOnClick: will connect to edit callback');
         }
     }
-} 
+};
    
 function ResultTile(service){
     this.service = service;
@@ -482,16 +482,16 @@ function ResultTile(service){
     this.tileElm = null;
     this.tileContentElm = null;
     this.tileResultMetaElm = null;   
-    this.listeners = new Array();
+    this.listeners = [];
 }
 
 ResultTile.prototype.getTileContentNode = function(){
     return this.tileContentElm;   
-}
+};
 
 ResultTile.prototype.getTileResultMetaElm = function(){
     return this.tileResultMetaElm;
-}
+};
 
 ResultTile.prototype.showLoadingDialog = function(){
     var dim = MochiKit.Style.getElementDimensions(this.tileElm);
