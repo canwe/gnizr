@@ -103,9 +103,10 @@
                 <artifactId>liquibase-maven-plugin</artifactId>
                 <groupId>org.liquibase</groupId>
                 <version>3.0.6</version>
+
                 <configuration>
                     <!--<propertyFile>src/main/resources/liquibase.properties</propertyFile>-->
-                    <url>${env.DATABASE_URL}</url>
+                    <url>${DATABASE_URL}</url>
                     <!--<username>${db.user}</username>-->
                     <!--<password>${db.password}</password>-->
                     <changeLogFile>./master_main.xml</changeLogFile>
@@ -121,6 +122,7 @@
                     </dependency>
                 </dependencies>
                 <executions>
+
                     <execution>
                         <id>schema-update</id>
                         <phase>package</phase>
@@ -132,4 +134,10 @@
             </plugin>
         </plugins>
     </build>
+
+    <properties>
+        <systemPropertyVariables>
+            <DATABASE_URL>${DATABASE_URL}</DATABASE_URL>
+        </systemPropertyVariables>
+    </properties>
 </project>
