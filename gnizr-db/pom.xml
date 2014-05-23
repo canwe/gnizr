@@ -44,6 +44,14 @@
             <groupId>com.vividsolutions</groupId>
             <artifactId>jts</artifactId>
         </dependency>
+        <dependency>
+            <artifactId>liquibase-core</artifactId>
+            <groupId>org.liquibase</groupId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <resources>
@@ -90,25 +98,6 @@
                             <includes>
                                 <include>META-INF/spring/test/*.xml</include>
                             </includes>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0-alpha-2</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>read-project-properties</goal>
-                        </goals>
-                        <configuration>
-                            <files>
-                                <file>src/main/resources/liquibase.properties</file>
-                            </files>
                         </configuration>
                     </execution>
                 </executions>
