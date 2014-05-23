@@ -98,7 +98,7 @@
             <plugin>
                 <artifactId>liquibase-maven-plugin</artifactId>
                 <groupId>org.liquibase</groupId>
-                <version>3.0.6-patch2</version>
+                <version>3.0.6</version>
                 <configuration>
                     <propertyFile>src/main/resources/liquibase.properties</propertyFile>
                     <url>${db.jdbcUrl}</url>
