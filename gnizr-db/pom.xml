@@ -105,8 +105,11 @@
                 <version>3.0.6</version>
 
                 <configuration>
+                    <systemProperties>
+                        <db.url>${DATABASE_URL}</db.url>
+                    </systemProperties>
                     <!--<propertyFile>src/main/resources/liquibase.properties</propertyFile>-->
-                    <url>${DATABASE_URL}</url>
+                    <url>${db.url}</url>
                     <!--<username>${db.user}</username>-->
                     <!--<password>${db.password}</password>-->
                     <changeLogFile>./master_main.xml</changeLogFile>
@@ -137,7 +140,7 @@
 
     <properties>
         <systemPropertyVariables>
-            <DATABASE_URL>${DATABASE_URL}</DATABASE_URL>
+
         </systemPropertyVariables>
     </properties>
 </project>
