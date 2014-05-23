@@ -105,9 +105,6 @@
                 <version>3.0.6</version>
 
                 <configuration>
-                    <systemProperties>
-                        <db.url>${DATABASE_URL}</db.url>
-                    </systemProperties>
                     <!--<propertyFile>src/main/resources/liquibase.properties</propertyFile>-->
                     <url>${db.url}</url>
                     <!--<username>${db.user}</username>-->
@@ -139,8 +136,6 @@
     </build>
 
     <properties>
-        <systemPropertyVariables>
-
-        </systemPropertyVariables>
+        <db.url>${env.DATABASE_URL}</db.url>
     </properties>
 </project>
