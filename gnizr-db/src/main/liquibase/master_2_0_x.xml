@@ -6,229 +6,229 @@
 
 	<changeSet id="create-schema" author="vrebesbyrd@gmail.com">
 		<sql>
-            CREATE TABLE E`bookmark` (
-            E`id` int(10) unsigned NOT NULL auto_increment,
-            E`user_id` int(10) unsigned NOT NULL,
-            E`link_id` int(10) unsigned NOT NULL,
-            E`title` text collate utf8_bin NOT NULL,
-            E`notes` text collate utf8_bin NOT NULL,
-            E`created_on` datetime NOT NULL,
-            E`last_updated` datetime NOT NULL,
-            PRIMARY KEY  (E`id`),
-            UNIQUE KEY E`bookmark_user_id_link_id_idx` USING BTREE (E`user_id`,E`link_id`),
-            KEY E`bookmark_user_id_idx` (E`user_id`),
-            KEY E`bookmark_link_id` USING BTREE (E`link_id`),
-            KEY E`bookmark_created_on_idx` (E`created_on`),
-            KEY E`bookmark_lastup_idx` (E`last_updated`),
-            CONSTRAINT E`FK_bookmark_1` FOREIGN KEY (E`user_id`) REFERENCES E`user` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT E`FK_bookmark_2` FOREIGN KEY (E`link_id`) REFERENCES E`link` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "bookmark" (
+            "id" int(10) unsigned NOT NULL auto_increment,
+            "user_id" int(10) unsigned NOT NULL,
+            "link_id" int(10) unsigned NOT NULL,
+            "titl" text collate utf8_bin NOT NULL,
+            "notes" text collate utf8_bin NOT NULL,
+            "created_on" datetime NOT NULL,
+            "last_updated" datetime NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE KEY "bookmark_user_id_link_id_idx" USING BTREE ("user_id","link_id"),
+            KEY "bookmark_user_id_idx" ("user_id"),
+            KEY "bookmark_link_id" USING BTREE ("link_id"),
+            KEY "bookmark_created_on_idx" ("created_on"),
+            KEY "bookmark_lastup_idx" ("last_updated"),
+            CONSTRAINT "FK_bookmark_1" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT "FK_bookmark_2" FOREIGN KEY ("link_id") REFERENCES "link" ("id") ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin ROW_FORMAT=DYNAMIC;
 
-            CREATE TABLE E`bookmark_folder` (
-            E`id` int(10) unsigned NOT NULL auto_increment,
-            E`bookmark_id` int(10) unsigned NOT NULL,
-            E`folder_id` int(10) unsigned NOT NULL,
-            E`last_updated` datetime NOT NULL,
-            PRIMARY KEY  (E`id`),
-            UNIQUE KEY E`bookmark_folder_unique_bmark` (E`bookmark_id`,E`folder_id`),
-            KEY E`FK_bookmark_folder_1` (E`bookmark_id`),
-            KEY E`FK_bookmark_folder_2` (E`folder_id`),
-            KEY E`bookmark_folder_lastup_idx` (E`last_updated`),
-            CONSTRAINT E`FK_bookmark_folder_1` FOREIGN KEY (E`bookmark_id`) REFERENCES E`bookmark` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT E`FK_bookmark_folder_2` FOREIGN KEY (E`folder_id`) REFERENCES E`folder` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "bookmark_folder" (
+            "id" int(10) unsigned NOT NULL auto_increment,
+            "bookmark_id" int(10) unsigned NOT NULL,
+            "folder_id" int(10) unsigned NOT NULL,
+            "last_updated" datetime NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE KEY "bookmark_folder_unique_bmark" ("bookmark_id","folder_id"),
+            KEY "FK_bookmark_folder_1" ("bookmark_id"),
+            KEY "FK_bookmark_folder_2" ("folder_id"),
+            KEY "bookmark_folder_lastup_idx" ("last_updated"),
+            CONSTRAINT "FK_bookmark_folder_1" FOREIGN KEY ("bookmark_id") REFERENCES "bookmark" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT "FK_bookmark_folder_2" FOREIGN KEY ("folder_id") REFERENCES "folder" ("id") ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-            CREATE TABLE E`bookmark_point_marker_idx` (
-            E`bookmark_id` int(10) unsigned NOT NULL,
-            E`point_marker_id` int(10) unsigned NOT NULL,
-            PRIMARY KEY  (E`bookmark_id`,E`point_marker_id`),
-            CONSTRAINT E`FK_bookmark_point_mark_idx_1` FOREIGN KEY (E`bookmark_id`) REFERENCES E`bookmark` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "bookmark_point_marker_idx" (
+            "bookmark_id" int(10) unsigned NOT NULL,
+            "point_marker_id" int(10) unsigned NOT NULL,
+            PRIMARY KEY  ("bookmark_id","point_marker_id"),
+            CONSTRAINT "FK_bookmark_point_mark_idx_1" FOREIGN KEY ("bookmark_id") REFERENCES "bookmark" ("id") ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-            CREATE TABLE E`bookmark_tag_idx` (
-            E`id` int(10) unsigned NOT NULL auto_increment,
-            E`bookmark_id` int(10) unsigned NOT NULL,
-            E`tag_id` int(10) unsigned NOT NULL,
-            E`count` int(10) unsigned NOT NULL,
-            E`position` smallint(5) unsigned NOT NULL,
-            PRIMARY KEY  (E`id`),
-            UNIQUE KEY E`Index_4` (E`bookmark_id`,E`tag_id`),
-            KEY E`Index_2` (E`bookmark_id`),
-            KEY E`Index_3` (E`tag_id`),
-            CONSTRAINT E`FK_bookmark_tag_idx_1` FOREIGN KEY (E`bookmark_id`) REFERENCES E`bookmark` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT E`FK_bookmark_tag_idx_2` FOREIGN KEY (E`tag_id`) REFERENCES E`tag` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "bookmark_tag_idx" (
+            "id" int(10) unsigned NOT NULL auto_increment,
+            "bookmark_id" int(10) unsigned NOT NULL,
+            "tag_id" int(10) unsigned NOT NULL,
+            "count" int(10) unsigned NOT NULL,
+            "position" smallint(5) unsigned NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE KEY "Index_4" ("bookmark_id","tag_id"),
+            KEY "Index_2" ("bookmark_id"),
+            KEY "Index_3" ("tag_id"),
+            CONSTRAINT "FK_bookmark_tag_idx_1" FOREIGN KEY ("bookmark_id") REFERENCES "bookmark" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT "FK_bookmark_tag_idx_2" FOREIGN KEY ("tag_id") REFERENCES "tag" ("id") ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-            CREATE TABLE E`feed_folder` (
-            E`id` int(10) unsigned NOT NULL auto_increment,
-            E`feed_id` int(10) unsigned NOT NULL,
-            E`folder_id` int(10) unsigned NOT NULL,
-            PRIMARY KEY  (E`id`),
-            UNIQUE KEY E`feed_folder_unique_entry` (E`feed_id`,E`folder_id`),
-            KEY E`FK_feed_folder_2` (E`folder_id`),
-            KEY E`FK_feed_folder_1` USING BTREE (E`feed_id`),
-            CONSTRAINT E`FK_feed_folder_1` FOREIGN KEY (E`feed_id`) REFERENCES E`feed_subscription` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT E`FK_feed_folder_2` FOREIGN KEY (E`folder_id`) REFERENCES E`folder` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "feed_folder" (
+            "id" int(10) unsigned NOT NULL auto_increment,
+            "feed_id" int(10) unsigned NOT NULL,
+            "folder_id" int(10) unsigned NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE KEY "feed_folder_unique_entry" ("feed_id","folder_id"),
+            KEY "FK_feed_folder_2" ("folder_id"),
+            KEY "FK_feed_folder_1" USING BTREE ("feed_id"),
+            CONSTRAINT "FK_feed_folder_1" FOREIGN KEY ("feed_id") REFERENCES "feed_subscription" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT "FK_feed_folder_2" FOREIGN KEY ("folder_id") REFERENCES "folder" ("id") ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-            CREATE TABLE E`feed_subscription` (
-            E`id` int(10) unsigned NOT NULL auto_increment,
-            E`bookmark_id` int(10) unsigned NOT NULL COMMENT 'ref a bmark that defines a RSS feed',
-            E`last_sync` datetime default NULL COMMENT 'when was the last time that this feed was read',
-            E`match_text` text character set utf8 NOT NULL COMMENT 'space-delimited tag labels that a bmark importer will use to match feed entries that should imported as bookmarks',
-            E`auto_import` tinyint(1) NOT NULL default '1',
-            E`pub_date` datetime default NULL,
-            PRIMARY KEY  (E`id`),
-            UNIQUE KEY E`feed_sub_unique_bm_id` (E`bookmark_id`),
-            KEY E`feed_sub_last_sync_idx` (E`last_sync`),
-            CONSTRAINT E`FK_feed_subscription_1` FOREIGN KEY (E`bookmark_id`) REFERENCES E`bookmark` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "feed_subscription" (
+            "id" int(10) unsigned NOT NULL auto_increment,
+            "bookmark_id" int(10) unsigned NOT NULL COMMENT 'ref a bmark that defines a RSS feed',
+            "last_sync" datetime default NULL COMMENT 'when was the last time that this feed was read',
+            "match_text" text character set utf8 NOT NULL COMMENT 'space-delimited tag labels that a bmark importer will use to match feed entries that should imported as bookmarks',
+            "auto_import" tinyint(1) NOT NULL default '1',
+            "pub_dat" datetime default NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE KEY "feed_sub_unique_bm_id" ("bookmark_id"),
+            KEY "feed_sub_last_sync_idx" ("last_sync"),
+            CONSTRAINT "FK_feed_subscription_1" FOREIGN KEY ("bookmark_id") REFERENCES "bookmark" ("id") ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin ROW_FORMAT=DYNAMIC;
 
-            CREATE TABLE E`folder` (
-            E`id` int(10) unsigned NOT NULL auto_increment,
-            E`folder_name` varchar(45) collate utf8_bin NOT NULL,
-            E`owner_id` int(10) unsigned NOT NULL,
-            E`description` text collate utf8_bin NOT NULL,
-            E`last_updated` datetime NOT NULL,
-            PRIMARY KEY  (E`id`),
-            UNIQUE KEY E`folder_owner_folder_idx` USING BTREE (E`folder_name`,E`owner_id`),
-            KEY E`FK_folder_admin_1` (E`owner_id`),
-            CONSTRAINT E`FK_folder_admin_1` FOREIGN KEY (E`owner_id`) REFERENCES E`user` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "folder" (
+            "id" int(10) unsigned NOT NULL auto_increment,
+            "folder_nam" varchar(45) collate utf8_bin NOT NULL,
+            "owner_id" int(10) unsigned NOT NULL,
+            "description" text collate utf8_bin NOT NULL,
+            "last_updated" datetime NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE KEY "folder_owner_folder_idx" USING BTREE ("folder_nam","owner_id"),
+            KEY "FK_folder_admin_1" ("owner_id"),
+            CONSTRAINT "FK_folder_admin_1" FOREIGN KEY ("owner_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
-            CREATE TABLE E`folder_tag_idx` (
-            E`folder_id` int(10) unsigned NOT NULL,
-            E`tag_id` int(10) unsigned NOT NULL,
-            E`count` int(10) unsigned NOT NULL,
-            PRIMARY KEY  (E`folder_id`,E`tag_id`),
-            KEY E`FK_folder_tag_idx_2` (E`tag_id`),
-            CONSTRAINT E`FK_folder_tag_idx_1` FOREIGN KEY (E`folder_id`) REFERENCES E`folder` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT E`FK_folder_tag_idx_2` FOREIGN KEY (E`tag_id`) REFERENCES E`tag` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "folder_tag_idx" (
+            "folder_id" int(10) unsigned NOT NULL,
+            "tag_id" int(10) unsigned NOT NULL,
+            "count" int(10) unsigned NOT NULL,
+            PRIMARY KEY  ("folder_id","tag_id"),
+            KEY "FK_folder_tag_idx_2" ("tag_id"),
+            CONSTRAINT "FK_folder_tag_idx_1" FOREIGN KEY ("folder_id") REFERENCES "folder" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT "FK_folder_tag_idx_2" FOREIGN KEY ("tag_id") REFERENCES "tag" ("id") ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-            CREATE TABLE E`for_user` (
-            E`id` int(10) unsigned NOT NULL auto_increment,
-            E`for_user_id` int(10) unsigned NOT NULL,
-            E`bookmark_id` int(10) unsigned NOT NULL,
-            E`message` text NOT NULL,
-            E`created_on` datetime NOT NULL,
-            PRIMARY KEY  (E`id`),
-            UNIQUE KEY E`for_user_index_1` (E`for_user_id`,E`bookmark_id`),
-            KEY E`FK_for_user_1` (E`for_user_id`),
-            KEY E`FK_for_user_2` (E`bookmark_id`),
-            CONSTRAINT E`FK_for_user_1` FOREIGN KEY (E`for_user_id`) REFERENCES E`user` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT E`FK_for_user_2` FOREIGN KEY (E`bookmark_id`) REFERENCES E`bookmark` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "for_user" (
+            "id" int(10) unsigned NOT NULL auto_increment,
+            "for_user_id" int(10) unsigned NOT NULL,
+            "bookmark_id" int(10) unsigned NOT NULL,
+            "messag" text NOT NULL,
+            "created_on" datetime NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE KEY "for_user_index_1" ("for_user_id","bookmark_id"),
+            KEY "FK_for_user_1" ("for_user_id"),
+            KEY "FK_for_user_2" ("bookmark_id"),
+            CONSTRAINT "FK_for_user_1" FOREIGN KEY ("for_user_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT "FK_for_user_2" FOREIGN KEY ("bookmark_id") REFERENCES "bookmark" ("id") ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-            CREATE TABLE E`link` (
-            E`id` int(10) unsigned NOT NULL auto_increment,
-            E`mime_type_id` int(10) unsigned default NULL,
-            E`url` text NOT NULL,
-            E`url_hash` varchar(45) NOT NULL,
-            PRIMARY KEY  (E`id`),
-            UNIQUE KEY E`url_hash_idx` USING BTREE (E`url_hash`),
-            KEY E`FK_link_1` (E`mime_type_id`),
-            CONSTRAINT E`FK_link_1` FOREIGN KEY (E`mime_type_id`) REFERENCES E`mime_type_admin` (E`id`) ON DELETE SET NULL ON UPDATE CASCADE
+            CREATE TABLE "link" (
+            "id" int(10) unsigned NOT NULL auto_increment,
+            "mime_type_id" int(10) unsigned default NULL,
+            "url" text NOT NULL,
+            "url_hash" varchar(45) NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE KEY "url_hash_idx" USING BTREE ("url_hash"),
+            KEY "FK_link_1" ("mime_type_id"),
+            CONSTRAINT "FK_link_1" FOREIGN KEY ("mime_type_id") REFERENCES "mime_type_admin" ("id") ON DELETE SET NULL ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
-            CREATE TABLE E`link_tag_idx` (
-            E`id` int(10) unsigned NOT NULL auto_increment,
-            E`link_id` int(10) unsigned NOT NULL,
-            E`tag_id` int(10) unsigned NOT NULL,
-            E`count` int(10) unsigned zerofill NOT NULL,
-            PRIMARY KEY  (E`id`),
-            UNIQUE KEY E`idx_link_id_tag_id` (E`link_id`,E`tag_id`),
-            KEY E`FK_link_tag_idx_2` (E`tag_id`),
-            KEY E`idx_link_id` (E`link_id`),
-            CONSTRAINT E`FK_link_tag_idx_1` FOREIGN KEY (E`link_id`) REFERENCES E`link` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT E`FK_link_tag_idx_2` FOREIGN KEY (E`tag_id`) REFERENCES E`tag` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "link_tag_idx" (
+            "id" int(10) unsigned NOT NULL auto_increment,
+            "link_id" int(10) unsigned NOT NULL,
+            "tag_id" int(10) unsigned NOT NULL,
+            "count" int(10) unsigned zerofill NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE KEY "idx_link_id_tag_id" ("link_id","tag_id"),
+            KEY "FK_link_tag_idx_2" ("tag_id"),
+            KEY "idx_link_id" ("link_id"),
+            CONSTRAINT "FK_link_tag_idx_1" FOREIGN KEY ("link_id") REFERENCES "link" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT "FK_link_tag_idx_2" FOREIGN KEY ("tag_id") REFERENCES "tag" ("id") ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
-            CREATE TABLE E`mime_type_admin` (
-            E`id` int(10) unsigned NOT NULL default '0',
-            E`mime_type` varchar(45) NOT NULL,
-            E`label` varchar(100) NOT NULL,
-            PRIMARY KEY  (E`id`)
+            CREATE TABLE "mime_type_admin" (
+            "id" int(10) unsigned NOT NULL default '0',
+            "mime_typ" varchar(45) NOT NULL,
+            "label" varchar(100) NOT NULL,
+            PRIMARY KEY  ("id")
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
-            CREATE TABLE E`point_marker` (
-            E`id` int(10) unsigned NOT NULL auto_increment,
-            E`geom` point NOT NULL,
-            E`notes` varchar(255) NOT NULL,
-            E`icon_id` tinyint(3) unsigned NOT NULL default '0',
-            PRIMARY KEY  (E`id`),
-            SPATIAL INDEX(E`geom`)
+            CREATE TABLE "point_marker" (
+            "id" int(10) unsigned NOT NULL auto_increment,
+            "geom" point NOT NULL,
+            "notes" varchar(255) NOT NULL,
+            "icon_id" tinyint(3) unsigned NOT NULL default '0',
+            PRIMARY KEY  ("id"),
+            SPATIAL INDEX("geom")
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-            CREATE TABLE E`search_idx` (
-            E`bookmark_id` int(10) unsigned NOT NULL,
-            E`text` text NOT NULL,
-            E`tags` text NOT NULL,
-            PRIMARY KEY  (E`bookmark_id`),
-            FULLTEXT KEY E`search_idx_text` (E`text`),
-            FULLTEXT KEY E`search_idx_tags` (E`tags`)
+            CREATE TABLE "search_idx" (
+            "bookmark_id" int(10) unsigned NOT NULL,
+            "text" text NOT NULL,
+            "tags" text NOT NULL,
+            PRIMARY KEY  ("bookmark_id"),
+            FULLTEXT KEY "search_idx_text" ("text"),
+            FULLTEXT KEY "search_idx_tags" ("tags")
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-            CREATE TABLE E`tag` (
-            E`id` int(10) unsigned NOT NULL auto_increment,
-            E`tag` varchar(45) collate utf8_bin NOT NULL,
-            E`count` int(10) unsigned zerofill NOT NULL,
-            PRIMARY KEY  (E`id`),
-            UNIQUE KEY E`idx_tag` (E`tag`)
+            CREATE TABLE "tag" (
+            "id" int(10) unsigned NOT NULL auto_increment,
+            "tag" varchar(45) collate utf8_bin NOT NULL,
+            "count" int(10) unsigned zerofill NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE KEY "idx_tag" ("tag")
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin ROW_FORMAT=DYNAMIC;
 
-            CREATE TABLE E`tag_assertion` (
-            E`id` int(10) unsigned NOT NULL auto_increment,
-            E`subject_id` int(10) unsigned NOT NULL,
-            E`prpt_id` int(10) unsigned NOT NULL,
-            E`object_id` int(10) unsigned NOT NULL,
-            E`user_id` int(10) unsigned NOT NULL,
-            PRIMARY KEY  (E`id`),
-            UNIQUE KEY E`tag_asrt_uniq_asrt_idx` (E`subject_id`,E`prpt_id`,E`object_id`,E`user_id`),
-            KEY E`FK_tag_asrt_prpt_id` USING BTREE (E`prpt_id`),
-            KEY E`FK_tag_asrt_subject_id` USING BTREE (E`subject_id`),
-            KEY E`FK_tag_asrt_object_id` USING BTREE (E`object_id`),
-            KEY E`FK_tag_asrt_user_id` USING BTREE (E`user_id`),
-            CONSTRAINT E`FK_tag_asrt_object_id` FOREIGN KEY (E`object_id`) REFERENCES E`user_tag_idx` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT E`FK_tag_asrt_prpt_id` FOREIGN KEY (E`prpt_id`) REFERENCES E`tag_prpt` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT E`FK_tag_asrt_subject_id` FOREIGN KEY (E`subject_id`) REFERENCES E`user_tag_idx` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT E`FK_tag_asrt_user_id` FOREIGN KEY (E`user_id`) REFERENCES E`user` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "tag_assertion" (
+            "id" int(10) unsigned NOT NULL auto_increment,
+            "subject_id" int(10) unsigned NOT NULL,
+            "prpt_id" int(10) unsigned NOT NULL,
+            "object_id" int(10) unsigned NOT NULL,
+            "user_id" int(10) unsigned NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE KEY "tag_asrt_uniq_asrt_idx" ("subject_id","prpt_id","object_id","user_id"),
+            KEY "FK_tag_asrt_prpt_id" USING BTREE ("prpt_id"),
+            KEY "FK_tag_asrt_subject_id" USING BTREE ("subject_id"),
+            KEY "FK_tag_asrt_object_id" USING BTREE ("object_id"),
+            KEY "FK_tag_asrt_user_id" USING BTREE ("user_id"),
+            CONSTRAINT "FK_tag_asrt_object_id" FOREIGN KEY ("object_id") REFERENCES "user_tag_idx" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT "FK_tag_asrt_prpt_id" FOREIGN KEY ("prpt_id") REFERENCES "tag_prpt" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT "FK_tag_asrt_subject_id" FOREIGN KEY ("subject_id") REFERENCES "user_tag_idx" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT "FK_tag_asrt_user_id" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
-            CREATE TABLE E`tag_prpt` (
-            E`id` int(10) unsigned NOT NULL auto_increment,
-            E`name` varchar(45) NOT NULL,
-            E`ns_prefix` varchar(10) NOT NULL default 'gn',
-            E`description` varchar(255) default NULL,
-            E`prpt_type` enum('spatial','temporal','system','reference','default') NOT NULL default 'default',
-            E`cardinality` int(11) NOT NULL default '-1',
-            PRIMARY KEY  (E`id`),
-            UNIQUE KEY E`tag_prpt_unique_prpt_idx` (E`name`,E`ns_prefix`)
+            CREATE TABLE "tag_prpt" (
+            "id" int(10) unsigned NOT NULL auto_increment,
+            "nam" varchar(45) NOT NULL,
+            "ns_prefix" varchar(10) NOT NULL default 'gn',
+            "description" varchar(255) default NULL,
+            "prpt_typ" enum('spatial','temporal','system','reference','default') NOT NULL default 'default',
+            "cardinality" int(11) NOT NULL default '-1',
+            PRIMARY KEY  ("id"),
+            UNIQUE KEY "tag_prpt_unique_prpt_idx" ("nam","ns_prefix")
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
-            CREATE TABLE E`user` (
-            E`id` int(10) unsigned NOT NULL auto_increment,
-            E`username` varchar(45) NOT NULL,
-            E`password` varchar(45) NOT NULL,
-            E`fullname` varchar(100) NOT NULL,
-            E`created_on` datetime NOT NULL,
-            E`email` varchar(50) NOT NULL,
-            E`acct_status` int(10) unsigned zerofill NOT NULL,
-            PRIMARY KEY  (E`id`),
-            UNIQUE KEY E`idx_username` (E`username`)
+            CREATE TABLE "user" (
+            "id" int(10) unsigned NOT NULL auto_increment,
+            "usernam" varchar(45) NOT NULL,
+            "password" varchar(45) NOT NULL,
+            "fullnam" varchar(100) NOT NULL,
+            "created_on" datetime NOT NULL,
+            "email" varchar(50) NOT NULL,
+            "acct_status" int(10) unsigned zerofill NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE KEY "idx_usernam" ("usernam")
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
-            CREATE TABLE E`user_tag_idx` (
-            E`id` int(10) unsigned NOT NULL auto_increment,
-            E`user_id` int(10) unsigned NOT NULL,
-            E`tag_id` int(10) unsigned NOT NULL,
-            E`count` int(10) unsigned zerofill NOT NULL,
-            PRIMARY KEY  (E`id`),
-            UNIQUE KEY E`idx_user_id_tag_id` (E`user_id`,E`tag_id`),
-            KEY E`FK_user_tag_idx_2` (E`tag_id`),
-            KEY E`idx_user_tag_id_user_id` (E`user_id`),
-            CONSTRAINT E`FK_user_tag_idx_1` FOREIGN KEY (E`user_id`) REFERENCES E`user` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT E`FK_user_tag_idx_2` FOREIGN KEY (E`tag_id`) REFERENCES E`tag` (E`id`) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "user_tag_idx" (
+            "id" int(10) unsigned NOT NULL auto_increment,
+            "user_id" int(10) unsigned NOT NULL,
+            "tag_id" int(10) unsigned NOT NULL,
+            "count" int(10) unsigned zerofill NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE KEY "idx_user_id_tag_id" ("user_id","tag_id"),
+            KEY "FK_user_tag_idx_2" ("tag_id"),
+            KEY "idx_user_tag_id_user_id" ("user_id"),
+            CONSTRAINT "FK_user_tag_idx_1" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+            CONSTRAINT "FK_user_tag_idx_2" FOREIGN KEY ("tag_id") REFERENCES "tag" ("id") ON DELETE CASCADE ON UPDATE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 		</sql>
 	</changeSet>
