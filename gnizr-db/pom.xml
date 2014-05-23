@@ -127,6 +127,20 @@
                     <contexts>prod</contexts>
                     <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
                     <driver>com.postgresql.jdbc.Driver</driver>
+                    <expressionVars>
+                        <property>
+                            <name>db.jdbcUrl</name>
+                            <value>${db.jdbcUrl}</value>
+                        </property>
+                        <property>
+                            <name>db.user</name>
+                            <value>${db.user}</value>
+                        </property>
+                        <property>
+                            <name>db.password</name>
+                            <value>${db.password}</value>
+                        </property>
+                    </expressionVars>
                 </configuration>
                 <dependencies>
                     <dependency>
