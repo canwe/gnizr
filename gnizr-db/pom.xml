@@ -99,16 +99,7 @@
                 <artifactId>liquibase-maven-plugin</artifactId>
                 <groupId>org.liquibase</groupId>
                 <version>3.0.6</version>
-                <configuration>
-                    <propertyFile>src/main/resources/liquibase.properties</propertyFile>
-                    <url>${db.jdbcUrl}</url>
-                    <username>${db.user}</username>
-                    <password>${db.password}</password>
-                    <changeLogFile>./master_main.xml</changeLogFile>
-                    <contexts>prod</contexts>
-                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
-                    <driver>com.postgresql.jdbc.Driver</driver>
-                </configuration>
+
                 <dependencies>
                     <dependency>
                         <groupId>org.postgresql</groupId>
@@ -118,11 +109,21 @@
                 </dependencies>
                 <executions>
                     <execution>
-                        <id>test-schema-update</id>
+                        <id>schema-update</id>
                         <phase>package</phase>
                         <goals>
                             <goal>update</goal>
                         </goals>
+                        <configuration>
+                            <propertyFile>src/main/resources/liquibase.properties</propertyFile>
+                            <url>${db.jdbcUrl}</url>
+                            <username>${db.user}</username>
+                            <password>${db.password}</password>
+                            <changeLogFile>./master_main.xml</changeLogFile>
+                            <contexts>prod</contexts>
+                            <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                            <driver>com.postgresql.jdbc.Driver</driver>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
