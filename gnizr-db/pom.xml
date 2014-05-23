@@ -105,7 +105,7 @@
                 <version>3.0.6</version>
                 <configuration>
                     <propertyFile>src/main/resources/liquibase.properties</propertyFile>
-                    <!--<url>${db.jdbcUrl}</url>-->
+                    <url>${env.DATABASE_URL}</url>
                     <!--<username>${db.user}</username>-->
                     <!--<password>${db.password}</password>-->
                     <changeLogFile>./master_main.xml</changeLogFile>
