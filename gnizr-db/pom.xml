@@ -45,10 +45,6 @@
             <artifactId>jts</artifactId>
         </dependency>
         <dependency>
-            <artifactId>liquibase-core</artifactId>
-            <groupId>org.liquibase</groupId>
-        </dependency>
-        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
