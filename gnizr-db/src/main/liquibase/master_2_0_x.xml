@@ -10,7 +10,7 @@
             id int(10) unsigned NOT NULL auto_increment,
             user_id int(10) unsigned NOT NULL,
             link_id int(10) unsigned NOT NULL,
-            titl text collate utf8_bin NOT NULL,
+            title text collate utf8_bin NOT NULL,
             notes text collate utf8_bin NOT NULL,
             created_on datetime NOT NULL,
             last_updated datetime NOT NULL,
