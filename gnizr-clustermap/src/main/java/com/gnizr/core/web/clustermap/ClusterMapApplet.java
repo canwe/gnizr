@@ -64,8 +64,7 @@ public class ClusterMapApplet extends JApplet {
 	 */
 	private static final long serialVersionUID = 477476797909541563L;
 
-	private static final Logger logger = Logger
-			.getLogger(ClusterMapApplet.class);
+	private static final Logger logger = Logger.getLogger(ClusterMapApplet.class);
 
 	/**
 	 * Applet paramater name <code>dataSourceUrl</code>, which defines the
