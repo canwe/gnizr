@@ -106,9 +106,9 @@
 
                 <configuration>
                     <!--<propertyFile>src/main/resources/liquibase.properties</propertyFile>-->
-                    <url>${db.url}</url>
-                    <!--<username>${db.user}</username>-->
-                    <!--<password>${db.password}</password>-->
+                    <url>jdbc:env.SNAP_DB_PG_URL</url>
+                    <username>env.SNAP_DB_PG_USER</username>
+                    <password>env.SNAP_DB_PG_PASSWORD</password>
                     <changeLogFile>./master_main.xml</changeLogFile>
                     <contexts>prod</contexts>
                     <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
@@ -134,8 +134,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <properties>
-        <db.url>${env.DATABASE_URL}</db.url>
-    </properties>
 </project>
