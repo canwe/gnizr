@@ -109,7 +109,7 @@
                     <url>${env.SNAP_DB_PG_JDBC_URL}</url>
                     <username>${env.SNAP_DB_PG_USER}</username>
                     <password>${env.SNAP_DB_PG_PASSWORD}</password>
-                    <changeLogFile>./master_main.xml</changeLogFile>
+                    <changeLogFile>src/main/liquibase/master_main.xml</changeLogFile>
                     <contexts>prod</contexts>
                     <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
                     <driver>org.postgresql.Driver</driver>
