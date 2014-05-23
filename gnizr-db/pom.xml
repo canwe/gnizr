@@ -126,7 +126,7 @@
                     <changeLogFile>./master_main.xml</changeLogFile>
                     <contexts>prod</contexts>
                     <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
-                    <driver>com.postgresql.jdbc.Driver</driver>
+                    <driver>com.postgresql.Driver</driver>
                 </configuration>
                 <dependencies>
                     <dependency>
