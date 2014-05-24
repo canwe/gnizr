@@ -6,6 +6,10 @@
 
     <changeSet id="create-schema" author="vrebesbyrd@gmail.com">
         <sql>
+            CREATE TABLE testt (
+            id integer NOT NULL
+            );
+            
             CREATE TABLE bookmark (
             id int(10) unsigned NOT NULL auto_increment,
             user_id int(10) unsigned NOT NULL,
