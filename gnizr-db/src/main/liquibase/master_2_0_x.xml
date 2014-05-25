@@ -11,22 +11,26 @@
             );
             
             CREATE TABLE bookmark (
-            id int(10) unsigned NOT NULL auto_increment,
-            user_id int(10) unsigned NOT NULL,
-            link_id int(10) unsigned NOT NULL,
-            title text collate utf8_bin NOT NULL,
-            notes text collate utf8_bin NOT NULL,
-            created_on datetime NOT NULL,
-            last_updated datetime NOT NULL,
+            id integer NOT NULL,
+            user_id integer NOT NULL,
+            link_id integer NOT NULL,
+            title text NOT NULL,
+            notes text NOT NULL,
+            created_on timestamp with time zone NOT NULL,
+            last_updated timestamp with time zone NOT NULL,
             PRIMARY KEY (id),
-            UNIQUE KEY bookmark_user_id_link_id_idx USING BTREE (user_id,link_id),
-            KEY bookmark_user_id_idx (user_id),
-            KEY bookmark_link_id USING BTREE (link_id),
-            KEY bookmark_created_on_idx (created_on),
-            KEY bookmark_lastup_idx (last_updated),
+            CONSTRAINT bookmark_user_id_link_id_idx UNIQUE (user_id,link_id) USING BTREE,
+            CONSTRAINT bookmark_user_id_idx NOT NULL (user_id),
+            CONSTRAINT bookmark_link_id NOT NULL (link_id) USING BTREE,
+            CONSTRAINT bookmark_created_on_idx NOT NULL (created_on),
+            CONSTRAINT bookmark_lastup_idx NOT NULL (last_updated),
             CONSTRAINT FK_bookmark_1 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE ON UPDATE CASCADE,
             CONSTRAINT FK_bookmark_2 FOREIGN KEY (link_id) REFERENCES link (id) ON DELETE CASCADE ON UPDATE CASCADE
             );
+            
+            CREATE SEQUENCE bookmark_id_seq; 
+            SELECT setval('bookmark_id_seq', max(id)) FROM bookmark_id_seq;
+            ALTER TABLE bookmark ALTER COLUMN id SET DEFAULT nextval('bookmark_id_seq');
 
             CREATE TABLE bookmark_folder (
             id int(10) unsigned NOT NULL auto_increment,
