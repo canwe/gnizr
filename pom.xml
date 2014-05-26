@@ -36,9 +36,9 @@
             </snapshots>
         </repository>
         <repository>
-            <id>repository.springsource.release</id>
-            <name>SpringSource GA Repository</name>
-            <url>http://repo.springsource.org/release</url>
+            <id>io.spring.repo.maven.release</id>
+            <url>http://repo.spring.io/release/</url>
+            <snapshots><enabled>false</enabled></snapshots>
         </repository>
     </repositories>
 
