@@ -125,7 +125,7 @@
             "id" integer  NOT NULL,
             "geom" point NOT NULL,
             "notes" varchar(510) NOT NULL,
-            "icon_id" tinyint(3)  NOT NULL default '0',
+            "icon_id" int4 NOT NULL default '0',
             PRIMARY KEY  ("id")
             );
 
