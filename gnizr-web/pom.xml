@@ -34,11 +34,36 @@
 			<artifactId>gnizr-core</artifactId>
 			<version>${gnVersion}</version>
 			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring</artifactId>
-		</dependency>
+		</dependency><!--
+				Force the version of all the spring jars (core, beans, context, ...) 
+				pulled by spring-data-jpa:1.3.4.RELEASE to 3.2.x when spring-data pulls 
+				the 3.1.x versions to prevent some misbehaviors of maven which sometimes 
+				pulls both 3.2.x and 3.1.x versions of spring-core, spring-beans and spring-context
+			-->
+			<dependency>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-core</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-beans</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-orm</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-aop</artifactId>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-tx</artifactId>
+			</dependency>
 		<dependency>
 			<groupId>com.opensymphony</groupId>
 			<artifactId>webwork</artifactId>
