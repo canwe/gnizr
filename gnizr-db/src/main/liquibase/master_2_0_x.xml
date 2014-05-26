@@ -16,8 +16,8 @@
             "id" integer  NOT NULL,
             "user_id" integer  NOT NULL,
             "link_id" integer  NOT NULL,
-            "title" text collate utf8_bin NOT NULL,
-            "notes" text collate utf8_bin NOT NULL,
+            "title" text character set utf8 NOT NULL,
+            "notes" text character set utf8 NOT NULL,
             "created_on" timestamp with time zone NOT NULL,
             "last_updated" timestamp with time zone NOT NULL,
             PRIMARY KEY  ("id"),
@@ -70,9 +70,9 @@
 
             CREATE TABLE "folder" (
             "id" integer  NOT NULL,
-            "folder_name" varchar(90) collate utf8_bin NOT NULL,
+            "folder_name" varchar(90) character set utf8 NOT NULL,
             "owner_id" integer  NOT NULL,
-            "description" text collate utf8_bin NOT NULL,
+            "description" text character set utf8 NOT NULL,
             "last_updated" timestamp with time zone NOT NULL,
             PRIMARY KEY  ("id"),
             UNIQUE ("folder_name","owner_id")
@@ -137,7 +137,7 @@
 
             CREATE TABLE "tag" (
             "id" integer  NOT NULL,
-            "tag" varchar(90) collate utf8_bin NOT NULL,
+            "tag" varchar(90) character set utf8 NOT NULL,
             "count" integer  zerofill NOT NULL,
             PRIMARY KEY  ("id"),
             UNIQUE ("tag")
