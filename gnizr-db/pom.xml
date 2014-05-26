@@ -48,6 +48,25 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
+
+        <!-- your own standard logging dependencies -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId><!-- or log4j2 or logback or whatever-->
+            <version>1.7.5</version>
+        </dependency>
+
+        <!-- special dependency to fix liquibase's logging fetish -->
+        <dependency>
+            <groupId>com.mattbertolini</groupId>
+            <artifactId>liquibase-slf4j</artifactId>
+            <version>1.2.1</version>
+        </dependency>
     </dependencies>
     <build>
         <resources>
@@ -119,6 +138,25 @@
                         <groupId>org.postgresql</groupId>
                         <artifactId>postgresql</artifactId>
                         <version>9.3-1101-jdbc41</version>
+                    </dependency>
+
+                    <!-- your own standard logging dependencies -->
+                    <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                        <version>1.7.5</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId><!-- or log4j2 or logback or whatever-->
+                        <version>1.7.5</version>
+                    </dependency>
+
+                    <!-- special dependency to fix liquibase's logging fetish -->
+                    <dependency>
+                        <groupId>com.mattbertolini</groupId>
+                        <artifactId>liquibase-slf4j</artifactId>
+                        <version>1.2.1</version>
                     </dependency>
                 </dependencies>
                 <executions>
