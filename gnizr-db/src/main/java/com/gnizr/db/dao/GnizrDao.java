@@ -17,6 +17,7 @@
 package com.gnizr.db.dao;
 
 import java.io.Serializable;
+import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
@@ -40,6 +41,14 @@ import com.gnizr.db.dao.tag.TagPropertyDBDao;
 import com.gnizr.db.dao.tag.TagPropertyDao;
 import com.gnizr.db.dao.user.UserDBDao;
 import com.gnizr.db.dao.user.UserDao;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
+import liquibase.resource.FileSystemResourceAccessor;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A convenient class that wraps DAO objects for access gnizr persistent store. There are two ways to create
@@ -58,7 +67,7 @@ import com.gnizr.db.dao.user.UserDao;
  * @author harryc
  *
  */
-public class GnizrDao implements Serializable{
+public class GnizrDao implements Serializable, InitializingBean {
 	
 	/**
 	 * 
@@ -76,6 +85,9 @@ public class GnizrDao implements Serializable{
 	private FolderDao folderDao;
 	private GeometryMarkerDao geometryMarkerDao;
 	private static GnizrDao gnizrDao;
+
+	@Autowired
+	private GnizrBasicDataSource dataSource;
 	
 	/**
 	 * Creates a singlton of this class using the defined connection object <code>datasource</code>. This singlton 
@@ -101,7 +113,28 @@ public class GnizrDao implements Serializable{
 		}
 		return gnizrDao;
 	}
-	
+
+	public void afterPropertiesSet() throws Exception {
+//		java.sql.Connection c = dataSource.getConnection();
+//		Liquibase liquibase = null;
+//		try {
+//			Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(c));
+//			liquibase = new Liquibase(YOUR_CHANGELOG, new FileSystemResourceAccessor(), database);
+//			liquibase.update();
+//		} catch (SQLException e) {
+//			throw new DatabaseException(e);
+//		} finally {
+//			if (c != null) {
+//				try {
+//					c.rollback();
+//					c.close();
+//				} catch (SQLException e) {
+//					//nothing to do
+//				}
+//			}
+//		}
+	}
+
 	/**
 	 * Returns a DAO object for tag assertion operations. 
 	 * 

@@ -2,98 +2,78 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 	"http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
+
+    <bean class="java.net.URI" id="dbUrl">
+        <constructor-arg value="#{systemEnvironment['DATABASE_URL']}"/>
+    </bean>
+
+    <bean id="dataSource" class="com.gnizr.db.dao.GnizrBasicDataSource">
+        <property name="driverClassName" value="org.postgresql.Driver"/>
+        <property name="url" value="#{ 'jdbc:postgresql://' + @dbUrl.getHost() + ':' + @dbUrl.getPort() + @dbUrl.getPath() }"/>
+        <property name="username" value="#{ @dbUrl.getUserInfo().split(':')[0] }"/>
+        <property name="password" value="#{ @dbUrl.getUserInfo().split(':')[1] }"/>
+
+        <!-- Defines misc. JDBC paramaters -->
+        <property name="connectionProperties">
+            <props>
+                <prop key="useUnicode">true</prop>
+                <prop key="characterEncoding">UTF-8</prop>
+                <prop key="characterSetResults">UTF-8</prop>
+            </props>
+        </property>
+    </bean>
 		
 	<!-- gnizr DAO class -->
-	<bean id="userDao" class="com.gnizr.db.dao.user.UserDBDao" singleton="true">
-		<constructor-arg>
-			<ref bean="dataSource"/>
-		</constructor-arg>
+	<bean id="userDao" class="com.gnizr.db.dao.user.UserDBDao">
+		<constructor-arg ref="dataSource"/>
 	</bean>
 	
-	<bean id="bookmarkDao" class="com.gnizr.db.dao.bookmark.BookmarkDBDao" singleton="true">
-		<constructor-arg>
-			<ref bean="dataSource"/>
-		</constructor-arg>
+	<bean id="bookmarkDao" class="com.gnizr.db.dao.bookmark.BookmarkDBDao">
+		<constructor-arg ref="dataSource"/>
 	</bean>
 	
-	<bean id="linkDao" class="com.gnizr.db.dao.link.LinkDBDao" singleton="true">
-		<constructor-arg>
-			<ref bean="dataSource"/>
-		</constructor-arg>
+	<bean id="linkDao" class="com.gnizr.db.dao.link.LinkDBDao">
+		<constructor-arg ref="dataSource"/>
 	</bean>
 	
-	<bean id="tagDao" class="com.gnizr.db.dao.tag.TagDBDao" singleton="true">
-		<constructor-arg>
-			<ref bean="dataSource"/>
-		</constructor-arg>
+	<bean id="tagDao" class="com.gnizr.db.dao.tag.TagDBDao">
+		<constructor-arg ref="dataSource"/>
 	</bean>
 	
-	<bean id="tagPropertyDao" class="com.gnizr.db.dao.tag.TagPropertyDBDao" singleton="true">
-		<constructor-arg>
-			<ref bean="dataSource"/>
-		</constructor-arg>
+	<bean id="tagPropertyDao" class="com.gnizr.db.dao.tag.TagPropertyDBDao">
+		<constructor-arg ref="dataSource"/>
 	</bean>
 	
-	<bean id="tagAssertionDao" class="com.gnizr.db.dao.tag.TagAssertionDBDao" singleton="true">
-		<constructor-arg>
-			<ref bean="dataSource"/>
-		</constructor-arg>
+	<bean id="tagAssertionDao" class="com.gnizr.db.dao.tag.TagAssertionDBDao">
+		<constructor-arg ref="dataSource"/>
 	</bean>
 	
-	<bean id="feedSubscriptionDao" class="com.gnizr.db.dao.subscription.FeedSubscriptionDBDao" singleton="true">
-		<constructor-arg>
-			<ref bean="dataSource"/>
-		</constructor-arg>
+	<bean id="feedSubscriptionDao" class="com.gnizr.db.dao.subscription.FeedSubscriptionDBDao">
+		<constructor-arg ref="dataSource"/>
 	</bean>
 
-	<bean id="forUserDao" class="com.gnizr.db.dao.foruser.ForUserDBDao" singleton="true">
-		<constructor-arg>
-			<ref bean="dataSource"/>
-		</constructor-arg>
+	<bean id="forUserDao" class="com.gnizr.db.dao.foruser.ForUserDBDao">
+		<constructor-arg ref="dataSource"/>
 	</bean>
 	
-	<bean id="folderDao" class="com.gnizr.db.dao.folder.FolderDBDao" singleton="true">
-		<constructor-arg>
-			<ref bean="dataSource"/>
-		</constructor-arg>
+	<bean id="folderDao" class="com.gnizr.db.dao.folder.FolderDBDao">
+		<constructor-arg ref="dataSource"/>
 	</bean>
 
-	<bean id="geometryMarkerDao" class="com.gnizr.db.dao.bookmark.GeometryMarkerDBDao" singleton="true">
-		<constructor-arg>
-			<ref bean="dataSource"/>
-		</constructor-arg>
+	<bean id="geometryMarkerDao" class="com.gnizr.db.dao.bookmark.GeometryMarkerDBDao">
+		<constructor-arg ref="dataSource"/>
 	</bean>
 	
-	<bean id="gnizrDao" class="com.gnizr.db.dao.GnizrDao" singleton="true">
-		<property name="linkDao">
-			<ref bean="linkDao"/>
-		</property>
-		<property name="tagDao">
-			<ref bean="tagDao"/>
-		</property>
-		<property name="userDao">
-			<ref bean="userDao"/>
-		</property>
-		<property name="bookmarkDao">
-			<ref bean="bookmarkDao"/>
-		</property>
-		<property name="tagPropertyDao">
-			<ref bean="tagPropertyDao"/>
-		</property>		
-		<property name="tagAssertionDao">
-			<ref bean="tagAssertionDao"/>
-		</property>
-		<property name="feedSubscriptionDao">
-			<ref bean="feedSubscriptionDao"/>
-		</property>
-		<property name="forUserDao">
-			<ref bean="forUserDao"/>
-		</property>
-		<property name="folderDao">
-			<ref bean="folderDao"/>
-		</property>
-		<property name="geometryMarkerDao">
-			<ref bean="geometryMarkerDao"/>
-		</property>
+	<bean id="gnizrDao" class="com.gnizr.db.dao.GnizrDao">
+		<property name="linkDao" ref="linkDao"/>
+		<property name="tagDao" ref="tagDao"/>
+		<property name="userDao" ref="userDao"/>
+		<property name="bookmarkDao" ref="bookmarkDao"/>
+		<property name="tagPropertyDao" ref="tagPropertyDao"/>		
+		<property name="tagAssertionDao" ref="tagAssertionDao"/>
+		<property name="feedSubscriptionDao" ref="feedSubscriptionDao"/>
+		<property name="forUserDao" ref="forUserDao"/>
+		<property name="folderDao" ref="folderDao"/>
+		<property name="geometryMarkerDao" ref="geometryMarkerDao"/>
 	</bean>
 </beans>

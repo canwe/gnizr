@@ -9,28 +9,6 @@
 	Typically, you only need to modify paramaters that are labeled "MODIFY-ME".
 -->
 <beans>
-	<!-- Defines the Database Connection to use -->
-	<bean id="dataSource" class="com.gnizr.db.dao.GnizrBasicDataSource" destroy-method="close" singleton="true">
-		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
-
-		<!-- MODIFY-ME: Defines the URL for connecting to gnizr database -->
-		<property name="url" value="jdbc:mysql://localhost/gnizr_db"/>
-
-		<!-- MODIFY-ME: Defines the database username -->
-		<property name="username" value="gnizr"/>
-
-		<!-- MODIFY-ME: Defines the database password -->
-		<property name="password" value="gnizr"/>
-
-		<!-- Defines misc. JDBC paramaters -->
-		<property name="connectionProperties">
-			<props>
-				<prop key="useUnicode">true</prop>
-				<prop key="characterEncoding">UTF-8</prop>
-				<prop key="characterSetResults">UTF-8</prop>
-			</props>
-		</property>
-	</bean>
 
 	<bean id="gnizrConfiguration"
 	      class="com.gnizr.web.util.GnizrConfiguration" singleton="true">
