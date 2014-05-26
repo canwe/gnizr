@@ -6,238 +6,300 @@
 
     <changeSet id="create-schema" author="vrebesbyrd@gmail.com">
         <sql>
-            CREATE TABLE testt (
-            id integer NOT NULL
-            );
-            
-            CREATE TABLE bookmark (
-            id integer NOT NULL,
-            user_id integer NOT NULL,
-            link_id integer NOT NULL,
-            title text NOT NULL,
-            notes text NOT NULL,
-            created_on timestamp with time zone NOT NULL,
-            last_updated timestamp with time zone NOT NULL,
-            PRIMARY KEY (id),
-            CONSTRAINT bookmark_user_id_link_id_idx UNIQUE (user_id,link_id) USING BTREE,
-            CONSTRAINT bookmark_user_id_idx NOT NULL (user_id),
-            CONSTRAINT bookmark_link_id NOT NULL (link_id) USING BTREE,
-            CONSTRAINT bookmark_created_on_idx NOT NULL (created_on),
-            CONSTRAINT bookmark_lastup_idx NOT NULL (last_updated),
-            CONSTRAINT FK_bookmark_1 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT FK_bookmark_2 FOREIGN KEY (link_id) REFERENCES link (id) ON DELETE CASCADE ON UPDATE CASCADE
-            );
-            
-            CREATE SEQUENCE bookmark_id_seq; 
-            SELECT setval('bookmark_id_seq', max(id)) FROM bookmark_id_seq;
-            ALTER TABLE bookmark ALTER COLUMN id SET DEFAULT nextval('bookmark_id_seq');
+            -- Converted by db_converter
+            START TRANSACTION;
+            SET standard_conforming_strings=off;
+            SET escape_string_warning=off;
+            SET CONSTRAINTS ALL DEFERRED;
 
-            CREATE TABLE bookmark_folder (
-            id int(10) unsigned NOT NULL auto_increment,
-            bookmark_id int(10) unsigned NOT NULL,
-            folder_id int(10) unsigned NOT NULL,
-            last_updated datetime NOT NULL,
-            PRIMARY KEY  (id),
-            UNIQUE KEY bookmark_folder_unique_bmark (bookmark_id,folder_id),
-            KEY FK_bookmark_folder_1 (bookmark_id),
-            KEY FK_bookmark_folder_2 (folder_id),
-            KEY bookmark_folder_lastup_idx (last_updated),
-            CONSTRAINT FK_bookmark_folder_1 FOREIGN KEY (bookmark_id) REFERENCES bookmark (id) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT FK_bookmark_folder_2 FOREIGN KEY (folder_id) REFERENCES folder (id) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "bookmark" (
+            "id" integer  NOT NULL,
+            "user_id" integer  NOT NULL,
+            "link_id" integer  NOT NULL,
+            "title" text collate utf8_bin NOT NULL,
+            "notes" text collate utf8_bin NOT NULL,
+            "created_on" timestamp with time zone NOT NULL,
+            "last_updated" timestamp with time zone NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE ("user_id","link_id")
             );
 
-            CREATE TABLE bookmark_point_marker_idx (
-            bookmark_id int(10) unsigned NOT NULL,
-            point_marker_id int(10) unsigned NOT NULL,
-            PRIMARY KEY  (bookmark_id,point_marker_id),
-            CONSTRAINT FK_bookmark_point_mark_idx_1 FOREIGN KEY (bookmark_id) REFERENCES bookmark (id) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "bookmark_folder" (
+            "id" integer  NOT NULL,
+            "bookmark_id" integer  NOT NULL,
+            "folder_id" integer  NOT NULL,
+            "last_updated" timestamp with time zone NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE ("bookmark_id","folder_id")
             );
 
-            CREATE TABLE bookmark_tag_idx (
-            id int(10) unsigned NOT NULL auto_increment,
-            bookmark_id int(10) unsigned NOT NULL,
-            tag_id int(10) unsigned NOT NULL,
-            count int(10) unsigned NOT NULL,
-            position smallint(5) unsigned NOT NULL,
-            PRIMARY KEY  (id),
-            UNIQUE KEY Index_4 (bookmark_id,tag_id),
-            KEY Index_2 (bookmark_id),
-            KEY Index_3 (tag_id),
-            CONSTRAINT FK_bookmark_tag_idx_1 FOREIGN KEY (bookmark_id) REFERENCES bookmark (id) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT FK_bookmark_tag_idx_2 FOREIGN KEY (tag_id) REFERENCES tag (id) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "bookmark_point_marker_idx" (
+            "bookmark_id" integer  NOT NULL,
+            "point_marker_id" integer  NOT NULL,
+            PRIMARY KEY  ("bookmark_id","point_marker_id")
             );
 
-            CREATE TABLE feed_folder (
-            id int(10) unsigned NOT NULL auto_increment,
-            feed_id int(10) unsigned NOT NULL,
-            folder_id int(10) unsigned NOT NULL,
-            PRIMARY KEY  (id),
-            UNIQUE KEY feed_folder_unique_entry (feed_id,folder_id),
-            KEY FK_feed_folder_2 (folder_id),
-            KEY FK_feed_folder_1 USING BTREE (feed_id),
-            CONSTRAINT FK_feed_folder_1 FOREIGN KEY (feed_id) REFERENCES feed_subscription (id) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT FK_feed_folder_2 FOREIGN KEY (folder_id) REFERENCES folder (id) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "bookmark_tag_idx" (
+            "id" integer  NOT NULL,
+            "bookmark_id" integer  NOT NULL,
+            "tag_id" integer  NOT NULL,
+            "count" integer  NOT NULL,
+            "position" int2  NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE ("bookmark_id","tag_id")
             );
 
-            CREATE TABLE feed_subscription (
-            id int(10) unsigned NOT NULL auto_increment,
-            bookmark_id int(10) unsigned NOT NULL COMMENT 'ref a bmark that defines a RSS feed',
-            last_sync datetime default NULL COMMENT 'when was the last time that this feed was read',
-            match_text text character set utf8 NOT NULL COMMENT 'space-delimited tag labels that a bmark importer will use to match feed entries that should imported as bookmarks',
-            auto_import tinyint(1) NOT NULL default '1',
-            pub_date datetime default NULL,
-            PRIMARY KEY  (id),
-            UNIQUE KEY feed_sub_unique_bm_id (bookmark_id),
-            KEY feed_sub_last_sync_idx (last_sync),
-            CONSTRAINT FK_feed_subscription_1 FOREIGN KEY (bookmark_id) REFERENCES bookmark (id) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "feed_folder" (
+            "id" integer  NOT NULL,
+            "feed_id" integer  NOT NULL,
+            "folder_id" integer  NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE ("feed_id","folder_id")
             );
 
-            CREATE TABLE folder (
-            id int(10) unsigned NOT NULL auto_increment,
-            folder_name varchar(45) collate utf8_bin NOT NULL,
-            owner_id int(10) unsigned NOT NULL,
-            description text collate utf8_bin NOT NULL,
-            last_updated datetime NOT NULL,
-            PRIMARY KEY  (id),
-            UNIQUE KEY folder_owner_folder_idx USING BTREE (folder_name,owner_id),
-            KEY FK_folder_admin_1 (owner_id),
-            CONSTRAINT FK_folder_admin_1 FOREIGN KEY (owner_id) REFERENCES user (id) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "feed_subscription" (
+            "id" integer  NOT NULL,
+            "bookmark_id" integer  NOT NULL COMMENT 'ref a bmark that defines a RSS feed',
+            "last_sync" timestamp with time zone default NULL COMMENT 'when was the last time that this feed was read',
+            "match_text" text character set utf8 NOT NULL COMMENT 'space-delimited tag labels that a bmark importer will use to match feed entries that should imported as bookmarks',
+            "auto_import" int4 NOT NULL default '1',
+            "pub_date" timestamp with time zone default NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE ("bookmark_id")
             );
 
-            CREATE TABLE folder_tag_idx (
-            folder_id int(10) unsigned NOT NULL,
-            tag_id int(10) unsigned NOT NULL,
-            count int(10) unsigned NOT NULL,
-            PRIMARY KEY  (folder_id,tag_id),
-            KEY FK_folder_tag_idx_2 (tag_id),
-            CONSTRAINT FK_folder_tag_idx_1 FOREIGN KEY (folder_id) REFERENCES folder (id) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT FK_folder_tag_idx_2 FOREIGN KEY (tag_id) REFERENCES tag (id) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "folder" (
+            "id" integer  NOT NULL,
+            "folder_name" varchar(90) collate utf8_bin NOT NULL,
+            "owner_id" integer  NOT NULL,
+            "description" text collate utf8_bin NOT NULL,
+            "last_updated" timestamp with time zone NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE ("folder_name","owner_id")
             );
 
-            CREATE TABLE for_user (
-            id int(10) unsigned NOT NULL auto_increment,
-            for_user_id int(10) unsigned NOT NULL,
-            bookmark_id int(10) unsigned NOT NULL,
-            message text NOT NULL,
-            created_on datetime NOT NULL,
-            PRIMARY KEY  (id),
-            UNIQUE KEY for_user_index_1 (for_user_id,bookmark_id),
-            KEY FK_for_user_1 (for_user_id),
-            KEY FK_for_user_2 (bookmark_id),
-            CONSTRAINT FK_for_user_1 FOREIGN KEY (for_user_id) REFERENCES user (id) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT FK_for_user_2 FOREIGN KEY (bookmark_id) REFERENCES bookmark (id) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "folder_tag_idx" (
+            "folder_id" integer  NOT NULL,
+            "tag_id" integer  NOT NULL,
+            "count" integer  NOT NULL,
+            PRIMARY KEY  ("folder_id","tag_id")
             );
 
-            CREATE TABLE link (
-            id int(10) unsigned NOT NULL auto_increment,
-            mime_type_id int(10) unsigned default NULL,
-            url text NOT NULL,
-            url_hash varchar(45) NOT NULL,
-            PRIMARY KEY  (id),
-            UNIQUE KEY url_hash_idx USING BTREE (url_hash),
-            KEY FK_link_1 (mime_type_id),
-            CONSTRAINT FK_link_1 FOREIGN KEY (mime_type_id) REFERENCES mime_type_admin (id) ON DELETE SET NULL ON UPDATE CASCADE
+            CREATE TABLE "for_user" (
+            "id" integer  NOT NULL,
+            "for_user_id" integer  NOT NULL,
+            "bookmark_id" integer  NOT NULL,
+            "message" text NOT NULL,
+            "created_on" timestamp with time zone NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE ("for_user_id","bookmark_id")
             );
 
-            CREATE TABLE link_tag_idx (
-            id int(10) unsigned NOT NULL auto_increment,
-            link_id int(10) unsigned NOT NULL,
-            tag_id int(10) unsigned NOT NULL,
-            count int(10) unsigned zerofill NOT NULL,
-            PRIMARY KEY  (id),
-            UNIQUE KEY idx_link_id_tag_id (link_id,tag_id),
-            KEY FK_link_tag_idx_2 (tag_id),
-            KEY idx_link_id (link_id),
-            CONSTRAINT FK_link_tag_idx_1 FOREIGN KEY (link_id) REFERENCES link (id) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT FK_link_tag_idx_2 FOREIGN KEY (tag_id) REFERENCES tag (id) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "link" (
+            "id" integer  NOT NULL,
+            "mime_type_id" integer  default NULL,
+            "url" text NOT NULL,
+            "url_hash" varchar(90) NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE ("url_hash")
             );
 
-            CREATE TABLE mime_type_admin (
-            id int(10) unsigned NOT NULL default '0',
-            mime_type varchar(45) NOT NULL,
-            label varchar(100) NOT NULL,
-            PRIMARY KEY  (id)
+            CREATE TABLE "link_tag_idx" (
+            "id" integer  NOT NULL,
+            "link_id" integer  NOT NULL,
+            "tag_id" integer  NOT NULL,
+            "count" integer  zerofill NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE ("link_id","tag_id")
             );
 
-            CREATE TABLE point_marker (
-            id int(10) unsigned NOT NULL auto_increment,
-            geom point NOT NULL,
-            notes varchar(255) NOT NULL,
-            icon_id tinyint(3) unsigned NOT NULL default '0',
-            PRIMARY KEY  (id),
-            SPATIAL INDEX(geom)
+            CREATE TABLE "mime_type_admin" (
+            "id" integer  NOT NULL default '0',
+            "mime_type" varchar(90) NOT NULL,
+            "label" varchar(200) NOT NULL,
+            PRIMARY KEY  ("id")
             );
 
-            CREATE TABLE search_idx (
-            bookmark_id int(10) unsigned NOT NULL,
-            text text NOT NULL,
-            tags text NOT NULL,
-            PRIMARY KEY  (bookmark_id),
-            FULLTEXT KEY search_idx_text (text),
-            FULLTEXT KEY search_idx_tags (tags)
+            CREATE TABLE "point_marker" (
+            "id" integer  NOT NULL,
+            "geom" point NOT NULL,
+            "notes" varchar(510) NOT NULL,
+            "icon_id" tinyint(3)  NOT NULL default '0',
+            PRIMARY KEY  ("id")
             );
 
-            CREATE TABLE tag (
-            id int(10) unsigned NOT NULL auto_increment,
-            tag varchar(45) collate utf8_bin NOT NULL,
-            count int(10) unsigned zerofill NOT NULL,
-            PRIMARY KEY  (id),
-            UNIQUE KEY idx_tag (tag)
+            CREATE TABLE "search_idx" (
+            "bookmark_id" integer  NOT NULL,
+            "text" text NOT NULL,
+            "tags" text NOT NULL,
+            PRIMARY KEY  ("bookmark_id")
             );
 
-            CREATE TABLE tag_assertion (
-            id int(10) unsigned NOT NULL auto_increment,
-            subject_id int(10) unsigned NOT NULL,
-            prpt_id int(10) unsigned NOT NULL,
-            object_id int(10) unsigned NOT NULL,
-            user_id int(10) unsigned NOT NULL,
-            PRIMARY KEY  (id),
-            UNIQUE KEY tag_asrt_uniq_asrt_idx (subject_id,prpt_id,object_id,user_id),
-            KEY FK_tag_asrt_prpt_id USING BTREE (prpt_id),
-            KEY FK_tag_asrt_subject_id USING BTREE (subject_id),
-            KEY FK_tag_asrt_object_id USING BTREE (object_id),
-            KEY FK_tag_asrt_user_id USING BTREE (user_id),
-            CONSTRAINT FK_tag_asrt_object_id FOREIGN KEY (object_id) REFERENCES user_tag_idx (id) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT FK_tag_asrt_prpt_id FOREIGN KEY (prpt_id) REFERENCES tag_prpt (id) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT FK_tag_asrt_subject_id FOREIGN KEY (subject_id) REFERENCES user_tag_idx (id) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT FK_tag_asrt_user_id FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "tag" (
+            "id" integer  NOT NULL,
+            "tag" varchar(90) collate utf8_bin NOT NULL,
+            "count" integer  zerofill NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE ("tag")
             );
 
-            CREATE TABLE tag_prpt (
-            id int(10) unsigned NOT NULL auto_increment,
-            name varchar(45) NOT NULL,
-            ns_prefix varchar(10) NOT NULL default 'gn',
-            description varchar(255) default NULL,
-            prpt_type enum('spatial','temporal','system','reference','default') NOT NULL default 'default',
-            cardinality int(11) NOT NULL default '-1',
-            PRIMARY KEY  (id),
-            UNIQUE KEY tag_prpt_unique_prpt_idx (name,ns_prefix)
+            CREATE TABLE "tag_assertion" (
+            "id" integer  NOT NULL,
+            "subject_id" integer  NOT NULL,
+            "prpt_id" integer  NOT NULL,
+            "object_id" integer  NOT NULL,
+            "user_id" integer  NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE ("subject_id","prpt_id","object_id","user_id")
             );
 
-            CREATE TABLE user (
-            id int(10) unsigned NOT NULL auto_increment,
-            username varchar(45) NOT NULL,
-            password varchar(45) NOT NULL,
-            fullname varchar(100) NOT NULL,
-            created_on datetime NOT NULL,
-            email varchar(50) NOT NULL,
-            acct_status int(10) unsigned zerofill NOT NULL,
-            PRIMARY KEY  (id),
-            UNIQUE KEY idx_username (username)
+            CREATE TYPE tag_prpt_prpt_type AS ENUM ('spatial','temporal','system','reference','default');
+            CREATE TABLE "tag_prpt" (
+            "id" integer  NOT NULL,
+            "name" varchar(90) NOT NULL,
+            "ns_prefix" varchar(20) NOT NULL default 'gn',
+            "description" varchar(510) default NULL,
+            "prpt_type" tag_prpt_prpt_type NOT NULL default 'default',
+            "cardinality" integer NOT NULL default '-1',
+            PRIMARY KEY  ("id"),
+            UNIQUE ("name","ns_prefix")
             );
 
-            CREATE TABLE user_tag_idx (
-            id int(10) unsigned NOT NULL auto_increment,
-            user_id int(10) unsigned NOT NULL,
-            tag_id int(10) unsigned NOT NULL,
-            count int(10) unsigned zerofill NOT NULL,
-            PRIMARY KEY  (id),
-            UNIQUE KEY idx_user_id_tag_id (user_id,tag_id),
-            KEY FK_user_tag_idx_2 (tag_id),
-            KEY idx_user_tag_id_user_id (user_id),
-            CONSTRAINT FK_user_tag_idx_1 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE ON UPDATE CASCADE,
-            CONSTRAINT FK_user_tag_idx_2 FOREIGN KEY (tag_id) REFERENCES tag (id) ON DELETE CASCADE ON UPDATE CASCADE
+            CREATE TABLE "user" (
+            "id" integer  NOT NULL,
+            "username" varchar(90) NOT NULL,
+            "password" varchar(90) NOT NULL,
+            "fullname" varchar(200) NOT NULL,
+            "created_on" timestamp with time zone NOT NULL,
+            "email" varchar(100) NOT NULL,
+            "acct_status" integer  zerofill NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE ("username")
             );
+
+            CREATE TABLE "user_tag_idx" (
+            "id" integer  NOT NULL,
+            "user_id" integer  NOT NULL,
+            "tag_id" integer  NOT NULL,
+            "count" integer  zerofill NOT NULL,
+            PRIMARY KEY  ("id"),
+            UNIQUE ("user_id","tag_id")
+            );
+
+
+            -- Post-data save --
+            COMMIT;
+            START TRANSACTION;
+
+            -- Typecasts --
+            ALTER TABLE "feed_subscription" ALTER COLUMN "auto_import" DROP DEFAULT, ALTER COLUMN "auto_import" TYPE boolean USING CAST("auto_import" as boolean);
+
+            -- Foreign keys --
+            ALTER TABLE "bookmark" ADD CONSTRAINT "FK_bookmark_1" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "bookmark" ("user_id");
+            ALTER TABLE "bookmark" ADD CONSTRAINT "FK_bookmark_2" FOREIGN KEY ("link_id") REFERENCES "link" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "bookmark" ("link_id");
+            ALTER TABLE "bookmark_folder" ADD CONSTRAINT "FK_bookmark_folder_1" FOREIGN KEY ("bookmark_id") REFERENCES "bookmark" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "bookmark_folder" ("bookmark_id");
+            ALTER TABLE "bookmark_folder" ADD CONSTRAINT "FK_bookmark_folder_2" FOREIGN KEY ("folder_id") REFERENCES "folder" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "bookmark_folder" ("folder_id");
+            ALTER TABLE "bookmark_point_marker_idx" ADD CONSTRAINT "FK_bookmark_point_mark_idx_1" FOREIGN KEY ("bookmark_id") REFERENCES "bookmark" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "bookmark_point_marker_idx" ("bookmark_id");
+            ALTER TABLE "bookmark_tag_idx" ADD CONSTRAINT "FK_bookmark_tag_idx_1" FOREIGN KEY ("bookmark_id") REFERENCES "bookmark" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "bookmark_tag_idx" ("bookmark_id");
+            ALTER TABLE "bookmark_tag_idx" ADD CONSTRAINT "FK_bookmark_tag_idx_2" FOREIGN KEY ("tag_id") REFERENCES "tag" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "bookmark_tag_idx" ("tag_id");
+            ALTER TABLE "feed_folder" ADD CONSTRAINT "FK_feed_folder_1" FOREIGN KEY ("feed_id") REFERENCES "feed_subscription" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "feed_folder" ("feed_id");
+            ALTER TABLE "feed_folder" ADD CONSTRAINT "FK_feed_folder_2" FOREIGN KEY ("folder_id") REFERENCES "folder" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "feed_folder" ("folder_id");
+            ALTER TABLE "feed_subscription" ADD CONSTRAINT "FK_feed_subscription_1" FOREIGN KEY ("bookmark_id") REFERENCES "bookmark" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "feed_subscription" ("bookmark_id");
+            ALTER TABLE "folder" ADD CONSTRAINT "FK_folder_admin_1" FOREIGN KEY ("owner_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "folder" ("owner_id");
+            ALTER TABLE "folder_tag_idx" ADD CONSTRAINT "FK_folder_tag_idx_1" FOREIGN KEY ("folder_id") REFERENCES "folder" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "folder_tag_idx" ("folder_id");
+            ALTER TABLE "folder_tag_idx" ADD CONSTRAINT "FK_folder_tag_idx_2" FOREIGN KEY ("tag_id") REFERENCES "tag" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "folder_tag_idx" ("tag_id");
+            ALTER TABLE "for_user" ADD CONSTRAINT "FK_for_user_1" FOREIGN KEY ("for_user_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "for_user" ("for_user_id");
+            ALTER TABLE "for_user" ADD CONSTRAINT "FK_for_user_2" FOREIGN KEY ("bookmark_id") REFERENCES "bookmark" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "for_user" ("bookmark_id");
+            ALTER TABLE "link" ADD CONSTRAINT "FK_link_1" FOREIGN KEY ("mime_type_id") REFERENCES "mime_type_admin" ("id") ON DELETE SET NULL ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "link" ("mime_type_id");
+            ALTER TABLE "link_tag_idx" ADD CONSTRAINT "FK_link_tag_idx_1" FOREIGN KEY ("link_id") REFERENCES "link" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "link_tag_idx" ("link_id");
+            ALTER TABLE "link_tag_idx" ADD CONSTRAINT "FK_link_tag_idx_2" FOREIGN KEY ("tag_id") REFERENCES "tag" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "link_tag_idx" ("tag_id");
+            ALTER TABLE "tag_assertion" ADD CONSTRAINT "FK_tag_asrt_object_id" FOREIGN KEY ("object_id") REFERENCES "user_tag_idx" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "tag_assertion" ("object_id");
+            ALTER TABLE "tag_assertion" ADD CONSTRAINT "FK_tag_asrt_prpt_id" FOREIGN KEY ("prpt_id") REFERENCES "tag_prpt" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "tag_assertion" ("prpt_id");
+            ALTER TABLE "tag_assertion" ADD CONSTRAINT "FK_tag_asrt_subject_id" FOREIGN KEY ("subject_id") REFERENCES "user_tag_idx" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "tag_assertion" ("subject_id");
+            ALTER TABLE "tag_assertion" ADD CONSTRAINT "FK_tag_asrt_user_id" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "tag_assertion" ("user_id");
+            ALTER TABLE "user_tag_idx" ADD CONSTRAINT "FK_user_tag_idx_1" FOREIGN KEY ("user_id") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "user_tag_idx" ("user_id");
+            ALTER TABLE "user_tag_idx" ADD CONSTRAINT "FK_user_tag_idx_2" FOREIGN KEY ("tag_id") REFERENCES "tag" ("id") ON DELETE CASCADE ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED;
+            CREATE INDEX ON "user_tag_idx" ("tag_id");
+
+            -- Sequences --
+            CREATE SEQUENCE bookmark_id_seq;
+            SELECT setval('bookmark_id_seq', max(id)) FROM bookmark;
+            ALTER TABLE "bookmark" ALTER COLUMN "id" SET DEFAULT nextval('bookmark_id_seq');
+            CREATE SEQUENCE bookmark_folder_id_seq;
+            SELECT setval('bookmark_folder_id_seq', max(id)) FROM bookmark_folder;
+            ALTER TABLE "bookmark_folder" ALTER COLUMN "id" SET DEFAULT nextval('bookmark_folder_id_seq');
+            CREATE SEQUENCE bookmark_tag_idx_id_seq;
+            SELECT setval('bookmark_tag_idx_id_seq', max(id)) FROM bookmark_tag_idx;
+            ALTER TABLE "bookmark_tag_idx" ALTER COLUMN "id" SET DEFAULT nextval('bookmark_tag_idx_id_seq');
+            CREATE SEQUENCE feed_folder_id_seq;
+            SELECT setval('feed_folder_id_seq', max(id)) FROM feed_folder;
+            ALTER TABLE "feed_folder" ALTER COLUMN "id" SET DEFAULT nextval('feed_folder_id_seq');
+            CREATE SEQUENCE feed_subscription_id_seq;
+            SELECT setval('feed_subscription_id_seq', max(id)) FROM feed_subscription;
+            ALTER TABLE "feed_subscription" ALTER COLUMN "id" SET DEFAULT nextval('feed_subscription_id_seq');
+            CREATE SEQUENCE folder_id_seq;
+            SELECT setval('folder_id_seq', max(id)) FROM folder;
+            ALTER TABLE "folder" ALTER COLUMN "id" SET DEFAULT nextval('folder_id_seq');
+            CREATE SEQUENCE for_user_id_seq;
+            SELECT setval('for_user_id_seq', max(id)) FROM for_user;
+            ALTER TABLE "for_user" ALTER COLUMN "id" SET DEFAULT nextval('for_user_id_seq');
+            CREATE SEQUENCE link_id_seq;
+            SELECT setval('link_id_seq', max(id)) FROM link;
+            ALTER TABLE "link" ALTER COLUMN "id" SET DEFAULT nextval('link_id_seq');
+            CREATE SEQUENCE link_tag_idx_id_seq;
+            SELECT setval('link_tag_idx_id_seq', max(id)) FROM link_tag_idx;
+            ALTER TABLE "link_tag_idx" ALTER COLUMN "id" SET DEFAULT nextval('link_tag_idx_id_seq');
+            CREATE SEQUENCE mime_type_admin_id_seq;
+            SELECT setval('mime_type_admin_id_seq', max(id)) FROM mime_type_admin;
+            ALTER TABLE "mime_type_admin" ALTER COLUMN "id" SET DEFAULT nextval('mime_type_admin_id_seq');
+            CREATE SEQUENCE point_marker_id_seq;
+            SELECT setval('point_marker_id_seq', max(id)) FROM point_marker;
+            ALTER TABLE "point_marker" ALTER COLUMN "id" SET DEFAULT nextval('point_marker_id_seq');
+            CREATE SEQUENCE tag_id_seq;
+            SELECT setval('tag_id_seq', max(id)) FROM tag;
+            ALTER TABLE "tag" ALTER COLUMN "id" SET DEFAULT nextval('tag_id_seq');
+            CREATE SEQUENCE tag_assertion_id_seq;
+            SELECT setval('tag_assertion_id_seq', max(id)) FROM tag_assertion;
+            ALTER TABLE "tag_assertion" ALTER COLUMN "id" SET DEFAULT nextval('tag_assertion_id_seq');
+            CREATE SEQUENCE tag_prpt_id_seq;
+            SELECT setval('tag_prpt_id_seq', max(id)) FROM tag_prpt;
+            ALTER TABLE "tag_prpt" ALTER COLUMN "id" SET DEFAULT nextval('tag_prpt_id_seq');
+            CREATE SEQUENCE user_id_seq;
+            SELECT setval('user_id_seq', max(id)) FROM user;
+            ALTER TABLE "user" ALTER COLUMN "id" SET DEFAULT nextval('user_id_seq');
+            CREATE SEQUENCE user_tag_idx_id_seq;
+            SELECT setval('user_tag_idx_id_seq', max(id)) FROM user_tag_idx;
+            ALTER TABLE "user_tag_idx" ALTER COLUMN "id" SET DEFAULT nextval('user_tag_idx_id_seq');
+
+            -- Full Text keys --
+            CREATE INDEX ON search_idx USING gin(to_tsvector('english', text));
+            CREATE INDEX ON search_idx USING gin(to_tsvector('english', tags));
+
+            COMMIT;
+
         </sql>
     </changeSet>
 
