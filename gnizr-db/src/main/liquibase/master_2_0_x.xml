@@ -289,7 +289,7 @@
             SELECT setval('tag_prpt_id_seq', max(id)) FROM tag_prpt;
             ALTER TABLE "tag_prpt" ALTER COLUMN "id" SET DEFAULT nextval('tag_prpt_id_seq');
             CREATE SEQUENCE user_id_seq;
-            SELECT setval('user_id_seq', max(id)) FROM user;
+            SELECT setval('user_id_seq', max(id)) FROM "user";
             ALTER TABLE "user" ALTER COLUMN "id" SET DEFAULT nextval('user_id_seq');
             CREATE SEQUENCE user_tag_idx_id_seq;
             SELECT setval('user_tag_idx_id_seq', max(id)) FROM user_tag_idx;
