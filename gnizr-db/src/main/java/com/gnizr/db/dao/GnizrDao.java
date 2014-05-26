@@ -129,7 +129,7 @@ public class GnizrDao implements Serializable, InitializingBean {
 				try {
 					c.rollback();
 					c.close();
-				} catch (SQLException e) {
+				} catch (Throwable e) {
 					//nothing to do
 				}
 			}
