@@ -124,7 +124,7 @@
     <profiles>
 
         <profile>
-            <id>snap-ci</id>
+            <id>snapci</id>
             <activation>
                 <property>
                     <name>SNAP-CI</name>
