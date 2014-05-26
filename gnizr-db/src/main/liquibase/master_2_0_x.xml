@@ -109,7 +109,7 @@
             "id" integer  NOT NULL,
             "link_id" integer  NOT NULL,
             "tag_id" integer  NOT NULL,
-            "count" integer  zerofill NOT NULL,
+            "count" integer NOT NULL,
             PRIMARY KEY  ("id"),
             UNIQUE ("link_id","tag_id")
             );
@@ -139,7 +139,7 @@
             CREATE TABLE "tag" (
             "id" integer  NOT NULL,
             "tag" varchar(90)  NOT NULL,
-            "count" integer  zerofill NOT NULL,
+            "count" integer NOT NULL,
             PRIMARY KEY  ("id"),
             UNIQUE ("tag")
             );
@@ -173,7 +173,7 @@
             "fullname" varchar(200) NOT NULL,
             "created_on" timestamp with time zone NOT NULL,
             "email" varchar(100) NOT NULL,
-            "acct_status" integer  zerofill NOT NULL,
+            "acct_status" integer NOT NULL,
             PRIMARY KEY  ("id"),
             UNIQUE ("username")
             );
@@ -182,7 +182,7 @@
             "id" integer  NOT NULL,
             "user_id" integer  NOT NULL,
             "tag_id" integer  NOT NULL,
-            "count" integer  zerofill NOT NULL,
+            "count" integer NOT NULL,
             PRIMARY KEY  ("id"),
             UNIQUE ("user_id","tag_id")
             );
