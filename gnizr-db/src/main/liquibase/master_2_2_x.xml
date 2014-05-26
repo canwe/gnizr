@@ -6,8 +6,8 @@
 
 	<changeSet id="fill-database" author="vrebesbyrd@gmail.com">
 		<sql>
-            DELETE FROM user;
-            INSERT INTO user(id, username, password,      fullname,  created_on,  email, acct_status)
+            DELETE FROM "user";
+            INSERT INTO "user"(id, username, password,      fullname,  created_on,  email, acct_status)
                    VALUES   (1,  'gnizr',  md5('gnizr'),  'gnizr',   now(),       '',    1);
 
             DELETE FROM tag;
