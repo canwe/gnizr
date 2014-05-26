@@ -47,6 +47,7 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -115,24 +116,24 @@ public class GnizrDao implements Serializable, InitializingBean {
 	}
 
 	public void afterPropertiesSet() throws Exception {
-//		java.sql.Connection c = dataSource.getConnection();
-//		Liquibase liquibase = null;
-//		try {
-//			Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(c));
-//			liquibase = new Liquibase(YOUR_CHANGELOG, new FileSystemResourceAccessor(), database);
-//			liquibase.update();
-//		} catch (SQLException e) {
-//			throw new DatabaseException(e);
-//		} finally {
-//			if (c != null) {
-//				try {
-//					c.rollback();
-//					c.close();
-//				} catch (SQLException e) {
-//					//nothing to do
-//				}
-//			}
-//		}
+		java.sql.Connection c = dataSource.getConnection();
+		Liquibase liquibase = null;
+		try {
+			Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(c));
+			liquibase = new Liquibase("classpath://master_main.xml", new ClassLoaderResourceAccessor(), database);
+			liquibase.update(Integer.MAX_VALUE, "");
+		} catch (SQLException e) {
+			throw new DatabaseException(e);
+		} finally {
+			if (c != null) {
+				try {
+					c.rollback();
+					c.close();
+				} catch (SQLException e) {
+					//nothing to do
+				}
+			}
+		}
 	}
 
 	/**
