@@ -60,9 +60,9 @@
 
             CREATE TABLE "feed_subscription" (
             "id" integer  NOT NULL,
-            "bookmark_id" integer  NOT NULL COMMENT 'ref a bmark that defines a RSS feed',
-            "last_sync" timestamp with time zone default NULL COMMENT 'when was the last time that this feed was read',
-            "match_text" text  NOT NULL COMMENT 'space-delimited tag labels that a bmark importer will use to match feed entries that should imported as bookmarks',
+            "bookmark_id" integer  NOT NULL --'ref a bmark that defines a RSS feed',
+            "last_sync" timestamp with time zone default NULL --'when was the last time that this feed was read',
+            "match_text" text  NOT NULL --'space-delimited tag labels that a bmark importer will use to match feed entries that should imported as bookmarks',
             "auto_import" int4 NOT NULL default '1',
             "pub_date" timestamp with time zone default NULL,
             PRIMARY KEY  ("id"),
