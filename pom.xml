@@ -180,6 +180,11 @@
 				<artifactId>spring-tx</artifactId>
 				<version>${spring-framework.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context-support</artifactId>
+				<version>${spring-framework.version}</version>
+			</dependency>
             <dependency>
                 <groupId>com.opensymphony</groupId>
                 <artifactId>webwork</artifactId>
