@@ -10,7 +10,7 @@
             START TRANSACTION;
             SET standard_conforming_strings=off;
             SET escape_string_warning=off;
-            SET NAMES 'utf8'
+            SET NAMES 'UTF8';
             SET CONSTRAINTS ALL DEFERRED;
 
             CREATE TABLE "bookmark" (
