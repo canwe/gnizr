@@ -118,58 +118,76 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <artifactId>liquibase-maven-plugin</artifactId>
-                <groupId>org.liquibase</groupId>
-                <version>3.0.6</version>
-
-                <configuration>
-                    <!--<propertyFile>src/main/resources/liquibase.properties</propertyFile>-->
-                    <url>${env.SNAP_DB_PG_JDBC_URL}</url>
-                    <username>${env.SNAP_DB_PG_USER}</username>
-                    <password>${env.SNAP_DB_PG_PASSWORD}</password>
-                    <changeLogFile>src/main/liquibase/master_main.xml</changeLogFile>
-                    <contexts>prod</contexts>
-                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
-                    <driver>org.postgresql.Driver</driver>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.postgresql</groupId>
-                        <artifactId>postgresql</artifactId>
-                        <version>9.3-1101-jdbc41</version>
-                    </dependency>
-
-                    <!-- your own standard logging dependencies -->
-                    <dependency>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                        <version>1.7.5</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-log4j12</artifactId><!-- or log4j2 or logback or whatever-->
-                        <version>1.7.5</version>
-                    </dependency>
-
-                    <!-- special dependency to fix liquibase's logging fetish -->
-                    <dependency>
-                        <groupId>com.mattbertolini</groupId>
-                        <artifactId>liquibase-slf4j</artifactId>
-                        <version>1.2.1</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-
-                    <execution>
-                        <id>schema-update</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>update</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+
+        <profile>
+            <id>snap-ci</id>
+            <activation>
+                <property>
+                    <name>SNAP-CI</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>liquibase-maven-plugin</artifactId>
+                        <groupId>org.liquibase</groupId>
+                        <version>3.0.6</version>
+
+                        <configuration>
+                            <!--<propertyFile>src/main/resources/liquibase.properties</propertyFile>-->
+                            <url>${env.SNAP_DB_PG_JDBC_URL}</url>
+                            <username>${env.SNAP_DB_PG_USER}</username>
+                            <password>${env.SNAP_DB_PG_PASSWORD}</password>
+                            <changeLogFile>src/main/liquibase/master_main.xml</changeLogFile>
+                            <contexts>prod</contexts>
+                            <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                            <driver>org.postgresql.Driver</driver>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.postgresql</groupId>
+                                <artifactId>postgresql</artifactId>
+                                <version>9.3-1101-jdbc41</version>
+                            </dependency>
+
+                            <!-- your own standard logging dependencies -->
+                            <dependency>
+                                <groupId>org.slf4j</groupId>
+                                <artifactId>slf4j-api</artifactId>
+                                <version>1.7.5</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.slf4j</groupId>
+                                <artifactId>slf4j-log4j12</artifactId><!-- or log4j2 or logback or whatever-->
+                                <version>1.7.5</version>
+                            </dependency>
+
+                            <!-- special dependency to fix liquibase's logging fetish -->
+                            <dependency>
+                                <groupId>com.mattbertolini</groupId>
+                                <artifactId>liquibase-slf4j</artifactId>
+                                <version>1.2.1</version>
+                            </dependency>
+                        </dependencies>
+                        <executions>
+
+                            <execution>
+                                <id>schema-update</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>update</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
 </project>
