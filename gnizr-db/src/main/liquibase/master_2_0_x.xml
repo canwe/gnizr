@@ -10,14 +10,15 @@
             START TRANSACTION;
             SET standard_conforming_strings=off;
             SET escape_string_warning=off;
+            SET NAMES 'utf8'
             SET CONSTRAINTS ALL DEFERRED;
 
             CREATE TABLE "bookmark" (
             "id" integer  NOT NULL,
             "user_id" integer  NOT NULL,
             "link_id" integer  NOT NULL,
-            "title" text character set utf8 NOT NULL,
-            "notes" text character set utf8 NOT NULL,
+            "title" text  NOT NULL,
+            "notes" text  NOT NULL,
             "created_on" timestamp with time zone NOT NULL,
             "last_updated" timestamp with time zone NOT NULL,
             PRIMARY KEY  ("id"),
@@ -61,7 +62,7 @@
             "id" integer  NOT NULL,
             "bookmark_id" integer  NOT NULL COMMENT 'ref a bmark that defines a RSS feed',
             "last_sync" timestamp with time zone default NULL COMMENT 'when was the last time that this feed was read',
-            "match_text" text character set utf8 NOT NULL COMMENT 'space-delimited tag labels that a bmark importer will use to match feed entries that should imported as bookmarks',
+            "match_text" text  NOT NULL COMMENT 'space-delimited tag labels that a bmark importer will use to match feed entries that should imported as bookmarks',
             "auto_import" int4 NOT NULL default '1',
             "pub_date" timestamp with time zone default NULL,
             PRIMARY KEY  ("id"),
@@ -70,9 +71,9 @@
 
             CREATE TABLE "folder" (
             "id" integer  NOT NULL,
-            "folder_name" varchar(90) character set utf8 NOT NULL,
+            "folder_name" varchar(90)  NOT NULL,
             "owner_id" integer  NOT NULL,
-            "description" text character set utf8 NOT NULL,
+            "description" text  NOT NULL,
             "last_updated" timestamp with time zone NOT NULL,
             PRIMARY KEY  ("id"),
             UNIQUE ("folder_name","owner_id")
@@ -137,7 +138,7 @@
 
             CREATE TABLE "tag" (
             "id" integer  NOT NULL,
-            "tag" varchar(90) character set utf8 NOT NULL,
+            "tag" varchar(90)  NOT NULL,
             "count" integer  zerofill NOT NULL,
             PRIMARY KEY  ("id"),
             UNIQUE ("tag")
