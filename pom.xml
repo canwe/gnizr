@@ -35,6 +35,11 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>repository.springsource.release</id>
+            <name>SpringSource GA Repository</name>
+            <url>http://repo.springsource.org/release</url>
+        </repository>
     </repositories>
 
     <dependencyManagement>
