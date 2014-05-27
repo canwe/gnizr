@@ -124,7 +124,7 @@ public class GnizrDao implements Serializable, InitializingBean {
 		try {
 			Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(c));
 			liquibase = new Liquibase("classpath:/master_main.xml", new ClassLoaderResourceAccessor(), database);
-			liquibase.update(Integer.MAX_VALUE, "");
+			liquibase.update("");
 		} catch (Throwable e) {
 			throw new DatabaseException(e);
 		} finally {
