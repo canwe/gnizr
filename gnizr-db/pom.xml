@@ -61,7 +61,8 @@
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId><!-- or log4j2 or logback or whatever-->
+            <artifactId>slf4j-log4j12</artifactId>
+            <!-- or log4j2 or logback or whatever-->
             <version>1.7.5</version>
         </dependency>
 
@@ -167,7 +168,8 @@
                             </dependency>
                             <dependency>
                                 <groupId>org.slf4j</groupId>
-                                <artifactId>slf4j-log4j12</artifactId><!-- or log4j2 or logback or whatever-->
+                                <artifactId>slf4j-log4j12</artifactId>
+                                <!-- or log4j2 or logback or whatever-->
                                 <version>1.7.5</version>
                             </dependency>
 
