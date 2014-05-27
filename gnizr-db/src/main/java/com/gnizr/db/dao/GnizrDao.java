@@ -87,8 +87,11 @@ public class GnizrDao implements Serializable, InitializingBean {
 	private GeometryMarkerDao geometryMarkerDao;
 	private static GnizrDao gnizrDao;
 
-	@Autowired
-	private GnizrBasicDataSource dataSource;
+	private DataSource dataSource;
+
+	public GnizrDao(DataSource ds) {
+		this.dataSource = ds;
+	}
 	
 	/**
 	 * Creates a singlton of this class using the defined connection object <code>datasource</code>. This singlton 
@@ -98,7 +101,7 @@ public class GnizrDao implements Serializable, InitializingBean {
 	 * @param datasource an instantiated connection object for accessing persistent store. 
 	 * @return an object this class
 	 */
-	public static final GnizrDao getInstance(DataSource datasource){
+	public static GnizrDao getInstance(DataSource datasource){
 		if(gnizrDao == null){
 			gnizrDao = new GnizrDao();
 			gnizrDao.setBookmarkDao(new BookmarkDBDao(datasource));

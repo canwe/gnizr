@@ -65,6 +65,7 @@
 	</bean>
 	
 	<bean id="gnizrDao" class="com.gnizr.db.dao.GnizrDao">
+        <constructor-arg ref="dataSource"/>
 		<property name="linkDao" ref="linkDao"/>
 		<property name="tagDao" ref="tagDao"/>
 		<property name="userDao" ref="userDao"/>
