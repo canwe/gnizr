@@ -58,18 +58,6 @@
             END;
             $c$ LANGUAGE plpgsql;
 
-            --------------------------------------------------------------
-            -- PROCEDURE: deleteUser
-            -- INPUT: uid
-            -- OUTPUT NONE
-            CREATE OR REPLACE FUNCTION deleteUser(uid INTEGER) RETURNS void AS $c$
-            BEGIN
-              DELETE user, bookmark, search_idx
-              FROM user LEFT JOIN (bookmark, search_idx) ON (user.id = bookmark.user_id AND bookmark.id = search_idx.bookmark_id)
-              WHERE user.id=uid;
-            END;
-            $c$ LANGUAGE plpgsql;
-
         </sql>
 	</changeSet>
 
