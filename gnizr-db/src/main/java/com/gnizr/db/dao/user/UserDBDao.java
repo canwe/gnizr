@@ -60,7 +60,6 @@ public class UserDBDao implements UserDao{
 	public static User createUserObject(ResultSet rs) throws SQLException{
 		if(rs == null) return null;
 		User aUser = new User();
-		aUser = new User();
 		aUser.setId(rs.getInt(UserSchema.ID));
 		aUser.setFullname(rs.getString(UserSchema.FULLNAME));
 		aUser.setUsername(rs.getString(UserSchema.USERNAME));

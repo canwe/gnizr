@@ -23,7 +23,7 @@ import com.gnizr.db.dao.User;
 import com.gnizr.web.action.AbstractAction;
 import com.gnizr.web.action.LoggedInUserAware;
 
-public class UserBookmarkTimeline extends AbstractAction implements LoggedInUserAware{
+public class UserBookmarkTimeline extends AbstractAction implements LoggedInUserAware {
 
 	/**
 	 * 

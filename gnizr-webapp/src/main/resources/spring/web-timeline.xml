@@ -3,11 +3,6 @@
 	"http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
 	<bean id="userBookmarkTimeline" class="com.gnizr.web.action.timeline.UserBookmarkTimeline" singleton="false">
-		<property name="userManager">
-			<ref bean="userManager"/>
-		</property>
-		<property name="bookmarkPager">
-			<ref bean="bookmarkPager"/>
-		</property>
+		<property name="userManager" ref="userManager"/>
 	</bean>
 </beans>

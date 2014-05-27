@@ -23,6 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -147,7 +148,7 @@ public class TagDBDao implements TagDao{
 		boolean deleted = false;
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call deleteLinkTag(?)");
+			stmt = conn.prepareCall("{call deleteLinkTag(?)}");
 			stmt.setInt(1,id);
 			if(stmt.executeUpdate() > 0){
 				logger.debug("# row deleted=" + stmt.getUpdateCount());
@@ -172,7 +173,7 @@ public class TagDBDao implements TagDao{
 		boolean deleted = false;
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call deleteTag(?)");
+			stmt = conn.prepareCall("{call deleteTag(?)}");
 			stmt.setInt(1,id);
 			if(stmt.executeUpdate() > 0){
 				logger.debug("# row deleted=" + stmt.getUpdateCount());
@@ -197,7 +198,7 @@ public class TagDBDao implements TagDao{
 		boolean deleted = false;
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call deleteUserTag(?)");
+			stmt = conn.prepareCall("{call deleteUserTag(?)}");
 			stmt.setInt(1,id);
 			if(stmt.executeUpdate() > 0){
 				logger.debug("# row deleted=" + stmt.getUpdateCount());
@@ -222,7 +223,7 @@ public class TagDBDao implements TagDao{
 		Connection conn = null;
 		try{				
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call findTag(?)");
+			stmt = conn.prepareCall("{call findTag(?)}");
 			stmt.setString(1,tag);
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
@@ -252,7 +253,7 @@ public class TagDBDao implements TagDao{
 		Connection conn = null;
 		try{				
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call findLinkTag(?,?)");
+			stmt = conn.prepareCall("{call findLinkTag(?,?)}");
 			stmt.setInt(1,link.getId());
 			stmt.setInt(2,tag.getId());
 			ResultSet rs = stmt.executeQuery();
@@ -283,7 +284,7 @@ public class TagDBDao implements TagDao{
 		Connection conn = null;
 		try{				
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call findUserTag(?,?)");
+			stmt = conn.prepareCall("{call findUserTag(?,?)}");
 			stmt.setInt(1,user.getId());
 			stmt.setInt(2,tag.getId());
 			ResultSet rs = stmt.executeQuery();
@@ -314,7 +315,7 @@ public class TagDBDao implements TagDao{
 		Connection conn = null;
 		try{						
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call getLinkTag(?);");
+			stmt = conn.prepareCall("{call getLinkTag(?)}");
 			stmt.setInt(1,id);
 			ResultSet rs = stmt.executeQuery();
 			if(rs.next()){
@@ -357,7 +358,7 @@ public class TagDBDao implements TagDao{
 		Connection conn = null;
 		try{						
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call getTag(?);");
+			stmt = conn.prepareCall("{call getTag(?)}");
 			stmt.setInt(1,id);
 			ResultSet rs = stmt.executeQuery();
 			if(rs.next()){
@@ -416,7 +417,7 @@ public class TagDBDao implements TagDao{
 		Connection conn = null;
 		try{						
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call getUserTag(?);");
+			stmt = conn.prepareCall("{call getUserTag(?)}");
 			stmt.setInt(1,id);
 			ResultSet rs = stmt.executeQuery();
 			if(rs.next()){
@@ -507,7 +508,7 @@ public class TagDBDao implements TagDao{
 		boolean isChanged = false;
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call updateLinkTag(?,?,?,?)");
+			stmt = conn.prepareCall("{call updateLinkTag(?,?,?,?)}");
 			stmt.setInt(1,tag.getId());
 			stmt.setInt(2,tag.getLink().getId());
 			stmt.setInt(3,tag.getTag().getId());
@@ -537,7 +538,7 @@ public class TagDBDao implements TagDao{
 		boolean isChanged = false;
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call updateTag(?,?,?)");
+			stmt = conn.prepareCall("{call updateTag(?,?,?)}");
 			stmt.setInt(1,tag.getId());
 			stmt.setString(2,tag.getLabel());
 			stmt.setInt(3,tag.getCount());
@@ -566,7 +567,7 @@ public class TagDBDao implements TagDao{
 		boolean isChanged = false;
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call updateUserTag(?,?,?,?)");
+			stmt = conn.prepareCall("{call updateUserTag(?,?,?,?)}");
 			stmt.setInt(1,tag.getId());
 			stmt.setInt(2,tag.getUser().getId());
 			stmt.setInt(3,tag.getTag().getId());
@@ -597,7 +598,7 @@ public class TagDBDao implements TagDao{
 		Connection conn = null;
 		try{				
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call findUserTagAll(?)");
+			stmt = conn.prepareCall("{call findUserTagAll(?)}");
 			stmt.setInt(1,user.getId());
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
@@ -628,7 +629,7 @@ public class TagDBDao implements TagDao{
 		Connection conn = null;
 		try{				
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call findLinkTagMinFreq(?,?)");
+			stmt = conn.prepareCall("{call findLinkTagMinFreq(?,?)}");
 			stmt.setInt(1,link.getId());
 			stmt.setInt(2,minFreq);
 			ResultSet rs = stmt.executeQuery();
@@ -665,9 +666,9 @@ public class TagDBDao implements TagDao{
 		try{				
 			conn = dataSource.getConnection();
 			if(sortBy == SORT_ALPH){
-				stmt = conn.prepareStatement("call findTagTopNSortByAlpha(?)");
+				stmt = conn.prepareCall("{call findTagTopNSortByAlpha(?)}");
 			}else{
-				stmt = conn.prepareStatement("call findTagTopNSortByFreq(?)");
+				stmt = conn.prepareCall("{call findTagTopNSortByFreq(?)}");
 			}
 			stmt.setInt(1,topN);
 			ResultSet rs = stmt.executeQuery();
@@ -703,9 +704,9 @@ public class TagDBDao implements TagDao{
 		try{				
 			conn = dataSource.getConnection();
 			if(TagDao.SORT_FREQ == sortBy){
-				stmt = conn.prepareStatement("call findUserTagMinFreqSortFreq(?,?);");
+				stmt = conn.prepareCall("{call findUserTagMinFreqSortFreq(?,?)}");
 			}else{
-				stmt = conn.prepareStatement("call findUserTagMinFreqSortAlph(?,?);");
+				stmt = conn.prepareCall("{call findUserTagMinFreqSortAlph(?,?)}");
 			}
 			stmt.setInt(1,user.getId());
 			stmt.setInt(2,minFreq);
@@ -764,7 +765,7 @@ public class TagDBDao implements TagDao{
 		boolean deleted = false;
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call deleteBookmarkTag(?)");
+			stmt = conn.prepareCall("{call deleteBookmarkTag(?)}");
 			stmt.setInt(1,id);
 			if(stmt.executeUpdate() > 0){
 				logger.debug("# row deleted=" + stmt.getUpdateCount());
@@ -789,7 +790,7 @@ public class TagDBDao implements TagDao{
 		Connection conn = null;
 		try{						
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call getBookmarkTag(?);");
+			stmt = conn.prepareCall("{call getBookmarkTag(?)}");
 			stmt.setInt(1,id);
 			ResultSet rs = stmt.executeQuery();
 			if(rs.next()){
@@ -817,7 +818,7 @@ public class TagDBDao implements TagDao{
 		boolean isChanged = false;
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call updateBookmarkTag(?,?,?,?,?)");
+			stmt = conn.prepareCall("{call updateBookmarkTag(?,?,?,?,?)}");
 			stmt.setInt(1,tag.getId());
 			stmt.setInt(2,tag.getBookmark().getId());
 			stmt.setInt(3,tag.getTag().getId());
@@ -848,7 +849,7 @@ public class TagDBDao implements TagDao{
 		Connection conn = null;
 		try{						
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call getBookmarkTagId(?,?);");
+			stmt = conn.prepareCall("{call getBookmarkTagId(?,?)}");
 			stmt.setInt(1,bookmark.getId());
 			stmt.setInt(2,tag.getId());
 			ResultSet rs = stmt.executeQuery();
@@ -876,7 +877,7 @@ public class TagDBDao implements TagDao{
 		Connection conn = null;
 		try{				
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call findBookmarkTagUserIdGrouped(?)");
+			stmt = conn.prepareCall("{call findBookmarkTagUserIdGrouped(?)}");
 			stmt.setInt(1,user.getId());
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
@@ -906,7 +907,7 @@ public class TagDBDao implements TagDao{
 		Connection conn = null;
 		try{				
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call findBookmarkTagByFolderId(?)");
+			stmt = conn.prepareCall("{call findBookmarkTagByFolderId(?)}");
 			stmt.setInt(1,folder.getId());
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
@@ -936,7 +937,7 @@ public class TagDBDao implements TagDao{
 		boolean[] opOkay = new boolean[tags.length];
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareCall("call addTagCountOne(?,?,?,?)");
+			stmt = conn.prepareCall("{call addTagCountOne(?,?,?,?)}");
 			for(Tag tag : tags){
 				stmt.setInt(1,tag.getId());
 				stmt.setInt(2,user.getId());
@@ -966,13 +967,13 @@ public class TagDBDao implements TagDao{
 	}
 
 	public boolean[] subtractTagCountOne(Tag[] tags, User user, Link link, Bookmark bookmark) {
-		logger.debug("subtractTagCountOne: tags="+tags+",user="+user+",link="+link+",bookmark="+bookmark);
+		logger.debug("subtractTagCountOne: tags=" + Arrays.toString(tags) + ",user=" + user + ",link=" + link + ",bookmark=" + bookmark);
 		Connection conn = null;
 		CallableStatement stmt = null;
 		boolean[] opOkay = new boolean[tags.length];
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareCall("call subtractTagCountOne(?,?,?,?)");
+			stmt = conn.prepareCall("{call subtractTagCountOne(?,?,?,?)}");
 			for(Tag tag: tags){
 				stmt.setInt(1,tag.getId());
 				stmt.setInt(2,user.getId());
@@ -1002,14 +1003,14 @@ public class TagDBDao implements TagDao{
 	}
 
 	public List<Bookmark> expandTag(User user, Tag fromTag, Tag[] toTags) {
-		logger.debug("expandTag: user="+user+", fromTag="+fromTag+",toTags="+toTags);
+		logger.debug("expandTag: user=" + user + ", fromTag=" + fromTag + ",toTags=" + Arrays.toString(toTags));
 		Connection conn = null;
 		CallableStatement stmt = null;
 		List<Bookmark> changedBookmarks = new ArrayList<Bookmark>();
 		try {
 			ResultSet rs = null;
 			conn = dataSource.getConnection();			
-			stmt = conn.prepareCall("call expandTag(?,?,?)");
+			stmt = conn.prepareCall("{call expandTag(?,?,?)}");
 			for(Tag t : toTags){
 				stmt.setInt(1,fromTag.getId());
 				stmt.setInt(2,t.getId());
@@ -1033,14 +1034,14 @@ public class TagDBDao implements TagDao{
 	}
 
 	public List<Bookmark> reduceTag(User user, Tag[] tags) {
-		logger.debug("expandTag: user="+user+", tags="+tags);
+		logger.debug("expandTag: user=" + user + ", tags=" + Arrays.toString(tags));
 		Connection conn = null;
 		CallableStatement stmt = null;
 		List<Bookmark> changeBookmarks = new ArrayList<Bookmark>();
 		try {
 			ResultSet rs = null;
 			conn = dataSource.getConnection();
-			stmt = conn.prepareCall("call reduceTag(?,?)");
+			stmt = conn.prepareCall("{call reduceTag(?,?)}");
 			for(Tag t : tags){
 				stmt.setInt(1,t.getId());
 				stmt.setInt(2,user.getId());
@@ -1069,7 +1070,7 @@ public class TagDBDao implements TagDao{
 		Connection conn = null;
 		try{				
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call findBookmarkTagCommunitySearch(?)");
+			stmt = conn.prepareCall("{call findBookmarkTagCommunitySearch(?)}");
 			stmt.setString(1,searchQuery);
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
@@ -1093,14 +1094,14 @@ public class TagDBDao implements TagDao{
 	}
 
 	public DaoResult<LinkTag> pageLinkTagSortByFreq(Link link, int offset, int count) {
-		logger.debug("findLinkTagSortByFreq: link="+link+",offset="+offset+",count="+count);
+		logger.debug("findLinkTagSortByFreq: link=" + link + ",offset=" + offset + ",count=" + count);
 		DaoResult<LinkTag> result = null;
 		List<LinkTag> tags = new ArrayList<LinkTag>();
 		CallableStatement stmt = null;
 		Connection conn = null;
 		try{
 			conn = dataSource.getConnection();
-			stmt = conn.prepareCall("call pageLinkTagSortByFreq(?,?,?,?)");
+			stmt = conn.prepareCall("{call pageLinkTagSortByFreq(?,?,?,?)}");
 			stmt.setInt(1,link.getId());
 			stmt.setInt(2,offset);
 			stmt.setInt(3,count);

@@ -16,11 +16,6 @@
  */
 package com.gnizr.db.dao;
 
-import java.io.Serializable;
-import java.sql.SQLException;
-
-import javax.sql.DataSource;
-
 import com.gnizr.db.dao.bookmark.BookmarkDBDao;
 import com.gnizr.db.dao.bookmark.BookmarkDao;
 import com.gnizr.db.dao.bookmark.GeometryMarkerDBDao;
@@ -33,12 +28,7 @@ import com.gnizr.db.dao.link.LinkDBDao;
 import com.gnizr.db.dao.link.LinkDao;
 import com.gnizr.db.dao.subscription.FeedSubscriptionDBDao;
 import com.gnizr.db.dao.subscription.FeedSubscriptionDao;
-import com.gnizr.db.dao.tag.TagAssertionDBDao;
-import com.gnizr.db.dao.tag.TagAssertionDao;
-import com.gnizr.db.dao.tag.TagDBDao;
-import com.gnizr.db.dao.tag.TagDao;
-import com.gnizr.db.dao.tag.TagPropertyDBDao;
-import com.gnizr.db.dao.tag.TagPropertyDao;
+import com.gnizr.db.dao.tag.*;
 import com.gnizr.db.dao.user.UserDBDao;
 import com.gnizr.db.dao.user.UserDao;
 import liquibase.Liquibase;
@@ -46,10 +36,11 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.sql.DataSource;
+import java.io.Serializable;
 
 /**
  * A convenient class that wraps DAO objects for access gnizr persistent store. There are two ways to create
@@ -120,10 +111,9 @@ public class GnizrDao implements Serializable, InitializingBean {
 
 	public void afterPropertiesSet() throws Exception {
 		java.sql.Connection c = dataSource.getConnection();
-		Liquibase liquibase = null;
 		try {
 			Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(c));
-			liquibase = new Liquibase("master_main.xml", new ClassLoaderResourceAccessor(), database);
+			Liquibase liquibase = new Liquibase("master_main.xml", new ClassLoaderResourceAccessor(), database);
 			liquibase.update("");
 		} catch (Throwable e) {
 			throw new DatabaseException(e);
