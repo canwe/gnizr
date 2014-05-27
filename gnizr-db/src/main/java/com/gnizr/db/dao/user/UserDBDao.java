@@ -124,8 +124,8 @@ public class UserDBDao implements UserDao{
 		Connection conn = null;
 		try{				
 			conn = datasource.getConnection();
-			stmt = conn.prepareStatement("call findUserUsername(?)");
-			stmt.setString(1,username);
+			stmt = conn.prepareCall("{call findUserUsername(?)}");
+			stmt.setString(1, username);
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
 				User aUser = createUserObject(rs);
@@ -154,7 +154,7 @@ public class UserDBDao implements UserDao{
 		Connection conn = null;
 		try{						
 			conn = datasource.getConnection();
-			stmt = conn.prepareStatement("call getUser(?);");
+			stmt = conn.prepareCall("{call getUser(?)}");
 			stmt.setInt(1,id);
 			ResultSet rs = stmt.executeQuery();
 			if(rs.next()){
@@ -211,7 +211,7 @@ public class UserDBDao implements UserDao{
 		Boolean isChanged = false;
 		try {
 			conn = datasource.getConnection();
-			stmt = conn.prepareStatement("call updateUser(?,?,?,?,?,?,?)");
+			stmt = conn.prepareCall("{call updateUser(?,?,?,?,?,?,?)}");
 			stmt.setInt(1,user.getId());
 			stmt.setString(2,user.getUsername());
 			stmt.setString(3,user.getPassword());
@@ -244,7 +244,7 @@ public class UserDBDao implements UserDao{
 		List<User> users = new ArrayList<User>();
 		try {
 			conn = datasource.getConnection();
-			stmt = conn.prepareStatement("call findUserUnamePwd(?,?)");
+			stmt = conn.prepareCall("{call findUserUnamePwd(?,?)}");
 			stmt.setString(1,username);
 			stmt.setString(2,password);
 			ResultSet rs = stmt.executeQuery();
@@ -272,7 +272,7 @@ public class UserDBDao implements UserDao{
 		Boolean deleted = false;
 		try {
 			conn = datasource.getConnection();
-			stmt = conn.prepareStatement("call deleteUser(?)");
+			stmt = conn.prepareCall("{call deleteUser(?)}");
 			stmt.setInt(1,id);
 			if(stmt.executeUpdate() > 0){
 				logger.debug("# row deleted=" + stmt.getUpdateCount());
@@ -297,7 +297,7 @@ public class UserDBDao implements UserDao{
 		Connection conn = null;
 		try{				
 			conn = datasource.getConnection();
-			stmt = conn.prepareStatement("call findAllUsers()");
+			stmt = conn.prepareCall("{call findAllUsers()}");
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
 				User aUser = createUserObject(rs);
@@ -326,7 +326,7 @@ public class UserDBDao implements UserDao{
 		Connection conn = null;
 		try{				
 			conn = datasource.getConnection();
-			stmt = conn.prepareStatement("call listUserStats();");
+			stmt = conn.prepareCall("{call listUserStats()}");
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
 				UserStat aUser = createUserStatObject(rs);
@@ -355,7 +355,7 @@ public class UserDBDao implements UserDao{
 		Connection conn = null;
 		try{				
 			conn = datasource.getConnection();
-			stmt = conn.prepareStatement("call findTagGroupsOfUser(?,?,?,?);");
+			stmt = conn.prepareCall("{call findTagGroupsOfUser(?,?,?,?)}");
 			stmt.setInt(1,user.getId());
 			stmt.setInt(2,minFreq);
 			stmt.setInt(3,sortBy);

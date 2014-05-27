@@ -2,23 +2,15 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
 	"http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
-	<bean id="bookmarkPager" class="com.gnizr.core.bookmark.BookmarkPager"
-		singleton="true">
-		<constructor-arg>
-			<ref bean="gnizrDao"/>
-		</constructor-arg>
+	<bean id="bookmarkPager" class="com.gnizr.core.bookmark.BookmarkPager">
+		<constructor-arg ref="gnizrDao"/>
 	</bean>
 	
-	<bean id="forUserPager" class="com.gnizr.core.foruser.ForUserPager"
-		singleton="true">
-		<constructor-arg>
-			<ref bean="gnizrDao"/>
-		</constructor-arg>
+	<bean id="forUserPager" class="com.gnizr.core.foruser.ForUserPager">
+		<constructor-arg ref="gnizrDao"/>
 	</bean>
 
-	<bean id="tagPager" class="com.gnizr.core.tag.TagPager" singleton="true">
-		<constructor-arg>
-			<ref bean="gnizrDao"/>
-		</constructor-arg>
+	<bean id="tagPager" class="com.gnizr.core.tag.TagPager">
+		<constructor-arg ref="gnizrDao"/>
 	</bean>
 </beans>
