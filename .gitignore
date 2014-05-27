@@ -1,4 +1,5 @@
 *.iml
 *.ipr
+*applet*.jar
 .idea
 target
