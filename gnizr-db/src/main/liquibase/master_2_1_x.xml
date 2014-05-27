@@ -10,40 +10,40 @@
             -- PROCEDURE: getUser(id)
             -- INPUT: id INTEGER
             -- OUTPUT: NONE
-            CREATE OR REPLACE FUNCTION getUser(uid INTEGER) RETURNS refcursor AS $$
+            CREATE OR REPLACE FUNCTION getUser(uid INTEGER) RETURNS refcursor AS $c$
             DECLARE
               ref refcursor;
             BEGIN
               OPEN ref SELECT * FROM user WHERE user.id=uid;
               RETURN ref;
             END;
-            $$ LANGUAGE plpgsql;
+            $c$ LANGUAGE plpgsql;
 
             --------------------------------------------------------------
             -- PROCEDURE: findUserUsername
             -- INPUT: username
             -- OUTPUT: NONE
-            CREATE OR REPLACE FUNCTION findUserUsername(username VARCHAR(45)) RETURNS refcursor AS $$
+            CREATE OR REPLACE FUNCTION findUserUsername(username VARCHAR(45)) RETURNS refcursor AS $c$
             DECLARE
               ref refcursor;
             BEGIN
               OPEN ref SELECT * FROM user WHERE user.username=username;
               RETURN ref;
             END;
-            $$ LANGUAGE plpgsql;
+            $c$ LANGUAGE plpgsql;
 
             --------------------------------------------------------------
             -- PROCEDURE: findAllUsers
             -- INPUT: NONE
             -- OUTPUT: NONE
-            CREATE OR REPLACE FUNCTION findAllUsers() RETURNS refcursor AS $$
+            CREATE OR REPLACE FUNCTION findAllUsers() RETURNS refcursor AS $c$
             DECLARE
               ref refcursor;
             BEGIN
               OPEN ref SELECT * FROM user WHERE user.username != "gnizr";
               RETURN ref;
             END;
-            $$ LANGUAGE plpgsql;
+            $c$ LANGUAGE plpgsql;
 
             --------------------------------------------------------------
             -- PROCEDURE: findUserUnamePwd
