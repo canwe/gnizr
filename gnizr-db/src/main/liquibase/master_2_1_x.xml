@@ -64,8 +64,11 @@
             -- OUTPUT NONE
             CREATE OR REPLACE FUNCTION deleteUser(uid INTEGER) RETURNS void AS $c$
             BEGIN
-              DELETE U, bookmark, search_idx
-              FROM "user" as U LEFT JOIN (bookmark, search_idx) ON (U.id = bookmark.user_id AND bookmark.id = search_idx.bookmark_id)
+              DELETE FROM search_idx
+              WHERE search_idx.bookmark_id in (SELECT id FROM bookmark WHERE bookmark.user_id = uid);
+              DELETE FROM bookmark
+              WHERE bookmark.user_id = uid;
+              DELETE FROM "user" as U
               WHERE U.id=uid;
             END;
             $c$ LANGUAGE plpgsql;
