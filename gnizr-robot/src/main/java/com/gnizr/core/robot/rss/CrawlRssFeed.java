@@ -34,7 +34,7 @@ import com.gnizr.db.dao.FeedSubscription;
 import com.gnizr.db.dao.MachineTag;
 import com.gnizr.db.dao.PointMarker;
 
-public class CrawlRssFeed extends TimerTask{
+public class CrawlRssFeed extends TimerTask {
 
 	private static final Logger logger = Logger.getLogger(CrawlRssFeed.class);
 	

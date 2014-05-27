@@ -73,8 +73,7 @@ import com.gnizr.db.vocab.UserSchema;
  */
 public class BookmarkManager implements Serializable {
 
-	private static final Logger logger = Logger
-			.getLogger(BookmarkManager.class);
+	private static final Logger logger = Logger.getLogger(BookmarkManager.class);
 
 	private static final long serialVersionUID = -717938169778226275L;
 
@@ -116,8 +115,7 @@ public class BookmarkManager implements Serializable {
 	 * @param listeners listeners will be notified when one of the bookmark change event occured
 	 * @param workerThreadNum the number of threads should be used to notify bookmark change evnet listeners.  
 	 */
-	public BookmarkManager(GnizrDao gnizrDao, List<BookmarkListener> listeners,
-			int workerThreadNum) {
+	public BookmarkManager(GnizrDao gnizrDao, List<BookmarkListener> listeners, int workerThreadNum) {
 		this.userDao = gnizrDao.getUserDao();
 		this.linkDao = gnizrDao.getLinkDao();
 		this.bookmarkDao = gnizrDao.getBookmarkDao();
@@ -125,8 +123,7 @@ public class BookmarkManager implements Serializable {
 		this.geomMarkerDao = gnizrDao.getGeometryMarkerDao();
 		this.gnizrUser = GnizrDaoUtil.getUser(userDao, UserSchema.GNIZR_USER);
 		if (this.gnizrUser == null) {
-			logger
-					.error("Database is properly initialized. Missing user: gnizr");
+			logger.error("Database is properly initialized. Missing user: gnizr");
 		}
 		if (listeners != null) {
 			this.listeners.addAll(listeners);

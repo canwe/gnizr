@@ -86,13 +86,11 @@ public class GnizrDaoUtil {
 	 *            not be <code>null</code>.
 	 * @throws NoSuchUserException
 	 */
-	public static void fillId(UserDao userDao, User user)
-			throws NoSuchUserException {
+	public static void fillId(UserDao userDao, User user) throws NoSuchUserException {
 		if (hasMissingId(user) == true) {
 			User obj = getUser(userDao, user.getUsername());
 			if (obj == null) {
-				throw new NoSuchUserException("no such user="
-						+ user.getUsername());
+				throw new NoSuchUserException("no such user=" + user.getUsername());
 			}
 			user.setId(obj.getId());
 		}

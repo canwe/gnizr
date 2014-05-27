@@ -100,16 +100,14 @@ public class TagManager implements Serializable {
 		try {
 			rdfTypeProperty = tagPrptDao.getTagProperty("rdf", "type");
 			skosBroaderProperty = tagPrptDao.getTagProperty("skos", "broader");
-			skosNarrowerProperty = tagPrptDao
-					.getTagProperty("skos", "narrower");
+			skosNarrowerProperty = tagPrptDao.getTagProperty("skos", "narrower");
 			skosRelatedProperty = tagPrptDao.getTagProperty("skos", "related");
 
 			User gnizrUser = new User(UserSchema.GNIZR_USER);
 			Tag placeTag = new Tag(PLACE_TAG);
 			GnizrDaoUtil.fillId(userDao, gnizrUser);
 			GnizrDaoUtil.fillId(tagDao, placeTag);
-			gnizrPlaceTag = GnizrDaoUtil
-					.getUserTag(tagDao, gnizrUser, placeTag);
+			gnizrPlaceTag = GnizrDaoUtil.getUserTag(tagDao, gnizrUser, placeTag);
 		} catch (Exception e) {
 			logger.fatal("unable to initialize system data values.", e);
 		}
