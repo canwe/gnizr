@@ -9,9 +9,8 @@
 	</parent>
 	
 	<modelVersion>4.0.0</modelVersion>
-	
-	<groupId>com.gnizr</groupId>
-	<artifactId>gnizr-webapp</artifactId>
+
+    <artifactId>gnizr-webapp</artifactId>
 	<name>gnizr web application</name>
 	<packaging>war</packaging>
 	<version>${gnVersion}</version>
@@ -96,6 +95,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
+                    <outputDirectory>${basedir}/../target/</outputDirectory>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -130,6 +130,7 @@
                             <goal>copy</goal>
                         </goals>
                         <configuration>
+                            <outputDirectory>${basedir}/../target/</outputDirectory>
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.mortbay.jetty</groupId>
