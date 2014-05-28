@@ -287,7 +287,7 @@ public class GnizrDaoUtil {
 		}
 		User user = null;
 		List<User> users = userDao.findUser(username);
-		if (users.isEmpty() == false) {
+		if (!users.isEmpty()) {
 			user = users.get(0);
 		}
 		return user;
@@ -299,7 +299,7 @@ public class GnizrDaoUtil {
 		}
 		Link link = null;
 		List<Link> links = linkDao.findLink(url);
-		if (links.isEmpty() == false) {
+		if (!links.isEmpty()) {
 			link = links.get(0);
 		}
 		return link;
@@ -307,10 +307,10 @@ public class GnizrDaoUtil {
 
 	public static Bookmark getBookmark(BookmarkDao bmarkDao, User user,
 			Link link) throws MissingIdException {
-		if (hasMissingId(user) == false && hasMissingId(link) == false) {
+		if (!hasMissingId(user) && !hasMissingId(link)) {
 			Bookmark bmark = null;
 			List<Bookmark> bmarks = bmarkDao.findBookmark(user, link);
-			if (bmarks.isEmpty() == false) {
+			if (!bmarks.isEmpty()) {
 				bmark = bmarks.get(0);
 			}
 			return bmark;
