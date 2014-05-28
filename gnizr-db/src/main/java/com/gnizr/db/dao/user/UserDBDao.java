@@ -123,6 +123,12 @@ public class UserDBDao implements UserDao{
 		Connection conn = null;
 		try{				
 			conn = datasource.getConnection();
+			
+			// make sure autocommit is off
+			conn.setAutoCommit(false);
+			// Turn use of the cursor on.
+			st.setFetchSize(50);
+			
 			stmt = conn.prepareStatement("select * from findUserUsername(?)");
 			stmt.setString(1, username);
 			ResultSet rs = stmt.executeQuery();
@@ -153,6 +159,12 @@ public class UserDBDao implements UserDao{
 		Connection conn = null;
 		try{						
 			conn = datasource.getConnection();
+			
+			// make sure autocommit is off
+			conn.setAutoCommit(false);
+			// Turn use of the cursor on.
+			st.setFetchSize(50);
+			
 			stmt = conn.prepareStatement("select * from getUser(?)");
 			stmt.setInt(1,id);
 			ResultSet rs = stmt.executeQuery();
@@ -243,6 +255,12 @@ public class UserDBDao implements UserDao{
 		List<User> users = new ArrayList<User>();
 		try {
 			conn = datasource.getConnection();
+			
+			// make sure autocommit is off
+			conn.setAutoCommit(false);
+			// Turn use of the cursor on.
+			st.setFetchSize(50);
+			
 			stmt = conn.prepareStatement("select * from findUserUnamePwd(?,?)");
 			stmt.setString(1,username);
 			stmt.setString(2,password);
@@ -296,6 +314,12 @@ public class UserDBDao implements UserDao{
 		Connection conn = null;
 		try{				
 			conn = datasource.getConnection();
+			
+			// make sure autocommit is off
+			conn.setAutoCommit(false);
+			// Turn use of the cursor on.
+			st.setFetchSize(Integer.MAX_VALUE);
+			
 			stmt = conn.prepareStatement("select * from findAllUsers()");
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
@@ -325,6 +349,12 @@ public class UserDBDao implements UserDao{
 		Connection conn = null;
 		try{				
 			conn = datasource.getConnection();
+			
+			// make sure autocommit is off
+			conn.setAutoCommit(false);
+			// Turn use of the cursor on.
+			st.setFetchSize(Integer.MAX_VALUE);
+			
 			stmt = conn.prepareStatement("select * from listUserStats()");
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
@@ -354,6 +384,12 @@ public class UserDBDao implements UserDao{
 		Connection conn = null;
 		try{				
 			conn = datasource.getConnection();
+			
+			// make sure autocommit is off
+			conn.setAutoCommit(false);
+			// Turn use of the cursor on.
+			st.setFetchSize(Integer.MAX_VALUE);
+			
 			stmt = conn.prepareCall("{call findTagGroupsOfUser(?,?,?,?)}");
 			stmt.setInt(1,user.getId());
 			stmt.setInt(2,minFreq);
