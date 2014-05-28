@@ -23,7 +23,7 @@
 		<property name="siteContactEmail" value=""/>
 
 		<!-- Define the web application URL of this gnizr installation -->
-		<property name="webApplicationUrl" value="http://localhost:8080/gnizr"/>
+		<!-- <property name="webApplicationUrl" value="http://localhost:8080/gnizr"/> -->
 
 		<!-- Define the Google Maps API Key to be used for this gnizr installation -->
 		<property name="googleMapsKey" value="AIzaSyDIEYEywGGj7BfS4ZjRXtGqeK9r_LvpCss"/>
