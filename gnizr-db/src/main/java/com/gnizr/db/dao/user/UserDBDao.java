@@ -126,10 +126,12 @@ public class UserDBDao implements UserDao{
 			
 			// make sure autocommit is off
 			conn.setAutoCommit(false);
-			// Turn use of the cursor on.
-			st.setFetchSize(50);
 			
 			stmt = conn.prepareStatement("select * from findUserUsername(?)");
+			
+			// Turn use of the cursor on.
+			stmt.setFetchSize(50);
+			
 			stmt.setString(1, username);
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
@@ -162,10 +164,12 @@ public class UserDBDao implements UserDao{
 			
 			// make sure autocommit is off
 			conn.setAutoCommit(false);
-			// Turn use of the cursor on.
-			st.setFetchSize(50);
 			
 			stmt = conn.prepareStatement("select * from getUser(?)");
+			
+			// Turn use of the cursor on.
+			stmt.setFetchSize(50);
+			
 			stmt.setInt(1,id);
 			ResultSet rs = stmt.executeQuery();
 			if(rs.next()){
@@ -258,10 +262,12 @@ public class UserDBDao implements UserDao{
 			
 			// make sure autocommit is off
 			conn.setAutoCommit(false);
-			// Turn use of the cursor on.
-			st.setFetchSize(50);
 			
 			stmt = conn.prepareStatement("select * from findUserUnamePwd(?,?)");
+			
+			// Turn use of the cursor on.
+			stmt.setFetchSize(50);
+			
 			stmt.setString(1,username);
 			stmt.setString(2,password);
 			ResultSet rs = stmt.executeQuery();
@@ -317,10 +323,12 @@ public class UserDBDao implements UserDao{
 			
 			// make sure autocommit is off
 			conn.setAutoCommit(false);
-			// Turn use of the cursor on.
-			st.setFetchSize(Integer.MAX_VALUE);
 			
 			stmt = conn.prepareStatement("select * from findAllUsers()");
+			
+			// Turn use of the cursor on.
+			stmt.setFetchSize(Integer.MAX_VALUE);
+			
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
 				User aUser = createUserObject(rs);
@@ -352,10 +360,12 @@ public class UserDBDao implements UserDao{
 			
 			// make sure autocommit is off
 			conn.setAutoCommit(false);
-			// Turn use of the cursor on.
-			st.setFetchSize(Integer.MAX_VALUE);
 			
 			stmt = conn.prepareStatement("select * from listUserStats()");
+			
+			// Turn use of the cursor on.
+			stmt.setFetchSize(Integer.MAX_VALUE);
+			
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
 				UserStat aUser = createUserStatObject(rs);
@@ -387,10 +397,12 @@ public class UserDBDao implements UserDao{
 			
 			// make sure autocommit is off
 			conn.setAutoCommit(false);
-			// Turn use of the cursor on.
-			st.setFetchSize(Integer.MAX_VALUE);
 			
 			stmt = conn.prepareCall("{call findTagGroupsOfUser(?,?,?,?)}");
+			
+			// Turn use of the cursor on.
+			stmt.setFetchSize(Integer.MAX_VALUE);
+			
 			stmt.setInt(1,user.getId());
 			stmt.setInt(2,minFreq);
 			stmt.setInt(3,sortBy);
