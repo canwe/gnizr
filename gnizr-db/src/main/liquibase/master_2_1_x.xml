@@ -88,11 +88,11 @@
                                                   IN status INTEGER) RETURNS integer AS $c$
             DECLARE
               newid integer;
-            DECLARE `USEREXISTS` CONDITION FOR SQLSTATE '23000';
-            DECLARE EXIT HANDLER FOR `USEREXISTS` ROLLBACK;
             BEGIN
               INSERT INTO "user"(username,password,fullname,email,created_on,acct_status) VALUES (username,MD5(password),fullname,email,createdOn,status) RETURNING id INTO newid;
               RETURN newid;
+            EXCEPTION WHEN unique_violation THEN
+              RETURN -1;
             END;
             $c$ LANGUAGE plpgsql;
 
