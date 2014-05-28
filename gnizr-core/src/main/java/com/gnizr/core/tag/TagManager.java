@@ -153,12 +153,12 @@ public class TagManager implements Serializable {
 		return tagPrptDao.findTagProperty();
 	}
 
-	private boolean addTagAssertions(User user, UserTag subjectTag, TagProperty prpt, List<String> tags2add){
+	private boolean addTagAssertions(User user, UserTag subjectTag, TagProperty prpt, List<String> tags2add) {
 		boolean isOkay = false;
 		List<TagAssertion> tagAssertion = new ArrayList<TagAssertion>();
 		try {
 			UserTag[] objectTag = createUserTag(user, tags2add);
-			for(int i = 0; i < objectTag.length; i++){
+			for (int i = 0; i < objectTag.length; i++) {
 				TagAssertion ta = new TagAssertion();
 				ta.setUser(user);
 				ta.setSubject(subjectTag);
@@ -169,21 +169,21 @@ public class TagManager implements Serializable {
 			int size = tagAssertion.size();
 			isOkay = tagAsrtDao.createTagAssertion(tagAssertion.toArray(new TagAssertion[size]));
 		} catch (Exception e) {
-			logger.error(e);			
+			logger.error(e);
 		}
 		return isOkay;
 	}
-	
-	public boolean addRDFTypeTags(User user, UserTag subjectTag, List<String> classTags){
+
+	public boolean addRDFTypeTags(User user, UserTag subjectTag, List<String> classTags) {
 		return addTagAssertions(user, subjectTag, rdfTypeProperty, classTags);
 	}
-	
-	public boolean addRDFInstanceTags(User user, UserTag clsTag, List<String> instTags){
+
+	public boolean addRDFInstanceTags(User user, UserTag clsTag, List<String> instTags) {
 		boolean isOkay = false;
 		List<TagAssertion> tagAssertion = new ArrayList<TagAssertion>();
 		try {
 			UserTag[] subjTag = createUserTag(user, instTags);
-			for(int i = 0; i < subjTag.length; i++){
+			for (int i = 0; i < subjTag.length; i++) {
 				TagAssertion ta = new TagAssertion();
 				ta.setUser(user);
 				ta.setSubject(subjTag[i]);
@@ -194,7 +194,7 @@ public class TagManager implements Serializable {
 			int size = tagAssertion.size();
 			isOkay = tagAsrtDao.createTagAssertion(tagAssertion.toArray(new TagAssertion[size]));
 		} catch (Exception e) {
-			logger.error(e);			
+			logger.error(e);
 		}
 		return isOkay;
 	}
@@ -230,9 +230,9 @@ public class TagManager implements Serializable {
 	private UserTag[] createUserTag(User user, List<String> tags) throws NoSuchUserException{
 		List<UserTag> objectTag = new ArrayList<UserTag>();
 		for(String ctag : tags){
-			User userX = null;
-			String tagX = null;
-			UserTag ut = null;
+			User userX;
+			String tagX;
+			UserTag ut;
 			if(TagUtil.isPrefixedUserTag(ctag)){
 				UserTag tmpObj = TagUtil.parsePrefixedUserTag(ctag);
 				if((tmpObj.getUser().getId() <= 0) && tmpObj.getUser().getUsername() != null){
@@ -296,8 +296,7 @@ public class TagManager implements Serializable {
 		List<TagAssertion> result = tagAsrtDao.findTagAssertion(aUser);
 		for (Iterator<TagAssertion> it = result.iterator(); it.hasNext();) {
 			TagAssertion ta = it.next();
-			GnizrDaoUtil
-					.fillObject(tagAsrtDao, tagPrptDao, tagDao, userDao, ta);
+			GnizrDaoUtil.fillObject(tagAsrtDao, tagPrptDao, tagDao, userDao, ta);
 		}
 		return result;
 	}
@@ -306,8 +305,7 @@ public class TagManager implements Serializable {
 			throws NoSuchUserException, NoSuchTagException,
 			NoSuchUserTagException, NoSuchTagPropertyException,
 			MissingIdException, ParseTagException {
-		logger.debug("addTagAssertion: assertion=" + assertion + ",createTags="
-				+ createTags);
+		logger.debug("addTagAssertion: assertion=" + assertion + ",createTags=" + createTags);
 		GnizrDaoUtil.checkNull(assertion);
 		GnizrDaoUtil.checkNull(assertion.getUser());
 		GnizrDaoUtil.checkNull(assertion.getSubject());
@@ -315,7 +313,7 @@ public class TagManager implements Serializable {
 		GnizrDaoUtil.checkNull(assertion.getProperty());
 
 		User defaultUser = assertion.getUser();
-		if (createTags == true) {
+		if (createTags) {
 			UserTag subject = assertion.getSubject();
 			UserTag object = assertion.getObject();
 			if (GnizrDaoUtil.hasMissingId(subject)) {
@@ -408,13 +406,10 @@ public class TagManager implements Serializable {
 		GnizrDaoUtil.fillId(tagAsrtDao, tagPrptDao, tagDao, userDao, obj);
 		TagProperty property = obj.getProperty();
 		UserTag objectTag = obj.getObject();
-		if (property.getId() == rdfTypeProperty.getId()
-				&& objectTag.getId() == gnizrPlaceTag.getId()) {
-			return true;
-		}
-		return false;
+		return property.getId() == rdfTypeProperty.getId() && objectTag.getId() == gnizrPlaceTag.getId();
 	}
 
+	@SuppressWarnings("unused")
 	public Boolean updateTagAssertion(TagAssertion assertion) {
 		throw new UnsupportedOperationException();
 	}
@@ -444,6 +439,7 @@ public class TagManager implements Serializable {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public boolean hasTagAssertion(TagAssertion assertion) {
 		boolean result = false;
 		GnizrDaoUtil.checkNull(assertion);
@@ -461,8 +457,6 @@ public class TagManager implements Serializable {
 		return result;
 	}
 
-	
-
 	public UserTag getUserTag(int id) throws NoSuchUserException,
 			NoSuchTagException, NoSuchUserTagException, MissingIdException {
 		logger.debug("getUserTag: id=" + id);
@@ -471,7 +465,6 @@ public class TagManager implements Serializable {
 		return ut;
 	}
 
-	
 	public UserTag createUserTag(User user, String tag) {
 		UserTag ut = null;
 		try {
@@ -485,7 +478,6 @@ public class TagManager implements Serializable {
 		return ut;
 	}
 
-	
 	public TagProperty getSkosBroaderProperty() {
 		return skosBroaderProperty;
 	}
@@ -508,14 +500,14 @@ public class TagManager implements Serializable {
 		}
 		return bTags;
 	}
-	
-	public List<BookmarkTag> listBookmarkTagUserFolder(User user, String folderName) throws NoSuchUserException, NoSuchFolderException{
+
+	public List<BookmarkTag> listBookmarkTagUserFolder(User user, String folderName) throws NoSuchUserException, NoSuchFolderException {
 		GnizrDaoUtil.fillId(userDao, user);
 		Folder f = folderDao.getFolder(user, folderName);
-		List<BookmarkTag> result = null;
-		if(f != null){
+		List<BookmarkTag> result;
+		if (f != null) {
 			result = tagDao.findBookmarkTag(f);
-		}else{
+		} else {
 			throw new NoSuchFolderException("no such folder: " + folderName);
 		}
 		return result;

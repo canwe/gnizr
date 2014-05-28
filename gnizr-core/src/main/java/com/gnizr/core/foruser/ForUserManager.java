@@ -46,8 +46,7 @@ public class ForUserManager implements Serializable {
 	 */
 	private static final long serialVersionUID = -8867759728094086548L;
 
-	private static final Logger logger = Logger.getLogger(ForUserManager.class
-			.getName());
+	private static final Logger logger = Logger.getLogger(ForUserManager.class.getName());
 
 	private LinkDao linkDao;
 
@@ -78,12 +77,13 @@ public class ForUserManager implements Serializable {
 	
 	/**
 	 * @deprecated use <code>deleteForUserById</code> instead 
-	 * @param forUser
-	 * @return
+	 * @param forUser user
+	 * @return true if user was deleted successfully
 	 * @throws MissingIdException
 	 * @throws NullPointerException
 	 * @throws IllegalArgumentException
 	 */
+	@SuppressWarnings("unused")
 	public boolean deleteForUser(ForUser forUser) throws MissingIdException,
 			NullPointerException, IllegalArgumentException {
 		if (forUser == null)
@@ -96,7 +96,7 @@ public class ForUserManager implements Serializable {
 	
 	private void fillForUserObject(ForUser forUser) throws MissingIdException, NoSuchUserException, NoSuchLinkException, NoSuchBookmarkException{
 		if(forUser == null) return;	
-		GnizrDaoUtil.fillObject(forUserDao,bookmarkDao, userDao, linkDao,forUser);
+		GnizrDaoUtil.fillObject(bookmarkDao, userDao, linkDao, forUser);
 	}
 	
 	public boolean hasForUser(Bookmark bookmark, User user)
@@ -135,11 +135,9 @@ public class ForUserManager implements Serializable {
 	}
 	
 	public DaoResult<ForUser> pageForUser(User user, User sender, int offset, int count) throws NoSuchUserException{
-		DaoResult<ForUser> result = null;
 		GnizrDaoUtil.fillId(userDao, user);
 		GnizrDaoUtil.fillId(userDao, sender);
-		result = forUserDao.pageForUser(user, sender, offset, count);
-		return result;
+		return forUserDao.pageForUser(user, sender, offset, count);
 	}
 	
 	public boolean deleteForUserById(User user, int[] ids) throws NoSuchUserException{

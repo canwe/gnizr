@@ -16,51 +16,25 @@
  */
 package com.gnizr.core.util;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HeaderElement;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.HeadMethod;
-
-import com.gnizr.core.exceptions.MissingIdException;
-import com.gnizr.core.exceptions.NoSuchBookmarkException;
-import com.gnizr.core.exceptions.NoSuchLinkException;
-import com.gnizr.core.exceptions.NoSuchLinkTagException;
-import com.gnizr.core.exceptions.NoSuchTagAssertionException;
-import com.gnizr.core.exceptions.NoSuchTagException;
-import com.gnizr.core.exceptions.NoSuchTagPropertyException;
-import com.gnizr.core.exceptions.NoSuchUserException;
-import com.gnizr.core.exceptions.NoSuchUserTagException;
-import com.gnizr.core.exceptions.ParseTagException;
+import com.gnizr.core.exceptions.*;
 import com.gnizr.core.folder.FolderManager;
 import com.gnizr.core.vocab.TimeRange;
-import com.gnizr.db.dao.Bookmark;
-import com.gnizr.db.dao.ForUser;
-import com.gnizr.db.dao.Link;
-import com.gnizr.db.dao.LinkTag;
-import com.gnizr.db.dao.Tag;
-import com.gnizr.db.dao.TagAssertion;
-import com.gnizr.db.dao.TagProperty;
-import com.gnizr.db.dao.User;
-import com.gnizr.db.dao.UserTag;
+import com.gnizr.db.dao.*;
 import com.gnizr.db.dao.bookmark.BookmarkDao;
-import com.gnizr.db.dao.foruser.ForUserDao;
 import com.gnizr.db.dao.link.LinkDao;
 import com.gnizr.db.dao.tag.TagAssertionDao;
 import com.gnizr.db.dao.tag.TagDao;
 import com.gnizr.db.dao.tag.TagPropertyDao;
 import com.gnizr.db.dao.user.UserDao;
 import com.gnizr.db.vocab.MIMEType;
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HeaderElement;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.HeadMethod;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.*;
 
 /**
  * This class defines convenience methods for working gnizr data transport
@@ -87,7 +61,7 @@ public class GnizrDaoUtil {
 	 * @throws NoSuchUserException
 	 */
 	public static void fillId(UserDao userDao, User user) throws NoSuchUserException {
-		if (hasMissingId(user) == true) {
+		if (hasMissingId(user)) {
 			User obj = getUser(userDao, user.getUsername());
 			if (obj == null) {
 				throw new NoSuchUserException("no such user=" + user.getUsername());
@@ -98,7 +72,7 @@ public class GnizrDaoUtil {
 
 	public static void fillId(LinkDao linkDao, Link link)
 			throws NoSuchLinkException {
-		if (hasMissingId(link) == true) {
+		if (hasMissingId(link)) {
 			Link obj = null;
 			if (link.getUrl() != null) {
 				obj = getLink(linkDao, link.getUrl());
@@ -118,7 +92,7 @@ public class GnizrDaoUtil {
 		}
 		Link link = null;
 		List<Link> links = linkDao.findLinkByUrlHash(urlHash);
-		if (links.isEmpty() == false) {
+		if (!links.isEmpty()) {
 			link = links.get(0);
 		}
 		return link;
@@ -127,19 +101,18 @@ public class GnizrDaoUtil {
 	public static void fillId(BookmarkDao bmarkDao, UserDao userDao,
 			LinkDao linkDao, Bookmark bmark) throws NoSuchUserException,
 			NoSuchLinkException, MissingIdException, NoSuchBookmarkException {
-		if (hasMissingId(bmark) == true) {
+		if (hasMissingId(bmark)) {
 			User user = bmark.getUser();
-			if (hasMissingId(user) == true) {
+			if (hasMissingId(user)) {
 				fillId(userDao, user);
 			}
 			Link link = bmark.getLink();
-			if (hasMissingId(link) == true) {
+			if (hasMissingId(link)) {
 				fillId(linkDao, link);
 			}
 			Bookmark obj = getBookmark(bmarkDao, user, link);
 			if (obj == null) {
-				throw new NoSuchBookmarkException("no such bookmark: user="
-						+ user + ",link=" + link);
+				throw new NoSuchBookmarkException("no such bookmark: user = [" + user + "] ,link = " + link);
 			}
 			bmark.setId(obj.getId());
 		}
@@ -147,16 +120,13 @@ public class GnizrDaoUtil {
 
 	private static boolean hasMissingId(ForUser forUser) {
 		checkNull(forUser);
-		if (forUser.getId() > 0) {
-			return false;
-		}
-		return true;
+		return forUser.getId() <= 0;
 	}
 
 	public static void fillId(TagDao tagDao, UserDao userDao, UserTag userTag)
 			throws NoSuchUserException, NoSuchTagException,
 			NoSuchUserTagException, MissingIdException {
-		if (hasMissingId(userTag) == true) {
+		if (hasMissingId(userTag)) {
 			User user = userTag.getUser();
 			Tag tag = userTag.getTag();
 			fillId(userDao, user);
@@ -173,7 +143,7 @@ public class GnizrDaoUtil {
 	public static void fillId(TagDao tagDao, LinkDao linkDao, LinkTag linkTag)
 			throws NoSuchLinkException, NoSuchTagException, MissingIdException,
 			NoSuchLinkTagException {
-		if (hasMissingId(linkTag) == true) {
+		if (hasMissingId(linkTag)) {
 			Link link = linkTag.getLink();
 			Tag tag = linkTag.getTag();
 			fillId(linkDao, link);
@@ -187,7 +157,7 @@ public class GnizrDaoUtil {
 	}
 
 	public static void fillId(TagDao tagDao, Tag tag) throws NoSuchTagException {
-		if (hasMissingId(tag) == true) {
+		if (hasMissingId(tag)) {
 			Tag obj = getTag(tagDao, tag.getLabel());
 			if (obj == null) {
 				throw new NoSuchTagException("no such tag=" + tag);
@@ -197,8 +167,8 @@ public class GnizrDaoUtil {
 	}
 
 	public static void fillId(TagPropertyDao tagPrptDao, TagProperty tagPrpt)
-			throws NoSuchTagPropertyException {
-		if (hasMissingId(tagPrpt) == true) {
+	throws NoSuchTagPropertyException {
+		if (hasMissingId(tagPrpt)) {
 			TagProperty obj = null;
 			String name = tagPrpt.getName();
 			String ns = tagPrpt.getNamespacePrefix();
@@ -213,12 +183,8 @@ public class GnizrDaoUtil {
 		}
 	}
 
-	public static void fillId(TagAssertionDao tagAssertionDao,
-			TagPropertyDao tagPrptDao, TagDao tagDao, UserDao userDao,
-			TagAssertion assertion) throws NoSuchUserException,
-			NoSuchTagException, NoSuchUserTagException,
-			NoSuchTagPropertyException, NoSuchTagAssertionException,
-			MissingIdException {
+	public static void fillId(TagAssertionDao tagAssertionDao, TagPropertyDao tagPrptDao, TagDao tagDao, UserDao userDao, TagAssertion assertion)
+	throws NoSuchUserException, NoSuchTagException, NoSuchUserTagException, NoSuchTagPropertyException, NoSuchTagAssertionException, MissingIdException {
 		if (hasMissingId(assertion)) {
 			User user = assertion.getUser();
 			UserTag subjTag = assertion.getSubject();
@@ -305,8 +271,7 @@ public class GnizrDaoUtil {
 		return link;
 	}
 
-	public static Bookmark getBookmark(BookmarkDao bmarkDao, User user,
-			Link link) throws MissingIdException {
+	public static Bookmark getBookmark(BookmarkDao bmarkDao, User user, Link link) throws MissingIdException {
 		if (!hasMissingId(user) && !hasMissingId(link)) {
 			Bookmark bmark = null;
 			List<Bookmark> bmarks = bmarkDao.findBookmark(user, link);
@@ -325,32 +290,29 @@ public class GnizrDaoUtil {
 		}
 		Tag aTag = null;
 		List<Tag> tags = tagDao.findTag(tag);
-		if (tags.isEmpty() == false) {
+		if (!tags.isEmpty()) {
 			aTag = tags.get(0);
 		}
 		return aTag;
 	}
 
-	public static UserTag getUserTag(TagDao tagDao, User user, Tag tag)
-			throws MissingIdException {
-		if (hasMissingId(user) == false && hasMissingId(tag) == false) {
+	public static UserTag getUserTag(TagDao tagDao, User user, Tag tag) throws MissingIdException {
+		if (!hasMissingId(user) && !hasMissingId(tag)) {
 			UserTag aTag = null;
 			List<UserTag> aTags = tagDao.findUserTag(user, tag);
-			if (aTags.isEmpty() == false) {
+			if (!aTags.isEmpty()) {
 				aTag = aTags.get(0);
 			}
 			return aTag;
 		}
-		throw new MissingIdException(
-				"either user or tag object is missing a valid id");
+		throw new MissingIdException("either user or tag object is missing a valid id");
 	}
 
-	public static LinkTag getLinkTag(TagDao tagDao, Link link, Tag tag)
-			throws MissingIdException {
-		if (hasMissingId(link) == false && hasMissingId(tag) == false) {
+	public static LinkTag getLinkTag(TagDao tagDao, Link link, Tag tag) throws MissingIdException {
+		if (!hasMissingId(link) && !hasMissingId(tag)) {
 			LinkTag aTag = null;
 			List<LinkTag> aTags = tagDao.findLinkTag(link, tag);
-			if (aTags.isEmpty() == false) {
+			if (!aTags.isEmpty()) {
 				aTag = aTags.get(0);
 			}
 			return aTag;
@@ -359,25 +321,23 @@ public class GnizrDaoUtil {
 				"either link or tag object is missing a valid id");
 	}
 
-	public static TagAssertion getTagAssertion(TagAssertionDao tagAssertionDao,
-			User user, UserTag subjTag, TagProperty tagPrpt, UserTag objTag)
-			throws MissingIdException {
-		if (hasMissingId(user) == true) {
+	public static TagAssertion getTagAssertion(TagAssertionDao tagAssertionDao, User user, UserTag subjTag, TagProperty tagPrpt, UserTag objTag)
+	throws MissingIdException {
+		if (hasMissingId(user)) {
 			throw new MissingIdException("user object is missing a valid id");
 		}
-		if (hasMissingId(subjTag) == true) {
+		if (hasMissingId(subjTag)) {
 			throw new MissingIdException("subjectTag is missing a valid id");
 		}
-		if (hasMissingId(objTag) == true) {
+		if (hasMissingId(objTag)) {
 			throw new MissingIdException("objectTag is missing a valid id");
 		}
-		if (hasMissingId(tagPrpt) == true) {
+		if (hasMissingId(tagPrpt)) {
 			throw new MissingIdException("tagProperty is missing a valid id");
 		}
 		TagAssertion asrt = null;
-		List<TagAssertion> asrts = tagAssertionDao.findTagAssertion(user,
-				subjTag, tagPrpt, objTag);
-		if (asrts.isEmpty() == false) {
+		List<TagAssertion> asrts = tagAssertionDao.findTagAssertion(user, subjTag, tagPrpt, objTag);
+		if (!asrts.isEmpty()) {
 			asrt = asrts.get(0);
 		}
 		return asrt;
@@ -393,7 +353,7 @@ public class GnizrDaoUtil {
 				Header h = method.getResponseHeader("Content-Type");
 				if (h != null) {
 					HeaderElement[] headElm = h.getElements();
-					if(headElm != null & headElm.length > 0){
+					if(headElm != null && headElm.length > 0){
 						String mimeType = headElm[0].getValue();
 						if(mimeType == null){
 							mimeType = headElm[0].getName();
@@ -489,10 +449,9 @@ public class GnizrDaoUtil {
 
 
 
-	public static void fillObject(TagDao tagDao, UserDao userDao,
-			UserTag userTag) throws NoSuchUserException, NoSuchTagException,
-			NoSuchUserTagException, MissingIdException {
-		if (hasMissingId(userTag) == true) {
+	public static void fillObject(TagDao tagDao, UserDao userDao, UserTag userTag)
+	throws NoSuchUserException, NoSuchTagException, NoSuchUserTagException, MissingIdException {
+		if (hasMissingId(userTag)) {
 			fillId(tagDao, userDao, userTag);
 		}
 		UserTag ut = tagDao.getUserTag(userTag.getId());
@@ -505,10 +464,9 @@ public class GnizrDaoUtil {
 		userTag.setCount(ut.getCount());
 	}
 
-	public static void fillObject(TagDao tagDao, LinkDao linkDao,
-			LinkTag linkTag) throws NoSuchLinkException, NoSuchTagException,
-			MissingIdException, NoSuchLinkTagException, NoSuchUserException {
-		if (hasMissingId(linkTag) == true) {
+	public static void fillObject(TagDao tagDao, LinkDao linkDao, LinkTag linkTag)
+	throws NoSuchLinkException, NoSuchTagException, MissingIdException, NoSuchLinkTagException, NoSuchUserException {
+		if (hasMissingId(linkTag)) {
 			fillId(tagDao, linkDao, linkTag);
 		}
 		LinkTag obj = tagDao.getLinkTag(linkTag.getId());
@@ -521,8 +479,7 @@ public class GnizrDaoUtil {
 		linkTag.setCount(obj.getCount());
 	}
 
-	public static void fillObject(TagDao tagDao, Tag tag)
-			throws NoSuchTagException {
+	public static void fillObject(TagDao tagDao, Tag tag) throws NoSuchTagException {
 		fillId(tagDao, tag);
 		Tag t = tagDao.getTag(tag.getId());
 		tag.setLabel(t.getLabel());
@@ -544,8 +501,7 @@ public class GnizrDaoUtil {
 	 * @throws NoSuchUserException
 	 *             thrown if no user data record exists for the input user ID.
 	 */
-	public static void fillObject(UserDao userDao, User user)
-			throws NoSuchUserException {
+	public static void fillObject(UserDao userDao, User user) throws NoSuchUserException {
 		fillId(userDao, user);
 		User u = userDao.getUser(user.getId());
 		user.setFullname(u.getFullname());
@@ -556,10 +512,9 @@ public class GnizrDaoUtil {
 		user.setAccountStatus(u.getAccountStatus());
 	}
 
-	public static void fillObject(BookmarkDao bmarkDao, UserDao userDao,
-			LinkDao linkDao, Bookmark bmark) throws NoSuchUserException,
-			NoSuchLinkException, MissingIdException, NoSuchBookmarkException {
-		if (hasMissingId(bmark) == true) {
+	public static void fillObject(BookmarkDao bmarkDao, UserDao userDao, LinkDao linkDao, Bookmark bmark)
+	throws NoSuchUserException, NoSuchLinkException, MissingIdException, NoSuchBookmarkException {
+		if (hasMissingId(bmark)) {
 			fillId(bmarkDao, userDao, linkDao, bmark);
 		}
 		Bookmark bm = bmarkDao.getBookmark(bmark.getId());
@@ -584,8 +539,7 @@ public class GnizrDaoUtil {
 		}
 	}
 
-	public static void fillObject(LinkDao linkDao, Link link)
-			throws NoSuchLinkException {
+	public static void fillObject(LinkDao linkDao, Link link) throws NoSuchLinkException {
 		fillId(linkDao, link);
 		Link l = linkDao.getLink(link.getId());
 		if (l != null) {
@@ -596,8 +550,7 @@ public class GnizrDaoUtil {
 		}
 	}
 
-	public static void fillObject(TagPropertyDao tagPrptDao, TagProperty tagPrpt)
-			throws NoSuchTagPropertyException {
+	public static void fillObject(TagPropertyDao tagPrptDao, TagProperty tagPrpt) throws NoSuchTagPropertyException {
 		fillId(tagPrptDao, tagPrpt);
 		TagProperty p = tagPrptDao.getTagProperty(tagPrpt.getId());
 		tagPrpt.setName(p.getName());
@@ -607,13 +560,9 @@ public class GnizrDaoUtil {
 		tagPrpt.setCardinality(p.getCardinality());
 	}
 
-	public static void fillObject(TagAssertionDao tagAssertionDao,
-			TagPropertyDao tagPrptDao, TagDao tagDao, UserDao userDao,
-			TagAssertion assertion) throws NoSuchUserException,
-			NoSuchTagException, NoSuchUserTagException,
-			NoSuchTagPropertyException, NoSuchTagAssertionException,
-			MissingIdException {
-		if (hasMissingId(assertion) == true) {
+	public static void fillObject(TagAssertionDao tagAssertionDao, TagPropertyDao tagPrptDao, TagDao tagDao, UserDao userDao, TagAssertion assertion)
+	throws NoSuchUserException, NoSuchTagException, NoSuchUserTagException, NoSuchTagPropertyException, NoSuchTagAssertionException, MissingIdException {
+		if (hasMissingId(assertion)) {
 			fillId(tagAssertionDao, tagPrptDao, tagDao, userDao, assertion);
 		}
 		TagAssertion ta = tagAssertionDao.getTagAssertion(assertion.getId());
@@ -649,11 +598,10 @@ public class GnizrDaoUtil {
 	 * the input <code>tag</code> string.
 	 *
 	 */
-	public static int createTagIfNotExist(TagDao tagDao, String tag)
-			throws ParseTagException {
-		Tag tagObj = null;
-		String tagLabel = null;
-		if (TagUtil.isPrefixedUserTag(tag) == true) {
+	public static int createTagIfNotExist(TagDao tagDao, String tag) throws ParseTagException {
+		Tag tagObj;
+		String tagLabel;
+		if (TagUtil.isPrefixedUserTag(tag)) {
 			UserTag ut = TagUtil.parsePrefixedUserTag(tag);
 			if (ut != null) {
 				tagLabel = ut.getTag().getLabel();
@@ -674,11 +622,9 @@ public class GnizrDaoUtil {
 		return tagObj.getId();
 	}
 
-	public static final int createUserTagIfNotExist(TagDao tagDao,
-			UserDao userDao, String tag, User defaultUser)
-			throws ParseTagException, NoSuchUserException {
+	public static int createUserTagIfNotExist(TagDao tagDao, UserDao userDao, String tag, User defaultUser) throws ParseTagException, NoSuchUserException {
 		int userTagId = 0;
-		UserTag tagParsed = null;
+		UserTag tagParsed;
 		if (TagUtil.isPrefixedUserTag(tag)) {
 			tagParsed = TagUtil.parsePrefixedUserTag(tag);
 			if (tagParsed == null) {
@@ -716,11 +662,9 @@ public class GnizrDaoUtil {
 		}
 	}
 
-	public static void fillObject(ForUserDao forUserDao,
-			BookmarkDao bookmarkDao, UserDao userDao, LinkDao linkDao,
-			ForUser forUser) throws MissingIdException, NoSuchUserException,
-			NoSuchLinkException, NoSuchBookmarkException {
-		if (hasMissingId(forUser) == true) {
+	public static void fillObject(BookmarkDao bookmarkDao, UserDao userDao, LinkDao linkDao, ForUser forUser)
+	throws MissingIdException, NoSuchUserException, NoSuchLinkException, NoSuchBookmarkException {
+		if (hasMissingId(forUser)) {
 			throw new MissingIdException("missing forUser.getId()");
 		}
 		Bookmark bm = forUser.getBookmark();
@@ -867,14 +811,14 @@ public class GnizrDaoUtil {
 	/**
 	 * Returns a list of String objects that appear aList but don't appear
 	 * in bList.
-	 * @param aList
-	 * @param bList
+	 * @param aList list
+	 * @param bList list
 	 * @return objects in aList but not in bList
 	 */
 	public static List<String> diffList(List<String> aList, List<String> bList){
 		List<String> result = new ArrayList<String>();
 		for(String a : aList){
-			if(bList.contains(a) == false){
+			if(!bList.contains(a)){
 				result.add(a);
 			}
 		}
@@ -885,7 +829,7 @@ public class GnizrDaoUtil {
 		if(s != null){
 			return s.replaceAll("[\\t\\n\\r\\f\\a\\e]+"," ");
 		}
-		return s;
+		return null;
 	}
 	
 	/**
@@ -910,8 +854,6 @@ public class GnizrDaoUtil {
 	}
 	
 	public static String getRandomURI(){
-		StringBuffer sb = new StringBuffer("urn-x:gnizr:");
-		sb.append(UUID.randomUUID().toString());
-		return sb.toString();
+		return "urn-x:gnizr:" + UUID.randomUUID().toString();
 	}
 }
