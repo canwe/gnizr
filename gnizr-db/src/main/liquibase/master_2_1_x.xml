@@ -73,6 +73,81 @@
             END;
             $c$ LANGUAGE plpgsql;
 
+            --------------------------------------------------------------
+            -- PROCEDURE: createUser
+            -- INPUT: username
+            --        password,
+            --        fullname,
+            --        email,
+            --        createdOn,
+            --        status
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION createUser(IN username VARCHAR(45), IN password VARCHAR(45),
+                                                  IN fullname VARCHAR(100),IN email VARCHAR(50),
+                                                  IN createdOn timestamp with time zone,
+                                                  IN status INTEGER) RETURNS integer AS $c$
+            DECLARE
+              newid integer;
+            DECLARE `USEREXISTS` CONDITION FOR SQLSTATE '23000';
+            DECLARE EXIT HANDLER FOR `USEREXISTS` ROLLBACK;
+            BEGIN
+              INSERT INTO "user"(username,password,fullname,email,created_on,acct_status) VALUES (username,MD5(password),fullname,email,createdOn,status) RETURNING id INTO newid;
+              RETURN newid;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            --------------------------------------------------------------
+            -- PROCEDURE: updateUser
+            -- INPUT: username
+            --        password
+            --        fullname
+            --        email
+            --        createdOn
+            --        status
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION updateUser(IN id INTEGER,
+                                                  IN username VARCHAR(45),
+                                                  IN password VARCHAR(45),
+                                                  IN fullname VARCHAR(100),
+                                                  IN email VARCHAR(50),
+                                                  IN createdOn timestamp with time zone,
+                                                  IN status INTEGER) RETURNS void AS $c$
+
+            BEGIN
+              IF CHAR_LENGTH(password) > 0 THEN
+                UPDATE "user" as U SET
+                U.username = username,
+                U.password = MD5(password),
+                U.fullname = fullname,
+                U.email = email,
+                U.created_on = created_on,
+                U.acct_status = status WHERE U.id=id;
+              ELSE
+                UPDATE "user" as U SET
+                U.username = username,
+                U.fullname = fullname,
+                U.email = email,
+                U.created_on = createdOn,
+                U.acct_status = status WHERE U.id=id;
+              END IF;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            --------------------------------------------------------------
+            -- PROCEDURE: listUserStats
+            -- INPUT: NONE
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION listUserStats() RETURNS refcursor AS $c$
+            DECLARE
+              ref refcursor;
+            BEGIN
+              OPEN ref FOR SELECT *,
+              (SELECT count(*) FROM bookmark WHERE bookmark.user_id = U.id) as total_number_bookmark,
+              (SELECT count(*) FROM user_tag_idx WHERE user_tag_idx.user_id = U.id) as total_number_tag
+              FROM "user" as U ORDER BY U.username ASC;
+            END;
+            $c$ LANGUAGE plpgsql;
+
         </sql>
 	</changeSet>
 
