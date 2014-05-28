@@ -10,12 +10,9 @@
             -- PROCEDURE: getUser(id)
             -- INPUT: id INTEGER
             -- OUTPUT: NONE
-            CREATE OR REPLACE FUNCTION getUser(uid INTEGER) RETURNS refcursor AS $c$
-            DECLARE
-              ref refcursor;
+            CREATE OR REPLACE FUNCTION getUser(uid INTEGER) RETURNS SETOF "user" AS $c$
             BEGIN
-              OPEN ref FOR SELECT * FROM "user" as U WHERE U.id=uid;
-              RETURN ref;
+              RETURN QUERY SELECT * FROM "user" as U WHERE U.id=uid;
             END;
             $c$ LANGUAGE plpgsql;
 
@@ -23,12 +20,9 @@
             -- PROCEDURE: findUserUsername
             -- INPUT: username
             -- OUTPUT: NONE
-            CREATE OR REPLACE FUNCTION findUserUsername(uname VARCHAR(45)) RETURNS refcursor AS $c$
-            DECLARE
-              ref refcursor;
+            CREATE OR REPLACE FUNCTION findUserUsername(uname VARCHAR(45)) RETURNS SETOF "user" AS $c$
             BEGIN
-              OPEN ref FOR SELECT * FROM "user" as U WHERE U.username=uname;
-              RETURN ref;
+              RETURN QUERY SELECT * FROM "user" as U WHERE U.username=uname;
             END;
             $c$ LANGUAGE plpgsql;
 
@@ -36,12 +30,9 @@
             -- PROCEDURE: findAllUsers
             -- INPUT: NONE
             -- OUTPUT: NONE
-            CREATE OR REPLACE FUNCTION findAllUsers() RETURNS refcursor AS $c$
-            DECLARE
-              ref refcursor;
+            CREATE OR REPLACE FUNCTION findAllUsers() RETURNS SETOF "user" AS $c$
             BEGIN
-              OPEN ref FOR SELECT * FROM "user" as U WHERE U.username != "gnizr";
-              RETURN ref;
+              RETURN QUERY SELECT * FROM "user" as U WHERE U.username != "gnizr";
             END;
             $c$ LANGUAGE plpgsql;
 
@@ -50,11 +41,9 @@
             -- INPUT: username
             --        password
             -- OUTPUT: NONE
-            CREATE OR REPLACE FUNCTION findUserUnamePwd(uname VARCHAR(45), pwd VARCHAR(45)) RETURNS refcursor AS $c$
-            DECLARE
-              ref refcursor;
+            CREATE OR REPLACE FUNCTION findUserUnamePwd(uname VARCHAR(45), pwd VARCHAR(45)) RETURNS SETOF "user" AS $c$
             BEGIN
-              OPEN ref FOR SELECT * FROM "user" as U WHERE U.username=uname AND U.password=MD5(pwd);
+              RETURN QUERY SELECT * FROM "user" as U WHERE U.username=uname AND U.password=MD5(pwd);
             END;
             $c$ LANGUAGE plpgsql;
 
@@ -137,11 +126,9 @@
             -- PROCEDURE: listUserStats
             -- INPUT: NONE
             -- OUTPUT: NONE
-            CREATE OR REPLACE FUNCTION listUserStats() RETURNS refcursor AS $c$
-            DECLARE
-              ref refcursor;
+            CREATE OR REPLACE FUNCTION listUserStats() RETURNS SETOF "user" AS $c$
             BEGIN
-              OPEN ref FOR SELECT *,
+              RETURN QUERY SELECT *,
               (SELECT count(*) FROM bookmark WHERE bookmark.user_id = U.id) as total_number_bookmark,
               (SELECT count(*) FROM user_tag_idx WHERE user_tag_idx.user_id = U.id) as total_number_tag
               FROM "user" as U ORDER BY U.username ASC;
