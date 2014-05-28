@@ -123,7 +123,7 @@ public class UserDBDao implements UserDao{
 		Connection conn = null;
 		try{				
 			conn = datasource.getConnection();
-			stmt = conn.prepareCall("{call findUserUsername(?)}");
+			stmt = conn.prepareStatement("select * from findUserUsername(?)");
 			stmt.setString(1, username);
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
@@ -153,7 +153,7 @@ public class UserDBDao implements UserDao{
 		Connection conn = null;
 		try{						
 			conn = datasource.getConnection();
-			stmt = conn.prepareCall("{call getUser(?)}");
+			stmt = conn.prepareStatement("select * from getUser(?)");
 			stmt.setInt(1,id);
 			ResultSet rs = stmt.executeQuery();
 			if(rs.next()){
@@ -243,7 +243,7 @@ public class UserDBDao implements UserDao{
 		List<User> users = new ArrayList<User>();
 		try {
 			conn = datasource.getConnection();
-			stmt = conn.prepareCall("{call findUserUnamePwd(?,?)}");
+			stmt = conn.prepareStatement("select * from findUserUnamePwd(?,?)");
 			stmt.setString(1,username);
 			stmt.setString(2,password);
 			ResultSet rs = stmt.executeQuery();
@@ -296,7 +296,7 @@ public class UserDBDao implements UserDao{
 		Connection conn = null;
 		try{				
 			conn = datasource.getConnection();
-			stmt = conn.prepareCall("{call findAllUsers()}");
+			stmt = conn.prepareStatement("select * from findAllUsers()");
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
 				User aUser = createUserObject(rs);
@@ -325,7 +325,7 @@ public class UserDBDao implements UserDao{
 		Connection conn = null;
 		try{				
 			conn = datasource.getConnection();
-			stmt = conn.prepareCall("{call listUserStats()}");
+			stmt = conn.prepareStatement("select * from listUserStats()");
 			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
 				UserStat aUser = createUserStatObject(rs);
