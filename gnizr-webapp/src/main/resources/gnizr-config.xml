@@ -42,7 +42,7 @@
 
  			If "open" or "approval" is used, siteContactEmail option must be defined (see above)
 		 -->
-		<property name="registrationPolicy" value="approval"/>
+		<property name="registrationPolicy" value="open"/>
 		<property name="serverMaintenanceModeEnabled" value="false"/>
 		<property name="openSearchServices">
 			<list>
@@ -74,7 +74,18 @@
 		http://java.sun.com/products/javamail/javadocs/com/sun/mail/smtp/package-summary.html
 	-->
 	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-		<property name="host" value="localhost"/>
+		<property name="host" value="smtp.gmail.com"/>
+		<property name="port" value="587"/>
+        <property name="username" value="bmkgnizr@gmail.com"/>
+        <property name="password" value="bmkgnizr123"/>
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.smtp.auth">true</prop>
+                <prop key="mail.smtp.starttls.enable">true</prop>
+                <prop key="mail.smtp.host">smtp.gmail.com</prop>
+                <prop key="mail.smtp.port">587</prop>
+            </props>
+        </property>
 	</bean>
 
 </beans>
