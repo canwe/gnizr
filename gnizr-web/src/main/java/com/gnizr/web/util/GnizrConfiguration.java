@@ -22,29 +22,29 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * <p>Holds the configuration of a gnizr web application. An instance of this class 
+ * <p>Holds the configuration of a gnizr web application. An instance of this class
  * is usually created via Spring IoC in <code>gnizr-config.xml</code>. In this XML file,
- * the administrator defines the local settings for the gnizr web application. 
- * </p>  
+ * the administrator defines the local settings for the gnizr web application.
+ * </p>
  * <p>
- * When extending gnizr web application, developers are encouraged to extend 
- * this class to define addition configurations that are specific to the extended web application. 
- * The advantage of sub-classing configuration from this class is that it allows 
+ * When extending gnizr web application, developers are encouraged to extend
+ * this class to define addition configurations that are specific to the extended web application.
+ * The advantage of sub-classing configuration from this class is that it allows
  * all settings of a gnizr web application to be grouped in a single <code>gnizr-config.xml</code>.
  * </p>
  * <p>
- * For example, if you want to introduce a new application configuration parameter: <code>foo</code>. 
+ * For example, if you want to introduce a new application configuration parameter: <code>foo</code>.
  * You can create a subclass call <code>MyOwnGnizrConfiguration</code>:
  * </p>
  * <pre>
  * package org.example;
  * public class MyOwnGnizrConfiguration extends GnizrConfiguration{
  *   private String foo;
- *   
+ *
  *   public void setFoo(String fooValue){
  *     this.foo = fooValue;
  *   }
- *   
+ *
  *   public String getFoo(){
  *     return this.foo;
  *   }
@@ -52,7 +52,7 @@ import java.util.Properties;
  * </pre>
  * <p>In <code>gnizr-config.xml</code>, you can define the bean object as the follows:</p>
  * <pre>
- * &lt;bean id="gnizrConfiguration" 
+ * &lt;bean id="gnizrConfiguration"
  *          class="org.example.MyOwnGnizrConfiguration" singleton="true"&gt;
  *    &lt;!-- configure standard gnizr settings --&gt;
  *    ...
@@ -61,19 +61,19 @@ import java.util.Properties;
  *    &lt;property name=\&quot;foo\&quot;&gt;
  *       &lt;value&gt;[foo value goes here]&lt;/value&gt;
  *    &lt;/property&gt;
- * &lt;/bean&gt;		  
+ * &lt;/bean&gt;
  * </pre>
- * @author Harry Chen
  *
+ * @author Harry Chen
  */
 public class GnizrConfiguration implements Serializable {
-	
+
 	private static final long serialVersionUID = 3110706144455468541L;
-	
+
 	public static final String WEB_APPLICATION_URL = "webApplicationUrl";
 	public static final String GOOGLE_MAPS_KEY = "googleMapsKey";
 	public static final String ENABLE_RSS_ROBOT = "enableRssRobot";
-	public static final String SNAPSHOTS_KEY = "snapShotsKey";	
+	public static final String SNAPSHOTS_KEY = "snapShotsKey";
 	public static final String ANONYMOUS_READER_POLICY = "anonymousReaderPolicy";
 	public static final String REGISTRATION_POLICY = "registrationPolicy";
 	public static final String SERVER_MAINTENANCE = "serverMaintenanceModeEnabled";
@@ -87,20 +87,19 @@ public class GnizrConfiguration implements Serializable {
 	private String snapShotsKey;
 	private String anonymousReaderPolicy;
 	private String registrationPolicy;
-	private String tempDirectoryPath;	
+	private String tempDirectoryPath;
 	private boolean serverMaintenanceModeEnabled;
 	private List<String> openSearchServices = new ArrayList<String>();
 	private Properties appProperties = new Properties();
-	
+
 	/**
 	 * Creates an instance of this class to hold
 	 * gnizr system configuration properties.
-	 *
 	 */
-	public GnizrConfiguration(){
+	public GnizrConfiguration() {
 		openSearchServices = new ArrayList<String>();
 	}
-	
+
 	public String getWebApplicationUrl() {
 		return webApplicationUrl;
 	}
@@ -188,7 +187,7 @@ public class GnizrConfiguration implements Serializable {
 	public void setTempDirectoryPath(String tempDirectoryPath) {
 		this.tempDirectoryPath = tempDirectoryPath;
 	}
-	
+
 	public Properties getAppProperties() {
 		return appProperties;
 	}

@@ -10,8 +10,7 @@
 -->
 <beans>
 
-	<bean id="gnizrConfiguration"
-	      class="com.gnizr.web.util.GnizrConfiguration" singleton="true">
+	<bean id="gnizrConfiguration" class="com.gnizr.web.util.GnizrConfiguration">
 
 		<!-- Define the site name of your gnizr installation -->
 		<property name="siteName" value="gnizr 2.4"/>
@@ -20,7 +19,7 @@
 		<property name="siteDescription" value="organize"/>
 
 		<!--  Define the admin email contact of your site -->
-		<property name="siteContactEmail" value=""/>
+		<property name="siteContactEmail" value="notreply@yandex.ru"/>
 
 		<!-- Define the web application URL of this gnizr installation -->
 		<!-- <property name="webApplicationUrl" value="http://localhost:8080/gnizr"/> -->
@@ -62,8 +61,7 @@
 		<property name="tempDirectoryPath" value=""/>
 	</bean>
 
-	<bean id="searchIndexProfile"
-	      class="com.gnizr.core.search.SearchIndexProfile" singleton="true">
+	<bean id="searchIndexProfile" class="com.gnizr.core.search.SearchIndexProfile">
 		<property name="searchIndexDirectory" value="c:/search-data"/>
 		<property name="resetSearchIndexOnStart" value="false"/>
 		<property name="searchSuggestDataFile" value="/dictionary/default.txt"/>
@@ -75,8 +73,7 @@
 		http://static.springframework.org/spring/docs/2.5.x/api/org/springframework/mail/javamail/JavaMailSenderImpl.html
 		http://java.sun.com/products/javamail/javadocs/com/sun/mail/smtp/package-summary.html
 	-->
-	<bean id="mailSender"
-	      class="org.springframework.mail.javamail.JavaMailSenderImpl" singleton="true">
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
 		<property name="host" value="localhost"/>
 	</bean>
 

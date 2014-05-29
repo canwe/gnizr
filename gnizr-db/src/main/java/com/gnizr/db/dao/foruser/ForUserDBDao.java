@@ -56,14 +56,13 @@ public class ForUserDBDao implements ForUserDao {
 		int id = -1;
 		try {
 			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("{? = call createForUser(?,?,?,?)}");
-			cStmt.setInt(2, forUser.getForUser().getId());
-			cStmt.setInt(3, forUser.getBookmark().getId());
-			cStmt.setString(4, forUser.getMessage());
-			cStmt.setTimestamp(5, new Timestamp(forUser.getCreatedOn().getTime()));
-			cStmt.registerOutParameter(1, Types.INTEGER);
-			cStmt.execute();
-			id = cStmt.getInt(1);
+			cStmt = conn.prepareCall("select * from createForUser(?,?,?,?)");
+			cStmt.setInt(1, forUser.getForUser().getId());
+			cStmt.setInt(2, forUser.getBookmark().getId());
+			cStmt.setString(3, forUser.getMessage());
+			cStmt.setTimestamp(4, new Timestamp(forUser.getCreatedOn().getTime()));
+			ResultSet rs = cStmt.executeQuery();
+			id = rs.next() ? rs.getInt(1) : id;
 		} catch (Exception e) {
 			logger.fatal(e);
 		} finally {
@@ -211,12 +210,11 @@ public class ForUserDBDao implements ForUserDao {
 		int count = 0;
 		try {
 			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("{? = call hasForUser(?,?)}");
-			cStmt.setInt(2, bookmark.getId());
-			cStmt.setInt(3, user.getId());
-			cStmt.registerOutParameter(1, Types.INTEGER);
-			cStmt.execute();
-			count = cStmt.getInt(1);
+			cStmt = conn.prepareCall("select * from hasForUser(?,?)");
+			cStmt.setInt(1, bookmark.getId());
+			cStmt.setInt(2, user.getId());
+			ResultSet rs = cStmt.executeQuery();
+			count = rs.next() ? rs.getInt(1) : count;
 			if (count > 0) found = true;
 		} catch (Exception e) {
 			logger.fatal(e);
@@ -237,11 +235,10 @@ public class ForUserDBDao implements ForUserDao {
 		int count = 0;
 		try {
 			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("{? = call getForUserCount(?)}");
-			cStmt.setInt(2, user.getId());
-			cStmt.registerOutParameter(1, Types.INTEGER);
-			cStmt.execute();
-			count = cStmt.getInt(1);
+			cStmt = conn.prepareCall("select * from getForUserCount(?)");
+			cStmt.setInt(1, user.getId());
+			ResultSet rs = cStmt.executeQuery();
+			count = rs.next() ? rs.getInt(1) : count;
 		} catch (Exception e) {
 			logger.fatal(e);
 		} finally {
@@ -340,13 +337,12 @@ public class ForUserDBDao implements ForUserDao {
 		int count = 0;
 		try {
 			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("{? = call getForUserInTimeRangeCount(?,?,?)}");
-			cStmt.setInt(2, user.getId());
-			cStmt.setTimestamp(3, new Timestamp(start.getTime()));
-			cStmt.setTimestamp(4, new Timestamp(end.getTime()));
-			cStmt.registerOutParameter(1, Types.INTEGER);
-			cStmt.execute();
-			count = cStmt.getInt(1);
+			cStmt = conn.prepareCall("select * from getForUserInTimeRangeCount(?,?,?)");
+			cStmt.setInt(1, user.getId());
+			cStmt.setTimestamp(2, new Timestamp(start.getTime()));
+			cStmt.setTimestamp(3, new Timestamp(end.getTime()));
+			ResultSet rs = cStmt.executeQuery();
+			count = rs.next() ? rs.getInt(1) : count;
 		} catch (Exception e) {
 			logger.fatal(e);
 		} finally {
@@ -419,21 +415,21 @@ public class ForUserDBDao implements ForUserDao {
 		Connection conn = null;
 		try {
 			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("{? = call pageForUserBySenderId(?,?,?,?,?)}");
-			cStmt.setInt(2, user.getId());
-			cStmt.setInt(3, sender.getId());
-			cStmt.setInt(4, offset);
-			cStmt.setInt(5, count);
-			cStmt.registerOutParameter(1, Types.INTEGER);
+			cStmt = conn.prepareCall("select * from pageForUserBySenderId(?,?,?,?)");
+			cStmt.setInt(1, user.getId());
+			cStmt.setInt(2, sender.getId());
+			cStmt.setInt(3, offset);
+			cStmt.setInt(4, count);
 			ResultSet rs = cStmt.executeQuery();
-			int size = cStmt.getInt(1);
+			int size = rs.next() ? rs.getInt(1) : -1;
 			if (size < 0) {
 				size = 0;
 			}
-			while (rs.next()) {
-				ForUser forUser = createForUserObject(rs);
-				forUsers.add(forUser);
-			}
+			//TODO
+			//while (rs.next()) {
+			//	ForUser forUser = createForUserObject(rs);
+			//	forUsers.add(forUser);
+			//}
 			result = new DaoResult<ForUser>(forUsers, size);
 			logger.debug("DaoResult: forUsers=" + forUsers + ",size=" + size);
 		} catch (Exception e) {

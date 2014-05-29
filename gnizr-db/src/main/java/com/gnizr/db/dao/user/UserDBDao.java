@@ -186,16 +186,17 @@ public class UserDBDao implements UserDao {
 		int userId = -1;
 		try {
 			conn = datasource.getConnection();
-			cStmt = conn.prepareCall("{? = call createUser(?,?,?,?,?,?)}");
-			cStmt.registerOutParameter(1, Types.INTEGER);
-			cStmt.setString(2, user.getUsername());
-			cStmt.setString(3, user.getPassword());
-			cStmt.setString(4, user.getFullname());
-			cStmt.setString(5, user.getEmail());
-			cStmt.setTimestamp(6, new Timestamp(user.getCreatedOn().getTime()));
-			cStmt.setInt(7, user.getAccountStatus());
-			cStmt.execute();
-			userId = cStmt.getInt(1);
+			cStmt = conn.prepareCall("select * from createUser(?,?,?,?,?,?)");
+			cStmt.setString(1, user.getUsername());
+			cStmt.setString(2, user.getPassword());
+			cStmt.setString(3, user.getFullname());
+			cStmt.setString(4, user.getEmail());
+			cStmt.setTimestamp(5, new Timestamp(user.getCreatedOn().getTime()));
+			cStmt.setInt(6, user.getAccountStatus());
+			ResultSet rs  = cStmt.executeQuery();
+			if (rs.next()) {
+				userId = rs.getInt(1);
+			}
 		} catch (Exception e) {
 			logger.error(e);
 		} finally {

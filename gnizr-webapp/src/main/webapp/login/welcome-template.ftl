@@ -6,11 +6,11 @@ Your account has been approved.
 
 To login, click the link below:
 
-${gnizrConfiguration.webApplicationUrl}/login
+http://gnizer.herokuapp.com/login
 
 If you forgot your password, click the link below:
 
-${gnizrConfiguration.webApplicationUrl}/password/forgot.action
+http://gnizer.herokuapp.com/password/forgot.action
 
 If clicking the link above does not work, copy and paste the URL in a
 new browser window instead.

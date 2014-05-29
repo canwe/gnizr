@@ -49,15 +49,14 @@ public class TagPropertyDBDao implements TagPropertyDao {
 		int id = -1;
 		try {
 			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("{? = call createTagProperty(?,?,?,?,?)}");
-			cStmt.registerOutParameter(1, Types.INTEGER);
-			cStmt.setString(2, tagPrpt.getName());
-			cStmt.setString(3, tagPrpt.getNamespacePrefix());
-			cStmt.setString(4, tagPrpt.getDescription());
-			cStmt.setString(5, tagPrpt.getPropertyType());
-			cStmt.setInt(6, tagPrpt.getCardinality());
-			cStmt.execute();
-			id = cStmt.getInt(1);
+			cStmt = conn.prepareCall("select * from createTagProperty(?,?,?,?,?)");
+			cStmt.setString(1, tagPrpt.getName());
+			cStmt.setString(2, tagPrpt.getNamespacePrefix());
+			cStmt.setString(3, tagPrpt.getDescription());
+			cStmt.setString(4, tagPrpt.getPropertyType());
+			cStmt.setInt(5, tagPrpt.getCardinality());
+			ResultSet rs = cStmt.executeQuery();
+			id = rs.next() ? rs.getInt(1) : id;
 		} catch (Exception e) {
 			logger.fatal(e);
 		} finally {
