@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("JpaQueryApiInspection")
 public class UserDBDao implements UserDao {
 
 	private static final long serialVersionUID = 1205142167824260031L;
@@ -65,13 +66,13 @@ public class UserDBDao implements UserDao {
 	public static User createNamedUserObject(String tableAlias, ResultSet rs, boolean noColumnRef) throws SQLException {
 		if (rs == null) return null;
 
-		String idCol = tableAlias + UserSchema.ID_COL;
-		String fullnameCol = tableAlias + UserSchema.FULLNAME_COL;
-		String usernameCol = tableAlias + UserSchema.USERNAME_COL;
-		String passwordCol = tableAlias + UserSchema.PASSWORD_COL;
-		String createdOnCol = tableAlias + UserSchema.CREATED_ON_COL;
-		String acctStatusCol = tableAlias + UserSchema.ACCT_STATUS_COL;
-		String emailStatusCol = tableAlias + UserSchema.EMAIL_COL;
+		String idCol = tableAlias + "." + UserSchema.ID_COL;
+		String fullnameCol = tableAlias + "." + UserSchema.FULLNAME_COL;
+		String usernameCol = tableAlias + "." + UserSchema.USERNAME_COL;
+		String passwordCol = tableAlias + "." + UserSchema.PASSWORD_COL;
+		String createdOnCol = tableAlias + "." + UserSchema.CREATED_ON_COL;
+		String acctStatusCol = tableAlias + "." + UserSchema.ACCT_STATUS_COL;
+		String emailStatusCol = tableAlias + "." + UserSchema.EMAIL_COL;
 
 		if (noColumnRef) {
 			idCol = idCol.replaceAll("\\.", "_");
@@ -185,16 +186,16 @@ public class UserDBDao implements UserDao {
 		int userId = -1;
 		try {
 			conn = datasource.getConnection();
-			cStmt = conn.prepareCall("{call createUser(?,?,?,?,?,?,?)}");
-			cStmt.setString(1, user.getUsername());
-			cStmt.setString(2, user.getPassword());
-			cStmt.setString(3, user.getFullname());
-			cStmt.setString(4, user.getEmail());
-			cStmt.setTimestamp(5, new Timestamp(user.getCreatedOn().getTime()));
-			cStmt.setInt(6, user.getAccountStatus());
-			cStmt.registerOutParameter(7, Types.INTEGER);
+			cStmt = conn.prepareCall("{? = call createUser(?,?,?,?,?,?)}");
+			cStmt.registerOutParameter(1, Types.INTEGER);
+			cStmt.setString(2, user.getUsername());
+			cStmt.setString(3, user.getPassword());
+			cStmt.setString(4, user.getFullname());
+			cStmt.setString(5, user.getEmail());
+			cStmt.setTimestamp(6, new Timestamp(user.getCreatedOn().getTime()));
+			cStmt.setInt(7, user.getAccountStatus());
 			cStmt.execute();
-			userId = cStmt.getInt(7);
+			userId = cStmt.getInt(1);
 		} catch (Exception e) {
 			logger.error(e);
 		} finally {

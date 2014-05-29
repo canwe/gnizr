@@ -18,10 +18,11 @@ package com.gnizr.db.vocab;
 
 public interface TagPropertySchema {
 	public static final String TABLE="tag_prpt";
-	public static final String ID = TABLE+".id";
-	public static final String NAME = TABLE+".name";
-	public static final String NS_PREFIX = TABLE+".ns_prefix";
-	public static final String DESCRIPTION = TABLE+".description";
-	public static final String PRPT_TYPE = TABLE+".prpt_type";
-	public static final String CARDINALITY = TABLE+".cardinality";
+
+	public static final String ID = "id";
+	public static final String NAME = "name";
+	public static final String NS_PREFIX = "ns_prefix";
+	public static final String DESCRIPTION = "description";
+	public static final String PRPT_TYPE = "prpt_type";
+	public static final String CARDINALITY = "cardinality";
 }

@@ -53,12 +53,9 @@
             -- OUTPUT NONE
             CREATE OR REPLACE FUNCTION deleteUser(uid INTEGER) RETURNS void AS $c$
             BEGIN
-              DELETE FROM search_idx
-              WHERE search_idx.bookmark_id in (SELECT id FROM bookmark WHERE bookmark.user_id = uid);
-              DELETE FROM bookmark
-              WHERE bookmark.user_id = uid;
-              DELETE FROM "user" as U
-              WHERE U.id=uid;
+              DELETE FROM search_idx WHERE search_idx.bookmark_id in (SELECT id FROM bookmark WHERE bookmark.user_id = uid);
+              DELETE FROM bookmark WHERE bookmark.user_id = uid;
+              DELETE FROM "user" as U WHERE U.id=uid;
             END;
             $c$ LANGUAGE plpgsql;
 
@@ -204,5 +201,347 @@
 
         </sql>
 	</changeSet>
+
+    <changeSet id="sp-tagprpt" author="vrebesbyrd@gmail.com">
+        <sql splitStatements="false">
+            --------------------------------------------------------------
+            -- PROCEDURE: getTagProperty
+            -- INPUT: id INT
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION getTagProperty(tid integer) RETURNS SETOF tag_prpt AS $c$
+            BEGIN
+              RETURN QUERY SELECT * FROM tag_prpt as t WHERE t.id=tid;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            --------------------------------------------------------------
+            -- PROCEDURE: createTagProperty
+            -- INPUT: name, ns_prefix, description, prpt_type, cardinaltiy
+            -- OUTPUT: id
+            CREATE OR REPLACE FUNCTION createTagProperty(IN n VARCHAR(45),
+                                                         IN ns_pr VARCHAR(10),
+                                                         IN descr VARCHAR(255),
+                                                         IN prpt_t VARCHAR(255),
+                                                         IN card integer) RETURNS integer AS $c$
+            DECLARE
+              newid integer;
+            BEGIN
+              INSERT INTO tag_prpt(name,ns_prefix,description,prpt_type,cardinality) VALUES (n,ns_pr,descr,prpt_t,card) RETURNING id INTO newid;
+              RETURN newid;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            --------------------------------------------------------------
+            -- PROCEDURE: deleteTagProperty
+            -- INPUT: id
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION deleteTagProperty(tid integer) RETURNS void AS $c$
+            BEGIN
+              DELETE FROM tag_prpt as tp WHERE tp.id=tid;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            --------------------------------------------------------------
+            -- PROCEDURE: updateTagProperty
+            -- INPUT: id, name, ns_prefix, description, prpt_type, cardinaltiy
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION updateTagProperty(tid integer,
+                                                         n VARCHAR(45),
+                                                         ns_pr VARCHAR(10),
+                                                         descr VARCHAR(255),
+                                                         prpt_t VARCHAR(255),
+                                                         card integer) RETURNS void AS $c$
+            BEGIN
+              UPDATE tag_prpt as tp SET
+                tp.name = n,
+                tp.ns_prefix = ns_pr,
+                tp.description = descr,
+                tp.prpt_type = prpt_t,
+                tp.cardinality = card
+              WHERE tp.id=tid;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            --------------------------------------------------------------
+            -- PROCEDURE: listAllTagProperty
+            -- INPUT: NONE
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION listAllTagProperty() RETURNS SETOF tag_prpt AS $c$
+            BEGIN
+              RETURN QUERY SELECT * FROM tag_prpt;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            --------------------------------------------------------------
+            -- PROCEDURE: getTagPropertyNSPrefixName
+            -- INPUT: nsPrefix, name
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION getTagPropertyNSPrefixName(nsPr VARCHAR(10),
+                                                                  n VARCHAR(45)) RETURNS SETOF tag_prpt AS $c$
+            BEGIN
+              RETURN QUERY SELECT * FROM tag_prpt WHERE tag_prpt.ns_prefix = nsPr AND tag_prpt.name = n;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            --------------------------------------------------------------
+            -- PROCEDURE: listTagPropertyOfType
+            -- INPUT: prptType
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION listTagPropertyOfType(prptType VARCHAR(255)) RETURNS SETOF tag_prpt AS $c$
+            BEGIN
+              RETURN QUERY SELECT * FROM tag_prpt as tp WHERE tp.prpt_type = prptType;
+            END;
+            $c$ LANGUAGE plpgsql;
+        </sql>
+    </changeSet>
+
+    <changeSet id="sp-gn-utils" author="vrebesbyrd@gmail.com">
+        <sql splitStatements="false">
+            --------------------------------------------------------------
+            -- FUNCTION: bookmarkTags
+            -- INPUT: bookmarkId
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION bookmarkTags(bookmarkId integer) RETURNS TEXT AS $c$
+            DECLARE
+              tags TEXT;
+            BEGIN
+              SELECT string_agg(DISTINCT t.tag, ' ' ORDER BY bti.position) INTO tags
+              FROM tag as t, bookmark_tag_idx as bti
+              WHERE bti.bookmark_id = bookmarkId AND bti.count > 0 AND bti.tag_id = t.id;
+              RETURN tags;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            --------------------------------------------------------------
+            -- FUNCTION: linkCount
+            -- INPUT: linkId
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION linkCount(linkId integer) RETURNS integer AS $c$
+            DECLARE
+              ssize integer;
+            BEGIN
+              SELECT count(*) INTO ssize FROM bookmark as bmk WHERE bmk.link_id = linkId;
+              RETURN ssize;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            --------------------------------------------------------------
+            -- FUNCTION: bookmarkInFolders
+            -- INPUT: bookmarkId
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION bookmarkInFolders(bookmarkId integer) RETURNS TEXT AS $c$
+            DECLARE
+              fnames TEXT;
+            BEGIN
+              SELECT string_agg(DISTINCT f.folder_name, ',' ORDER BY f.folder_name) INTO fnames
+              FROM folder as f, bookmark_folder as bf
+              WHERE bf.bookmark_id = bookmarkId AND bf.folder_id = f.id;
+              RETURN fnames;
+            END;
+            $c$ LANGUAGE plpgsql;
+        </sql>
+    </changeSet>
+
+    <changeSet id="sp-foruser" author="vrebesbyrd@gmail.com">
+        <sql splitStatements="false">
+            ---------------------------------------------------------------
+            -- PROCEDURE: createForUser
+            -- INPUT: bmid,
+            --        tags,
+            -- OUTPUT: id
+            CREATE OR REPLACE FUNCTION createForUser(IN userId integer,
+                                                     IN bmid integer,
+                                                     IN msg TEXT,
+                                                     IN createdOn timestamp with time zone) RETURNS integer AS $c$
+            DECLARE
+              newid integer;
+            BEGIN
+              SELECT fu.id INTO newid FROM for_user as fu WHERE fu.for_user_id = userId AND fu.bookmark_id = bmid;
+              INSERT INTO for_user(for_user_id, bookmark_id, message, created_on) VALUES(userId, bmid, msg, createdOn) RETURNING id INTO newid;
+              RETURN newid;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: deleteForUser
+            -- INPUT: id
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION deleteForUser(fuid integer) RETURNS void AS $c$
+            BEGIN
+              DELETE FROM for_user as fu WHERE fu.id=fuid;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: getForUser
+            -- INPUT: id
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION getForUser(IN fuid integer) RETURNS SETOF RECORD AS $c$
+            BEGIN
+              RETURN QUERY SELECT *, bookmarkTags(bmk.id) AS tags, bookmarkInFolders(bmk.id) AS folders, linkCount(lnk.id) AS count
+              FROM for_user as fu, bookmark as bmk, link as lnk, user as fuser, user as buser
+              WHERE fu.id=fuid AND fu.bookmark_id = bmk.id AND fu.for_user_id = fuser.id AND bmk.user_id = buser.id AND bmk.link_id = lnk.id;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: getForUserCount
+            -- INPUT: id
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION getForUserCount(IN uid integer) RETURNS integer AS $c$
+            DECLARE
+              fu_count integer;
+            BEGIN
+              SELECT COUNT(*) INTO fu_count FROM for_user as fu WHERE fu.for_user_id=uid;
+              RETURN fu_count;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: getForUserInTimeRangeCount
+            -- INPUT: id, startTime, endTime
+            -- OUTPUT: count INT
+            CREATE OR REPLACE FUNCTION getForUserInTimeRangeCount(IN uid integer,
+                                                        IN startTime timestamp with time zone,
+                                                        IN endTime timestamp with time zone) RETURNS integer AS $c$
+            DECLARE
+              fu_count integer;
+            BEGIN
+              SELECT COUNT(*) INTO fu_count FROM for_user as fu WHERE fu.for_user_id=uid AND fu.created_on BETWEEN startTime AND endTime;
+              RETURN fu_count;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: updateForUser
+            CREATE OR REPLACE FUNCTION updateForUser (IN fuid integer,
+                                            IN userId integer,
+                                            IN bmid integer,
+                                            IN msg TEXT,
+                                            IN createdOn timestamp with time zone) RETURNS void AS $c$
+            BEGIN
+              UPDATE for_user as fu SET
+                fu.for_user_id=userId,
+                fu.bookmark_id=bmid,
+                fu.message=msg,
+                fu.created_on=createdOn
+              WHERE for_user.id=fuid;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: hasForUser
+            -- INPUT: offset,
+            --        count
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION hasForUser(IN bmid integer, IN userId integer) RETURNS integer AS $c$
+            DECLARE
+              fu_count integer;
+            BEGIN
+              SELECT COUNT(*) INTO fu_count FROM for_user as fu WHERE fu.for_user_id=userId AND fu.bookmark_id=bmid;
+              RETURN fu_count;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: pageForUser
+            -- INPUT: offset,
+            --        count
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION pageForUser(IN userId integer, IN off integer, IN count integer) RETURNS SETOF RECORD AS $c$
+            BEGIN
+              RETURN QUERY SELECT *, bookmarkTags(bmk.id) AS tags, bookmarkInFolders(bmk.id) AS folders, linkCount(lnk.id) AS count
+              FROM for_user as fu, bookmark as bmk, link as lnk, user as fuser, user as buser
+              WHERE bmk.id=fu.bookmark_id AND fu.for_user_id=userId AND fu.for_user_id=fuser.id AND bmk.user_id=buser.id AND bmk.link_id=lnk.id
+              ORDER BY fu.created_on DESC LIMIT count OFFSET off;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: listForUserFromBookmark
+            -- INPUT: id
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION listForUserFromBookmark(bmid integer) RETURNS SETOF RECORD AS $c$
+            BEGIN
+              RETURN QUERY SELECT *, bookmarkTags(bmk.id) AS tags, bookmarkInFolders(bmk.id) AS folders, linkCount(lnk.id) AS count
+              FROM for_user as fu, bookmark as bmk, link as lnk, user as fuser, user as buser
+              WHERE fu.bookmark_id=bmid AND fu.bookmark_id=bmk.id AND fu.for_user_id=fuser.id AND bmk.user_id=buser.id AND bmk.link_id=lnk.id;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: pageForUserInTimeRange
+            -- INPUT: userId,
+            --        startTime,
+            --        endTime,
+            --        offset,
+            --        count
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION pageForUserInTimeRange(userId integer,
+                                                              startTime timestamp with time zone,
+                                                              endTime timestamp with time zone,
+                                                              off integer,
+                                                              count integer) RETURNS SETOF RECORD AS $c$
+            BEGIN
+              RETURN QUERY SELECT *, bookmarkTags(bmk.id) AS tags, bookmarkInFolders(bmk.id) AS folders, linkCount(lnk.id) AS count
+              FROM for_user as fu, bookmark as bmk, link as lnk, user as fuser, user as buser
+              WHERE fu.for_user_id=userId AND fu.created_on BETWEEN startTime AND endTime AND bmk.id = fu.bookmark_id AND bmk.link_id = lnk.id AND bmk.user_id = buser.id AND fu.for_user_id = fuser.id
+              ORDER BY fu.created_on DESC LIMIT count OFFSET off;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------------
+            -- PROCEDURE: pageForUserBySenderId
+            -- INPUT: userId, senderId, offset, count
+            -- OUTPUT: totalCount
+            CREATE OR REPLACE FUNCTION pageForUserBySenderId(IN userId integer,
+                                                             IN senderId integer,
+                                                             IN off integer,
+                                                             IN count integer) RETURNS integer AS $c$
+            DECLARE
+            totalCount integer;
+            BEGIN
+              SELECT COUNT(*) INTO totalCount
+              FROM (SELECT *, bookmarkTags(bmk.id) AS tags, bookmarkInFolders(bmk.id) AS folders, linkCount(lnk.id) AS count
+                    FROM for_user as fu, bookmark as bmk, user as fuser, user as buser, link as lnk
+                    WHERE for_user.id IN (SELECT for_user.id FROM for_user as fuu, bookmark as bmkk WHERE fuu.for_user_id = userId AND fuu.bookmark_id = bmkk.id AND bmkk.user_id = senderId)
+                          AND fu.for_user_id = fuser.id AND fu.bookmark_id = bmk.id AND bmk.link_id = lnk.id AND bmk.user_id = buser.id
+                    ORDER BY for_user.created_on DESC) as FF;
+              RETURN totalCount;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------------
+            -- PROCEDURE: deleteForUserById
+            -- INPUT: userId, id
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION deleteForUserById(IN userId integer, IN fuid integer) RETURNS void AS $c$
+            BEGIN
+              DELETE FROM for_user as fu WHERE fu.for_user_id = userId AND fu.id = fuid;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------------
+            -- PROCEDURE: deleteAllForUser
+            -- INPUT: userId, id
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION deleteAllForUser(IN userId integer) RETURNS void AS $c$
+            BEGIN
+              DELETE FROM for_user as fu WHERE fu.for_user_id = userId;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------------
+            -- PROCEDURE: listForUserSenders
+            -- INPUT: forUserId
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION listForUserSenders(IN fuid integer) RETURNS SETOF "user" AS $c$
+            BEGIN
+              RETURN QUERY SELECT * FROM "user" as U WHERE U.id IN
+              (SELECT DISTINCT bmk.user_id FROM bookmark as bmk, for_user as fu WHERE fu.for_user_id = fuid AND fu.bookmark_id = bmk.id);
+            END;
+            $c$ LANGUAGE plpgsql;
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>
