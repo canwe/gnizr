@@ -49,9 +49,8 @@ public class GnizrBasicDataSource extends BasicDataSource implements Serializabl
 	 */
 	@SuppressWarnings("unchecked")
 	public void setConnectionProperties(Properties props) {
-		for (Iterator iter = props.entrySet().iterator(); iter.hasNext();) {
-			Map.Entry entry = (Map.Entry) iter.next();
-			addConnectionProperty((String) entry.getKey(), (String)entry.getValue());
+		for (Map.Entry<Object, Object> entry : props.entrySet()) {
+			addConnectionProperty((String) entry.getKey(), (String) entry.getValue());
 		}
 	}
 

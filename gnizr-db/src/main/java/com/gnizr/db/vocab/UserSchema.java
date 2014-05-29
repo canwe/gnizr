@@ -18,24 +18,18 @@ package com.gnizr.db.vocab;
 
 public interface UserSchema {
 	public static final String TABLE_NAME = "user";
-	public static final String ID = TABLE_NAME + ".id";
-	public static final String USERNAME = TABLE_NAME + ".username";
-	public static final String PASSWORD = TABLE_NAME + ".password";
-	public static final String FULLNAME = TABLE_NAME + ".fullname";
-	public static final String CREATED_ON = TABLE_NAME + ".created_on";
-	public static final String ACCT_STATUS = TABLE_NAME + ".acct_status";
-	public static final String EMAIL = TABLE_NAME + ".email";
+
 	public static final String NUM_OF_BOOKMARKS = "total_number_bookmark";
 	public static final String NUM_OF_TAGS = "total_number_tag";
 	
 	public static final String GNIZR_USER = "gnizr";
 	
-	public static final String ID_COL =  ".id";
-	public static final String USERNAME_COL =  ".username";
-	public static final String PASSWORD_COL =  ".password";
-	public static final String FULLNAME_COL = ".fullname";
-	public static final String CREATED_ON_COL =  ".created_on";
-	public static final String ACCT_STATUS_COL =  ".acct_status";
-	public static final String EMAIL_COL = ".email";
+	public static final String ID_COL =  "id";
+	public static final String USERNAME_COL =  "username";
+	public static final String PASSWORD_COL =  "password";
+	public static final String FULLNAME_COL = "fullname";
+	public static final String CREATED_ON_COL =  "created_on";
+	public static final String ACCT_STATUS_COL =  "acct_status";
+	public static final String EMAIL_COL = "email";
 	
 }
