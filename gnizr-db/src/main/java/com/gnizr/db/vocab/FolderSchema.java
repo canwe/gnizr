@@ -19,10 +19,10 @@ package com.gnizr.db.vocab;
 public interface FolderSchema {
 
 	public static final String TABLE_NAME = "folder";
-	public static final String ID = TABLE_NAME + ".id";
-	public static final String FOLDER_NAME = TABLE_NAME + ".folder_name";
-	public static final String OWNER_ID = TABLE_NAME +".owner_id";
-	public static final String DESCRIPTION = TABLE_NAME + ".description";
-	public static final String LAST_UPDATED = TABLE_NAME + ".last_updated";
+	public static final String ID = TABLE_NAME + "_id";
+	public static final String FOLDER_NAME = "folder_name";
+	public static final String OWNER_ID = "owner_id";
+	public static final String DESCRIPTION = "description";
+	public static final String LAST_UPDATED = "last_updated";
 	public static final String SIZE = "folder_size";
 }

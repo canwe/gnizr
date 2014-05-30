@@ -111,7 +111,7 @@ public class EditUserFolder extends AbstractAction implements LoggedInUserAware{
 				return ERROR;
 			}
 		}
-		if(isOkay == false){
+		if(!isOkay){
 			addActionMessage(DUPLICATED_FOLDER_NAME);
 			return INPUT;
 		}
@@ -123,7 +123,7 @@ public class EditUserFolder extends AbstractAction implements LoggedInUserAware{
 		if(folderName != null){
 			isOkay = folderManager.deleteUserFolder(loggedInUser, folderName);
 		}
-		if(isOkay == false){
+		if(!isOkay){
 			addActionMessage(DEL_FOLDER_FAILED);
 			return INPUT;
 		}

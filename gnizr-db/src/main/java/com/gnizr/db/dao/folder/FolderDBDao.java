@@ -46,26 +46,27 @@ import com.gnizr.db.dao.user.UserDBDao;
 import com.gnizr.db.vocab.FolderSchema;
 import com.gnizr.db.vocab.FolderTagSchema;
 
-public class FolderDBDao implements FolderDao{
+@SuppressWarnings("JpaQueryApiInspection")
+public class FolderDBDao implements FolderDao {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 8291307434207262302L;
 
 	private static final Logger logger = Logger.getLogger(FolderDBDao.class);
 	private static final String MEMBER_TAG_COL = "mem_tag";
 	private static final String GROUP_TAG_COL = "grp_tag";
-	private static final String FOLDER_TAG_IDX_COL = "fti"; 
-	
+	private static final String FOLDER_TAG_IDX_COL = "fti";
+
 	private DataSource dataSource;
-	
-	public FolderDBDao(DataSource ds){
+
+	public FolderDBDao(DataSource ds) {
 		this.dataSource = ds;
 	}
-	
+
 	public boolean[] addBookmarks(Folder folder, List<Bookmark> bookmarks, Date timestamp) {
-		logger.debug("addBookmarks: folder="+folder+",bookmarks="+bookmarks);
+		logger.debug("addBookmarks: folder=" + folder + ",bookmarks=" + bookmarks);
 		Connection conn = null;
 		CallableStatement cStmt = null;
 		boolean[] opOkay = new boolean[bookmarks.size()];
@@ -73,23 +74,23 @@ public class FolderDBDao implements FolderDao{
 			conn = dataSource.getConnection();
 			cStmt = conn.prepareCall("{call addBookmarkToFolder(?,?,?)};");
 			Timestamp tsmp = new Timestamp(timestamp.getTime());
-			for(Bookmark bm : bookmarks){
-				cStmt.setInt(1,folder.getId());
-				cStmt.setInt(2,bm.getId());
-				cStmt.setTimestamp(3,tsmp);
-				cStmt.addBatch();				
-			}			
+			for (Bookmark bm : bookmarks) {
+				cStmt.setInt(1, folder.getId());
+				cStmt.setInt(2, bm.getId());
+				cStmt.setTimestamp(3, tsmp);
+				cStmt.addBatch();
+			}
 			int result[] = cStmt.executeBatch();
-			for(int i = 0; i < result.length; i++){
-				if(result[i] >= 0 ){
+			for (int i = 0; i < result.length; i++) {
+				if (result[i] >= 0) {
 					opOkay[i] = true;
-				}else{
+				} else {
 					opOkay[i] = false;
 				}
-			}		
+			}
 		} catch (SQLException e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, cStmt);
 			} catch (SQLException e) {
@@ -106,17 +107,16 @@ public class FolderDBDao implements FolderDao{
 		int id = -1;
 		try {
 			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("{call createFolder(?,?,?,?,?)}");
-			cStmt.setInt(1,folder.getUser().getId());
-			cStmt.setString(2,folder.getName());
-			cStmt.setString(3,folder.getDescription());
-			cStmt.setTimestamp(4,new Timestamp(folder.getLastUpdated().getTime()));
-			cStmt.registerOutParameter(5,Types.INTEGER);
-			cStmt.execute();
-			id = cStmt.getInt(5);
+			cStmt = conn.prepareCall("select * from createFolder(?,?,?,?)");
+			cStmt.setInt(1, folder.getUser().getId());
+			cStmt.setString(2, folder.getName());
+			cStmt.setString(3, folder.getDescription());
+			cStmt.setTimestamp(4, new Timestamp(folder.getLastUpdated().getTime()));
+			ResultSet rs = cStmt.executeQuery();
+			id = rs.next() ? rs.getInt(1) : id;
 		} catch (Exception e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, cStmt);
 			} catch (SQLException e) {
@@ -127,22 +127,22 @@ public class FolderDBDao implements FolderDao{
 	}
 
 	public boolean deleteFolder(User owner, String folderName) {
-		logger.debug("deleteFolder: owner=" + owner+",folderName="+folderName);
+		logger.debug("deleteFolder: owner=" + owner + ",folderName=" + folderName);
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		boolean deleted = false;
 		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareStatement("call deleteFolderByOwnerIdFolderName(?,?)");
-			stmt.setInt(1,owner.getId());
-			stmt.setString(2,folderName);
-			if(stmt.executeUpdate() > 0){
+			stmt.setInt(1, owner.getId());
+			stmt.setString(2, folderName);
+			if (stmt.executeUpdate() > 0) {
 				logger.debug("# row deleted=" + stmt.getUpdateCount());
 				deleted = true;
 			}
 		} catch (SQLException e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
@@ -151,50 +151,51 @@ public class FolderDBDao implements FolderDao{
 		}
 		return deleted;
 	}
-	
-	public static Folder createFolderObject(ResultSet rs) throws SQLException{
-		if(rs == null) return null;
+
+	public static Folder createFolderObject(ResultSet rs) throws SQLException {
+		if (rs == null) return null;
 		Folder folder = new Folder();
 		folder.setId(rs.getInt(FolderSchema.ID));
 		folder.setName(rs.getString(FolderSchema.FOLDER_NAME));
 		folder.setDescription(rs.getString(FolderSchema.DESCRIPTION));
 		folder.setLastUpdated(rs.getTimestamp(FolderSchema.LAST_UPDATED));
 		folder.setSize(rs.getInt(FolderSchema.SIZE));
-		User user = UserDBDao.createUserObject("owner",rs);
+		User user = UserDBDao.createUserObject("owner", rs);
 		folder.setUser(user);
-		
-		return folder;		
+
+		return folder;
 	}
-	
+
 	public DaoResult<Folder> pageFolders(User owner, int offset, int count) {
-		logger.debug("pageFolders: owner="+owner + ",offset="+offset+",count="+count);		
+		logger.debug("pageFolders: owner=" + owner + ",offset=" + offset + ",count=" + count);
 		List<Folder> folders = new ArrayList<Folder>();
 		DaoResult<Folder> result = null;
 		CallableStatement cStmt = null;
 		Connection conn = null;
-		try{						
+		try {
 			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("call pageFoldersByOwnerId(?,?,?,?);");
-			cStmt.setInt(1,owner.getId());
-			cStmt.setInt(2,offset);
-			cStmt.setInt(3,count);
-			cStmt.registerOutParameter(4,Types.INTEGER);
+			cStmt = conn.prepareCall("select * from pageFoldersByOwnerId(?,?,?,?)");
+			cStmt.setInt(1, owner.getId());
+			cStmt.setInt(2, offset);
+			cStmt.setInt(3, count);
+			cStmt.registerOutParameter(4, Types.INTEGER);
 			ResultSet rs = cStmt.executeQuery();
-			while(rs.next()){
-				Folder folder = createFolderObject(rs);				
+			int size = 0;
+			while (rs.next()) {
+				Folder folder = createFolderObject(rs);
 				folders.add(folder);
+				size = rs.getInt("totalCount");
 			}
-			int size = cStmt.getInt(4);
-			if(size < 0){
+			if (size < 0) {
 				size = 0;
 			}
-			result = new DaoResult<Folder>(folders,size);
-			logger.debug("DaoResult: folders="+folders+",size="+size);
-		}catch(Exception e){		
+			result = new DaoResult<Folder>(folders, size);
+			logger.debug("DaoResult: folders=" + folders + ",size=" + size);
+		} catch (Exception e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,cStmt);
+				DBUtil.cleanup(conn, cStmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -203,26 +204,26 @@ public class FolderDBDao implements FolderDao{
 	}
 
 	public Folder getFolder(int id) {
-		logger.debug("getFolder: id="+id);
+		logger.debug("getFolder: id=" + id);
 		Folder folder = null;
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{						
+		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call getFolderById(?);");
-			stmt.setInt(1,id);
+			stmt = conn.prepareStatement("select * from getFolderById(?) as f(folder_id integer, folder_name varchar, owner_id integer, description text, last_updated timestamp with time zone, id integer, username varchar, password varchar, fullname varchar, created_on timestamp with time zone, email varchar, acct_status integer, folder_size integer)");
+			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
-			if(rs.next()){
+			if (rs.next()) {
 				folder = createFolderObject(rs);
 				logger.debug("found: " + folder);
-			}else{
+			} else {
 				logger.debug("found no matching folder");
 			}
-		}catch(Exception e){		
+		} catch (Exception e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -231,27 +232,27 @@ public class FolderDBDao implements FolderDao{
 	}
 
 	public Folder getFolder(User owner, String folderName) {
-		logger.debug("getFolder: owner="+owner + ",folderName="+folderName);
+		logger.debug("getFolder: owner=" + owner + ",folderName=" + folderName);
 		Folder folder = null;
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{						
+		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call getFolderByOwnerIdFolderName(?,?);");
-			stmt.setInt(1,owner.getId());
-			stmt.setString(2,folderName);
+			stmt = conn.prepareStatement("select * from getFolderByOwnerIdFolderName(?,?) as f(folder_id integer, folder_name varchar, owner_id integer, description text, last_updated timestamp with time zone, user_id integer, username varchar, password varchar, fullname varchar, created_on timestamp with time zone, email varchar, acct_status integer, folder_size integer)");
+			stmt.setInt(1, owner.getId());
+			stmt.setString(2, folderName);
 			ResultSet rs = stmt.executeQuery();
-			if(rs.next()){
+			if (rs.next()) {
 				folder = createFolderObject(rs);
 				logger.debug("found: " + folder);
-			}else{
+			} else {
 				logger.debug("found no matching folder");
 			}
-		}catch(Exception e){		
+		} catch (Exception e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -260,21 +261,21 @@ public class FolderDBDao implements FolderDao{
 	}
 
 	public int removeAllBookmarks(Folder folder) {
-		logger.debug("removeAllBookmarks: folder="+folder);
+		logger.debug("removeAllBookmarks: folder=" + folder);
 		Connection conn = null;
 		CallableStatement cstmt = null;
 		int upCnt = 0;
 		try {
 			conn = dataSource.getConnection();
 			cstmt = conn.prepareCall("call removeAllBookmarksFromFolder(?)");
-			cstmt.setInt(1,folder.getId());
+			cstmt.setInt(1, folder.getId());
 			ResultSet rs = cstmt.executeQuery();
-			if(rs.next()){
+			if (rs.next()) {
 				upCnt = rs.getInt(1);
 			}
-		}catch(SQLException e){
-			logger.fatal(e);			
-		}finally{
+		} catch (SQLException e) {
+			logger.fatal(e);
+		} finally {
 			try {
 				DBUtil.cleanup(conn, cstmt);
 			} catch (SQLException e) {
@@ -285,30 +286,30 @@ public class FolderDBDao implements FolderDao{
 	}
 
 	public boolean[] removeBookmarks(Folder folder, List<Bookmark> bookmarks) {
-		logger.debug("removeBookmarkFromFolder: folder="+folder + ",boomarks="+bookmarks);
+		logger.debug("removeBookmarkFromFolder: folder=" + folder + ",boomarks=" + bookmarks);
 		Connection conn = null;
 		CallableStatement cstmt = null;
 		boolean[] opOkay = new boolean[bookmarks.size()];
 		try {
 			conn = dataSource.getConnection();
 			cstmt = conn.prepareCall("call removeBookmarkFromFolder(?,?)");
-			int folderId = folder.getId();		
-			for(Bookmark bm : bookmarks){
-				cstmt.setInt(1,folderId);
-				cstmt.setInt(2,bm.getId());				
+			int folderId = folder.getId();
+			for (Bookmark bm : bookmarks) {
+				cstmt.setInt(1, folderId);
+				cstmt.setInt(2, bm.getId());
 				cstmt.addBatch();
 			}
 			int result[] = cstmt.executeBatch();
-			for(int i = 0; i < result.length; i++){
-				if(result[i] >= 0){
+			for (int i = 0; i < result.length; i++) {
+				if (result[i] >= 0) {
 					opOkay[i] = true;
-				}else{
+				} else {
 					opOkay[i] = false;
 				}
 			}
 		} catch (SQLException e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, cstmt);
 			} catch (SQLException e) {
@@ -325,64 +326,64 @@ public class FolderDBDao implements FolderDao{
 		boolean isChanged = false;
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call updateFolder(?,?,?,?,?)");
-			stmt.setInt(1,folder.getId());
-			stmt.setInt(2,folder.getUser().getId());
-			stmt.setString(3,folder.getName());
-			stmt.setString(4,folder.getDescription());			
+			stmt = conn.prepareCall("{call updateFolder(?,?,?,?,?)}");
+			stmt.setInt(1, folder.getId());
+			stmt.setInt(2, folder.getUser().getId());
+			stmt.setString(3, folder.getName());
+			stmt.setString(4, folder.getDescription());
 			stmt.setTimestamp(5, new Timestamp(folder.getLastUpdated().getTime()));
 			stmt.execute();
-			if(stmt.getUpdateCount()>0){
-				logger.debug("updateCount="+stmt.getUpdateCount());
+			if (stmt.getUpdateCount() > 0) {
+				logger.debug("updateCount=" + stmt.getUpdateCount());
 				isChanged = true;
 			}
 			stmt.getResultSet();
 		} catch (SQLException e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
-		}		
+		}
 		return isChanged;
 	}
 
 	public DaoResult<Bookmark> pageBookmarks(Folder folder, int offset, int count) {
-		logger.debug("pageBookmarks: folder="+folder + ",offset="+offset+",count="+count);		
-		return pageBookmarks(folder, offset, count, FolderDao.SORT_BY_BMRK_FLDR_LAST_UPDATED,FolderDao.DESCENDING);
+		logger.debug("pageBookmarks: folder=" + folder + ",offset=" + offset + ",count=" + count);
+		return pageBookmarks(folder, offset, count, FolderDao.SORT_BY_BMRK_FLDR_LAST_UPDATED, FolderDao.DESCENDING);
 	}
 
 	public DaoResult<Folder> pageContainedInFolders(Bookmark bookmark, int offset, int count) {
-		logger.debug("pageContainedInFolders: bookmark="+bookmark + ",offset="+offset+",count="+count);		
+		logger.debug("pageContainedInFolders: bookmark=" + bookmark + ",offset=" + offset + ",count=" + count);
 		List<Folder> folders = new ArrayList<Folder>();
 		DaoResult<Folder> result = null;
 		CallableStatement cStmt = null;
 		Connection conn = null;
-		try{						
+		try {
 			conn = dataSource.getConnection();
 			cStmt = conn.prepareCall("call pageContainedInFolders(?,?,?,?);");
-			cStmt.setInt(1,bookmark.getId());
-			cStmt.setInt(2,offset);
-			cStmt.setInt(3,count);
-			cStmt.registerOutParameter(4,Types.INTEGER);			
+			cStmt.setInt(1, bookmark.getId());
+			cStmt.setInt(2, offset);
+			cStmt.setInt(3, count);
+			cStmt.registerOutParameter(4, Types.INTEGER);
 			ResultSet rs = cStmt.executeQuery();
 			int size = cStmt.getInt(4);
-			if(size < 0){
+			if (size < 0) {
 				size = 0;
-			}	
-			while(rs.next()){
-				Folder aFolder = createFolderObject(rs);				
+			}
+			while (rs.next()) {
+				Folder aFolder = createFolderObject(rs);
 				folders.add(aFolder);
 			}
-			result = new DaoResult<Folder>(folders,size);
-			logger.debug("DaoResult: folders="+folders+",size="+size);
-		}catch(Exception e){		
+			result = new DaoResult<Folder>(folders, size);
+			logger.debug("DaoResult: folders=" + folders + ",size=" + size);
+		} catch (Exception e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,cStmt);
+				DBUtil.cleanup(conn, cStmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -391,7 +392,7 @@ public class FolderDBDao implements FolderDao{
 	}
 
 	public DaoResult<Bookmark> pageBookmarks(Folder folder, Tag tag, int offset, int count) {
-		logger.debug("pageBookmarks: folder="+folder + ", tag=" + tag +",offset="+offset+",count="+count);		
+		logger.debug("pageBookmarks: folder=" + folder + ", tag=" + tag + ",offset=" + offset + ",count=" + count);
 		return pageBookmarks(folder, tag, offset, count, FolderDao.SORT_BY_BMRK_FLDR_LAST_UPDATED, FolderDao.DESCENDING);
 	}
 
@@ -400,31 +401,31 @@ public class FolderDBDao implements FolderDao{
 		DaoResult<Bookmark> result = null;
 		CallableStatement cStmt = null;
 		Connection conn = null;
-		try{						
+		try {
 			conn = dataSource.getConnection();
 			cStmt = conn.prepareCall("call pageBookmarksByFolderId(?,?,?,?,?,?);");
-			cStmt.setInt(1,folder.getId());
-			cStmt.setInt(2,offset);
-			cStmt.setInt(3,count);
-			cStmt.registerOutParameter(4,Types.INTEGER);			
-			cStmt.setInt(5,sortBy);
-			cStmt.setInt(6,order);
+			cStmt.setInt(1, folder.getId());
+			cStmt.setInt(2, offset);
+			cStmt.setInt(3, count);
+			cStmt.registerOutParameter(4, Types.INTEGER);
+			cStmt.setInt(5, sortBy);
+			cStmt.setInt(6, order);
 			ResultSet rs = cStmt.executeQuery();
 			int size = cStmt.getInt(4);
-			if(size < 0){
+			if (size < 0) {
 				size = 0;
-			}	
-			while(rs.next()){
-				Bookmark bookmark = BookmarkDBDao.createBookmarkObject2(rs);				
+			}
+			while (rs.next()) {
+				Bookmark bookmark = BookmarkDBDao.createBookmarkObject2(rs);
 				bmarks.add(bookmark);
 			}
-			result = new DaoResult<Bookmark>(bmarks,size);
-			logger.debug("DaoResult: bookmarks="+bmarks+",size="+size);
-		}catch(Exception e){		
+			result = new DaoResult<Bookmark>(bmarks, size);
+			logger.debug("DaoResult: bookmarks=" + bmarks + ",size=" + size);
+		} catch (Exception e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,cStmt);
+				DBUtil.cleanup(conn, cStmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -437,56 +438,56 @@ public class FolderDBDao implements FolderDao{
 		DaoResult<Bookmark> result = null;
 		CallableStatement cStmt = null;
 		Connection conn = null;
-		try{						
+		try {
 			conn = dataSource.getConnection();
 			cStmt = conn.prepareCall("call pageBookmarksByFolderIdTagId(?,?,?,?,?,?,?);");
-			cStmt.setInt(1,folder.getId());
-			cStmt.setInt(2,tag.getId());
-			cStmt.setInt(3,offset);
-			cStmt.setInt(4,count);
-			cStmt.registerOutParameter(5,Types.INTEGER);			
-			cStmt.setInt(6,sortBy);
-			cStmt.setInt(7,order);
+			cStmt.setInt(1, folder.getId());
+			cStmt.setInt(2, tag.getId());
+			cStmt.setInt(3, offset);
+			cStmt.setInt(4, count);
+			cStmt.registerOutParameter(5, Types.INTEGER);
+			cStmt.setInt(6, sortBy);
+			cStmt.setInt(7, order);
 			ResultSet rs = cStmt.executeQuery();
 			int size = cStmt.getInt(5);
-			if(size < 0){
+			if (size < 0) {
 				size = 0;
-			}	
-			while(rs.next()){
-				Bookmark bookmark = BookmarkDBDao.createBookmarkObject2(rs);				
+			}
+			while (rs.next()) {
+				Bookmark bookmark = BookmarkDBDao.createBookmarkObject2(rs);
 				bmarks.add(bookmark);
 			}
-			result = new DaoResult<Bookmark>(bmarks,size);
-			logger.debug("DaoResult: bookmarks="+bmarks+",size="+size);
-		}catch(Exception e){		
+			result = new DaoResult<Bookmark>(bmarks, size);
+			logger.debug("DaoResult: bookmarks=" + bmarks + ",size=" + size);
+		} catch (Exception e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,cStmt);
+				DBUtil.cleanup(conn, cStmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
 		}
 		return result;
 	}
-	
-	public boolean hasFolderTag(Folder folder, Tag tag){
-		logger.debug("hasFolderTag: folder=" + folder+",tag="+tag);
+
+	public boolean hasFolderTag(Folder folder, Tag tag) {
+		logger.debug("hasFolderTag: folder=" + folder + ",tag=" + tag);
 		Connection conn = null;
-		CallableStatement cStmt = null;		
+		CallableStatement cStmt = null;
 		boolean exists = false;
 		try {
 			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("{call hasFolderTag(?,?)}");
-			cStmt.setInt(1,folder.getId());
-			cStmt.setInt(2,tag.getId());
-			ResultSet rs = cStmt.executeQuery();			
-			if(rs.next()){
+			cStmt = conn.prepareCall("select * from hasFolderTag(?,?)");
+			cStmt.setInt(1, folder.getId());
+			cStmt.setInt(2, tag.getId());
+			ResultSet rs = cStmt.executeQuery();
+			if (rs.next()) {
 				exists = true;
 			}
 		} catch (Exception e) {
-			logger.fatal(e);			
-		} finally{
+			logger.fatal(e);
+		} finally {
 			try {
 				DBUtil.cleanup(conn, cStmt);
 			} catch (SQLException e) {
@@ -495,93 +496,93 @@ public class FolderDBDao implements FolderDao{
 		}
 		return exists;
 	}
-	
+
 	public List<FolderTag> findTagsInFolder(Folder folder, int minFreq, int sortBy, int order) {
-		logger.debug("findTagsInFolder: folder="+folder + ",minFreq=" + minFreq+",sortBy="+sortBy+",order="+order);		
+		logger.debug("findTagsInFolder: folder=" + folder + ",minFreq=" + minFreq + ",sortBy=" + sortBy + ",order=" + order);
 		List<FolderTag> folderTags = new ArrayList<FolderTag>();
 		CallableStatement cStmt = null;
 		Connection conn = null;
-		try{						
+		try {
 			conn = dataSource.getConnection();
 			cStmt = conn.prepareCall("call findAllTagsInFolder(?,?,?,?);");
-			cStmt.setInt(1,folder.getId());
-			cStmt.setInt(2,minFreq);
-			cStmt.setInt(3,sortBy);
-			cStmt.setInt(4,order);			
+			cStmt.setInt(1, folder.getId());
+			cStmt.setInt(2, minFreq);
+			cStmt.setInt(3, sortBy);
+			cStmt.setInt(4, order);
 			ResultSet rs = cStmt.executeQuery();
-			while(rs.next()){
+			while (rs.next()) {
 				FolderTag ft = new FolderTag();
 				Tag t = TagDBDao.createTagObject(rs);
 				ft.setTag(t);
 				ft.setCount(rs.getInt(FolderTagSchema.COUNT));
 				folderTags.add(ft);
 			}
-			if(folderTags.isEmpty() == false){
-				setFolderOnFolderTags(folderTags,folder);
-			}			
-		}catch(Exception e){		
+			if (folderTags.isEmpty() == false) {
+				setFolderOnFolderTags(folderTags, folder);
+			}
+		} catch (Exception e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,cStmt);
+				DBUtil.cleanup(conn, cStmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
 		}
 		return folderTags;
 	}
-	
-	private void setFolderOnFolderTags(List<FolderTag> folderTags, Folder f){
-		logger.debug("setFolderOnFolderTags: folderTags=" + folderTags + ",folder="+f);
+
+	private void setFolderOnFolderTags(List<FolderTag> folderTags, Folder f) {
+		logger.debug("setFolderOnFolderTags: folderTags=" + folderTags + ",folder=" + f);
 		Folder folder = getFolder(f.getId());
-		if(folder != null){
-			for(FolderTag ft : folderTags){
+		if (folder != null) {
+			for (FolderTag ft : folderTags) {
 				ft.setFolder(new Folder(folder));
 			}
 		}
 	}
 
 	public Map<String, List<FolderTag>> listTagGroups(Folder folder, int minFreq, int sortBy, int order) {
-		logger.debug("listTagGroups: folder="+folder + ",minFreq=" + minFreq+",sortBy="+sortBy+",order="+order);		
+		logger.debug("listTagGroups: folder=" + folder + ",minFreq=" + minFreq + ",sortBy=" + sortBy + ",order=" + order);
 		Map<String, List<FolderTag>> tagGroups = new HashMap<String, List<FolderTag>>();
 		CallableStatement cStmt = null;
 		Connection conn = null;
-		try{						
+		try {
 			conn = dataSource.getConnection();
 			cStmt = conn.prepareCall("call findTagGroupsInFolder(?,?,?,?);");
-			cStmt.setInt(1,folder.getId());
-			cStmt.setInt(2,minFreq);
-			cStmt.setInt(3,sortBy);
-			cStmt.setInt(4,order);			
+			cStmt.setInt(1, folder.getId());
+			cStmt.setInt(2, minFreq);
+			cStmt.setInt(3, sortBy);
+			cStmt.setInt(4, order);
 			ResultSet rs = cStmt.executeQuery();
-			while(rs.next()){
+			while (rs.next()) {
 				FolderTag ft = new FolderTag();
 				Tag memTag = TagDBDao.createNamedTagObject(MEMBER_TAG_COL, rs, true);
 				Tag grpTag = TagDBDao.createNamedTagObject(GROUP_TAG_COL, rs, true);
 				ft.setTag(memTag);
-				ft.setCount(rs.getInt(FOLDER_TAG_IDX_COL+"_count"));
+				ft.setCount(rs.getInt(FOLDER_TAG_IDX_COL + "_count"));
 				List<FolderTag> folderTags = tagGroups.get(grpTag.getLabel());
-				if(folderTags == null){
+				if (folderTags == null) {
 					folderTags = new ArrayList<FolderTag>();
-					tagGroups.put(grpTag.getLabel(),folderTags);
+					tagGroups.put(grpTag.getLabel(), folderTags);
 				}
 				folderTags.add(ft);
 			}
-			if(tagGroups.isEmpty() == false){
-				for(List<FolderTag> ftags: tagGroups.values()){
-					setFolderOnFolderTags(ftags,folder);
+			if (tagGroups.isEmpty() == false) {
+				for (List<FolderTag> ftags : tagGroups.values()) {
+					setFolderOnFolderTags(ftags, folder);
 				}
-			}			
-		}catch(Exception e){		
+			}
+		} catch (Exception e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,cStmt);
+				DBUtil.cleanup(conn, cStmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
 		}
 		return tagGroups;
 	}
-	
+
 }

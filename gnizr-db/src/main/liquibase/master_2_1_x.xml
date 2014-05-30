@@ -497,16 +497,14 @@
             CREATE OR REPLACE FUNCTION pageForUserBySenderId(IN userId integer,
                                                              IN senderId integer,
                                                              IN off integer,
-                                                             IN count integer) RETURNS integer AS $c$
+                                                             IN cnt integer) RETURNS integer AS $c$
             DECLARE
-            totalCount integer;
+              totalCount integer;
             BEGIN
               SELECT COUNT(*) INTO totalCount
-              FROM (SELECT *, bookmarkTags(bmk.id) AS tags, bookmarkInFolders(bmk.id) AS folders, linkCount(lnk.id) AS count
-                    FROM for_user as fu, bookmark as bmk, user as fuser, user as buser, link as lnk
-                    WHERE for_user.id IN (SELECT for_user.id FROM for_user as fuu, bookmark as bmkk WHERE fuu.for_user_id = userId AND fuu.bookmark_id = bmkk.id AND bmkk.user_id = senderId)
-                          AND fu.for_user_id = fuser.id AND fu.bookmark_id = bmk.id AND bmk.link_id = lnk.id AND bmk.user_id = buser.id
-                    ORDER BY for_user.created_on DESC) as FF;
+              FROM for_user as fu, bookmark as bmk, user as fuser, user as buser, link as lnk
+              WHERE fu.id IN (SELECT fuu.id FROM for_user as fuu, bookmark as bmkk WHERE fuu.for_user_id = userId AND fuu.bookmark_id = bmkk.id AND bmkk.user_id = senderId)
+                AND fu.for_user_id = fuser.id AND fu.bookmark_id = bmk.id AND bmk.link_id = lnk.id AND bmk.user_id = buser.id;
               RETURN totalCount;
             END;
             $c$ LANGUAGE plpgsql;

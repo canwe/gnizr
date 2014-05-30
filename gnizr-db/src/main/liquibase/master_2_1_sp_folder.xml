@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog logicalFilePath="classpath:/master_2_1_sp_folder.xml"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+
+    <changeSet id="sp-folder" author="vrebesbyrd@gmail.com">
+        <sql splitStatements="false">
+            ---------------------------------------------------------------
+            -- PROCEDURE: createFolder
+            CREATE OR REPLACE FUNCTION createFolder(IN userId integer, IN fname VARCHAR(45), IN descr TEXT, IN lu timestamp with time zone) RETURNS integer AS $c$
+            DECLARE
+              newid integer;
+            BEGIN
+              SELECT f.id INTO newid FROM folder as f WHERE f.owner_id = userId AND f.folder_name = fname;
+              INSERT INTO folder(owner_id,folder_name,description,last_updated) VALUES (userId,fname,descr,lu) RETURNING id INTO newid;
+              RETURN newid;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: updateFolder
+            CREATE OR REPLACE FUNCTION updateFolder(IN fid integer, IN ownerId integer, IN fName VARCHAR(45), IN descr TEXT, IN lu timestamp with time zone) RETURNS void AS $c$
+            BEGIN
+              UPDATE folder as f SET
+                f.owner_id = ownerId,
+                f.folder_name = fName,
+                f.description = descr,
+                f.last_updated = lu
+              WHERE f.id = fid;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: deleteFolderByOwnerIdFolderName
+            CREATE OR REPLACE FUNCTION deleteFolderByOwnerIdFolderName (IN ownerId integer, IN folderName VARCHAR(45)) RETURNS void AS $c$
+            BEGIN
+              DELETE FROM bookmark_folder as bf WHERE bf.folder_id in (SELECT f.id FROM folder as f WHERE f.owner_id = ownerId AND f.folder_name = folderName);
+              DELETE FROM folder as f WHERE f.owner_id = ownerId AND f.folder_name = folderName;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: getFolderById
+            CREATE OR REPLACE FUNCTION getFolderById (IN fid integer) RETURNS SETOF RECORD AS $c$
+            BEGIN
+              RETURN QUERY SELECT f.*, own.*, folderSize(f.id) as folder_size
+              FROM "user" AS own, folder as f
+              WHERE f.id = fid AND f.owner_id = own.id;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: getFolderByOwnerIdFolderName
+            CREATE OR REPLACE FUNCTION getFolderByOwnerIdFolderName (IN ownerId integer, IN folderName VARCHAR(45)) RETURNS SETOF RECORD AS $c$
+            BEGIN
+              RETURN QUERY SELECT f.*, own.*, folderSize(f.id) as folder_size
+              FROM "user" AS own, folder as f
+              WHERE f.owner_id = ownerId AND f.owner_id = own.id AND f.folder_name = folderName;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: pageFoldersByOwnerId
+            --CREATE OR REPLACE FUNCTION pageFoldersByOwnerId (IN ownerId integer, IN off integer, IN cnt integer) RETURNS SETOF RECORD AS $c$
+            --DECLARE
+            --  totalCount integer;
+            --BEGIN
+            --  SELECT COUNT(*) into totalCount
+            --  FROM folder as f, "user" AS own
+            --  WHERE f.owner_id = ownerId AND f.owner_id = own.id;
+
+            --  RETURN QUERY SELECT totalCount, *, folderSize(f.id) as folder_size
+            --  FROM folder as f, "user" AS own
+            --  WHERE f.owner_id = ownerId AND f.owner_id = own.id
+            --  ORDER BY f.folder_name
+            --  LIMIT cnt OFFSET off;
+            --END;
+            --$c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: pageBookmarksByFolderId
+            -- INPUT: folderId, offset, count
+            -- OUTPUT: totalCount
+            --CREATE OR REPLACE FUNCTION pageBookmarksByFolderId (IN folderId integer, IN offset integer, IN count integer, OUT totalCount integer, IN sortBy integer, IN orderFlag integer)
+            --BEGIN
+            --SET @offset = offset;
+            --SET @count = count;
+            --SET @folderId = folderId;
+            --SET @qry = CONCAT("
+            --SELECT SQL_CALC_FOUND_ROWS *, bookmarkTags(bookmark.id) AS tags,
+            --bookmarkInFolders(bookmark.id) AS folders,
+            --linkCount(link.id) AS count
+            --FROM link, "user", bookmark, bookmark_folder
+            --WHERE bookmark_folder.folder_id = ? AND
+            --bookmark_folder.bookmark_id = bookmark.id AND
+            --bookmark.link_id = link.id AND
+            --bookmark.user_id = user.id
+            --");
+
+            --IF (sortBy = 1) THEN
+            --SET @qry = CONCAT(@qry," ORDER BY bookmark.created_on ");
+            --ELSEIF (sortBy = 2) THEN
+            --SET @qry = CONCAT(@qry," ORDER BY bookmark.last_updated ");
+            --ELSE
+            --SET @qry = CONCAT(@qry," ORDER BY bookmark_folder.last_updated ");
+            --END IF;
+
+            --IF(orderFlag = 1) THEN
+            --SET @qry = CONCAT(@qry, " DESC LIMIT ?,?");
+            --ELSE
+            --SET @qry = CONCAT(@qry, " ASC LIMIT ?,?");
+            --END IF;
+
+            --PREPARE STMT FROM @qry;
+            --EXECUTE STMT USING @folderId, @offset, @count;
+            --SELECT FOUND_ROWS() INTO totalCount;
+            --END;
+            --$c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: pageBookmarksByFolderIdTagId
+            -- INPUT: folderId, offset, count, sortBy, orderFlag
+            -- OUTPUT: totalCount
+            --CREATE OR REPLACE FUNCTION pageBookmarksByFolderIdTagId(IN folderId integer,
+            --IN tagId integer,
+            --IN offset integer,
+            --IN count integer,
+            --OUT totalCount integer,
+            --IN sortBy integer,
+            --IN orderFlag integer)
+            --BEGIN
+            --SET @offset = offset;
+            --SET @count = count;
+            --SET @folderId = folderId;
+            --SET @tagId = tagId;
+            --SET @qry = CONCAT("
+            --SELECT SQL_CALC_FOUND_ROWS *, bookmarkTags(bookmark.id) AS tags,
+            --bookmarkInFolders(bookmark.id) AS folders,
+            --linkCount(link.id) AS count
+            --FROM link, user, bookmark, bookmark_folder, bookmark_tag_idx
+            --WHERE bookmark_folder.folder_id = ? AND
+            --bookmark_folder.bookmark_id = bookmark.id AND
+            --bookmark_tag_idx.tag_id = ? AND
+            --bookmark_tag_idx.count > 0 AND
+            --bookmark_tag_idx.bookmark_id = bookmark.id AND
+            --bookmark.link_id = link.id AND
+            --bookmark.user_id = user.id
+            --");
+
+            --IF (sortBy = 1) THEN
+            --SET @qry = CONCAT(@qry," ORDER BY bookmark.created_on ");
+            --ELSEIF (sortBy = 2) THEN
+            --SET @qry = CONCAT(@qry," ORDER BY bookmark.last_updated ");
+            --ELSE
+            --SET @qry = CONCAT(@qry," ORDER BY bookmark_folder.last_updated ");
+            --END IF;
+
+            --IF(orderFlag = 1) THEN
+            --SET @qry = CONCAT(@qry, " DESC LIMIT ?,?");
+            --ELSE
+            --SET @qry = CONCAT(@qry, " ASC LIMIT ?,?");
+            --END IF;
+            --PREPARE STMT FROM @qry;
+            --EXECUTE STMT USING @folderId, @tagId, @offset, @count;
+            --SELECT FOUND_ROWS() INTO totalCount;
+            --END;
+            --$c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: addBookmarkToFolder
+            -- INPUT: folderId,bookmarkId,lastUpdated
+            -- OUTPUT: NONE
+            --CREATE OR REPLACE FUNCTION addBookmarkToFolder(IN folderId integer,
+            --IN bookmarkId integer,
+            --IN lastUpdated timestamp with time zone)
+            --BEGIN
+            --DECLARE `Constraint Violation` CONDITION FOR SQLSTATE '23000';
+            --DECLARE EXIT HANDLER FOR `Constraint Violation` ROLLBACK;
+
+            --START TRANSACTION;
+            --INSERT INTO bookmark_folder(folder_id,bookmark_id,last_updated)
+            --VALUES (folderId,bookmarkId,lastUpdated);
+
+            --- initialize records that don't exsit in the table.
+            --INSERT INTO folder_tag_idx(folder_id,tag_id,count)
+            --SELECT folderId, bookmark_tag_idx.tag_id, 0 FROM bookmark_tag_idx
+            --WHERE bookmark_tag_idx.bookmark_id = bookmarkId AND
+            --bookmark_tag_idx.tag_id NOT IN (
+            --SELECT folder_tag_idx.tag_id FROM folder_tag_idx
+            --WHERE folder_tag_idx.folder_id = folderId);
+
+            --UPDATE folder_tag_idx
+            --SET folder_tag_idx.count = folder_tag_idx.count + 1
+            --WHERE folder_tag_idx.folder_id = folderId AND
+            --folder_tag_idx.tag_id IN (
+            --SELECT bookmark_tag_idx.tag_id FROM bookmark_tag_idx
+            --WHERE bookmark_tag_idx.bookmark_id = bookmarkId AND
+            --bookmark_tag_idx.count > 0);
+            --COMMIT;
+            --END;
+            --$c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: removeBookmarkFromFolder
+            -- INPUT: folderId, bookmarkId
+            -- OUTPUT: NONE
+            --CREATE OR REPLACE FUNCTION removeBookmarkFromFolder(IN folderId integer,
+            --IN bookmarkId integer)
+            --BEGIN
+            --START TRANSACTION;
+            --DELETE FROM bookmark_folder WHERE
+            --bookmark_folder.folder_id = folderId AND
+            --bookmark_folder.bookmark_id = bookmarkId;
+
+            --IF (ROW_COUNT() > 0) THEN
+            --UPDATE folder_tag_idx
+            --SET folder_tag_idx.count = folder_tag_idx.count - 1
+            --WHERE folder_tag_idx.folder_id = folderId AND
+            --folder_tag_idx.count > 0 AND
+            --folder_tag_idx.tag_id IN (
+            --SELECT bookmark_tag_idx.tag_id FROM bookmark_tag_idx
+            --WHERE bookmark_tag_idx.bookmark_id = bookmarkId AND
+            --bookmark_tag_idx.count > 0 );
+            --END IF;
+            --COMMIT;
+            --END;
+            --$c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: removeAllBookmarksFromFolder
+            CREATE OR REPLACE FUNCTION removeAllBookmarksFromFolder(IN folderId integer) RETURNS void AS $c$
+            BEGIN
+              DELETE FROM folder_tag_idx as fti WHERE fti.folder_id = folderId;
+              DELETE FROM bookmark_folder as bf WHERE bf.folder_id = folderId;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: pageContainedInFolders
+            -- INPUT: bookmarkId,offset,count
+            -- OUTPUT: totalCount
+            --CREATE OR REPLACE FUNCTION pageContainedInFolders(IN bookmarkId integer,
+            --IN offset integer,
+            --IN count integer,
+            --OUT totalCount integer)
+            --BEGIN
+            --SET @offset = offset;
+            --SET @count = count;
+            --SET @bookmarkId = bookmarkId;
+            --PREPARE STMT FROM "
+            --SELECT SQL_CALC_FOUND_ROWS *, folderSize(folder.id) as folder_size
+            --FROM folder, user as own
+            --WHERE folder.id IN
+            --(SELECT bookmark_folder.folder_id
+            --FROM bookmark_folder WHERE
+            --bookmark_folder.bookmark_id = ?) AND
+            --folder.owner_id = own.id
+            --ORDER BY folder.folder_name
+            --LIMIT ?, ?;
+            --";
+            --EXECUTE STMT USING @bookmarkId, @offset, @count;
+            --SELECT FOUND_ROWS() INTO totalCount;
+            --END;
+            --$c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- FUNCTION: folderSize
+            CREATE OR REPLACE FUNCTION folderSize(folderId integer) RETURNS integer AS $c$
+            DECLARE
+              ssize integer;
+            BEGIN
+              SELECT count(*) INTO ssize
+              FROM bookmark_folder as bf
+              WHERE bf.folder_id = folderId;
+              RETURN ssize;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: hasFolderTag
+            CREATE OR REPLACE FUNCTION hasFolderTag(IN folderId integer, IN tagId integer) RETURNS SETOF folder_tag_idx AS $c$
+            BEGIN
+              RETURN QUERY SELECT *
+              FROM folder_tag_idx as fti
+              WHERE fti.folder_id = folderId AND fti.tag_id = tagId;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: findAllTagsInFolder
+            -- INPUT: folderId, sortBy, minFreq, orderFlag integer
+            -- OUTPUT:
+            --CREATE OR REPLACE FUNCTION findAllTagsInFolder(IN folderId integer,
+            --IN minFreq integer,
+            --IN sortBy integer,
+            --IN orderFlag integer)
+            --BEGIN
+            --SET @folderId = folderId;
+            --SET @minFreq = minFreq;
+            --SET @qry = CONCAT("
+            --SELECT * FROM tag, folder_tag_idx
+            --WHERE folder_tag_idx.folder_id = ? AND
+            --folder_tag_idx.tag_id = tag.id ");
+
+            --SET @qry = CONCAT(@qry, " AND folder_tag_idx.count >= ? ");
+
+            --- 1: sort alphabetically
+            --- 2: sort by usage freq
+            --IF (sortBy = 1) THEN
+            --SET @qry = CONCAT(@qry, " ORDER BY tag.tag ");
+            --ELSE
+            --SET @qry = CONCAT(@qry, " ORDER BY folder_tag_idx.count ");
+            --END IF;
+
+            --IF(orderFlag = 1) THEN
+            --SET @qry = CONCAT(@qry, " DESC ");
+            --ELSE
+            --SET @qry = CONCAT(@qry, " ASC ");
+            --END IF;
+            --PREPARE STMT FROM @qry;
+            --EXECUTE STMT USING @folderId, @minFreq;
+            --END;
+            --$c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: findTagGroupsInFolder
+            -- INPUT: folderId, minFreq, sortBy, orderFlag
+            -- OUTPUT:
+            --CREATE OR REPLACE FUNCTION findTagGroupsInFolder(IN folderId integer,
+            --IN minFreq integer,
+            --IN sortBy integer,
+            --IN orderFlag integer)
+            --BEGIN
+            --SET @folderId = folderId;
+            --SET @minFreq = minFreq;
+            --SET @qry = CONCAT("
+            --(SELECT mem_tag.id AS mem_tag_id, mem_tag.tag AS mem_tag_tag, mem_tag.count AS mem_tag_count,
+            --grp_tag.id AS grp_tag_id, grp_tag.tag AS grp_tag_tag, grp_tag.count AS grp_tag_count,
+            --fti.folder_id AS fti_folder_id, fti.tag_id AS fti_tag_id, fti.count AS fti_count
+            --FROM tag as mem_tag, tag as grp_tag,
+            --user_tag_idx as mem_tag_uti,
+            --user_tag_idx as grp_tag_uti,
+            --tag_assertion,
+            --folder_tag_idx AS fti
+            --WHERE tag_assertion.user_id=(SELECT folder.owner_id FROM folder where folder.id=?) AND
+            --tag_assertion.prpt_id=4 AND
+            --tag_assertion.object_id = grp_tag_uti.id AND
+            --tag_assertion.subject_id = mem_tag_uti.id AND
+            --grp_tag_uti.tag_id = grp_tag.id AND
+            --mem_tag_uti.tag_id = mem_tag.id AND
+            --fti.folder_id = ? AND
+            --fti.tag_id = mem_tag.id AND
+            --fti.count >= ? ) ");
+
+            --SET @qry = CONCAT(@qry, " UNION ");
+
+            --SET @qry = CONCAT(@qry, "
+            --(SELECT mem_tag.id, mem_tag.tag, mem_tag.count,
+            --grp_tag.id, grp_tag.tag, grp_tag.count,
+            --fti.folder_id, fti.tag_id, fti.count
+            --FROM tag AS mem_tag,
+            --(SELECT 0 AS id, '' AS tag, 0 AS count) AS grp_tag,
+            --folder_tag_idx AS fti
+            --WHERE fti.folder_id = ? AND
+            --fti.tag_id=mem_tag.id AND
+            --fti.count >= ? AND
+            --mem_tag.id NOT IN (SELECT user_tag_idx.tag_id
+            --FROM user_tag_idx, tag_assertion, folder
+            --WHERE folder.id=fti.folder_id AND
+            --folder.owner_id = tag_assertion.user_id AND
+            --tag_assertion.subject_id = user_tag_idx.id AND
+            --tag_assertion.prpt_id = 4)) ");
+
+            --- 1: sort alphabetically
+            --- 2: sort by usage freq
+            --IF (sortBy = 1) THEN
+            --SET @qry = CONCAT(@qry, " ORDER BY grp_tag_tag ASC, mem_tag_tag ");
+            --ELSE
+            --SET @qry = CONCAT(@qry, " ORDER BY grp_tag_tag ASC, fti_count ");
+            --END IF;
+
+            --IF(orderFlag = 1) THEN
+            --SET @qry = CONCAT(@qry, " DESC ");
+            --ELSE
+            --SET @qry = CONCAT(@qry, " ASC ");
+            --END IF;
+            --PREPARE STMT FROM @qry;
+            --EXECUTE STMT USING @folderId, @folderId, @minFreq, @folderId, @minFreq;
+            --END//
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: findTagsUsedInAnyFolder
+            --CREATE OR REPLACE FUNCTION findTagsUsedInAnyFolder(IN userId integer, IN sortBy integer, IN minFreq integer)
+            --BEGIN
+            --  SELECT *, SUM(fti.count) as totalCount
+            --  FROM tag as t, folder_tag_idx as fti
+            --  WHERE fti.folder_id IN (SELECT fld.id FROM folder as fld WHERE fld.owner_id = userId)
+            --    AND fti.tag_id = t.id
+            --  GROUP BY fti.tag_id;
+            --END;
+            --$c$ LANGUAGE plpgsql;
+
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
