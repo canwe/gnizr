@@ -60,7 +60,7 @@ public class UserDBDao implements UserDao {
 	}
 
 	public static User createUserObject(String tableAlias, ResultSet rs) throws SQLException {
-		return createNamedUserObject(tableAlias, rs, false);
+		return createNamedUserObject(tableAlias, rs, true);
 	}
 
 	public static User createNamedUserObject(String tableAlias, ResultSet rs, boolean noColumnRef) throws SQLException {

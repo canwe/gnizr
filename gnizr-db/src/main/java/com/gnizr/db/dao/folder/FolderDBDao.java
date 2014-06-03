@@ -160,7 +160,7 @@ public class FolderDBDao implements FolderDao {
 		folder.setDescription(rs.getString(FolderSchema.DESCRIPTION));
 		folder.setLastUpdated(rs.getTimestamp(FolderSchema.LAST_UPDATED));
 		folder.setSize(rs.getInt(FolderSchema.SIZE));
-		User user = UserDBDao.createUserObject("owner", rs);
+		User user = UserDBDao.createUserObject("user", rs);
 		folder.setUser(user);
 
 		return folder;
@@ -210,7 +210,7 @@ public class FolderDBDao implements FolderDao {
 		Connection conn = null;
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("select * from getFolderById(?) as f(folder_id integer, folder_name varchar, owner_id integer, description text, last_updated timestamp with time zone, id integer, username varchar, password varchar, fullname varchar, created_on timestamp with time zone, email varchar, acct_status integer, folder_size integer)");
+			stmt = conn.prepareStatement("select * from getFolderById(?) as f(folder_id integer, folder_name varchar, owner_id integer, description text, last_updated timestamp with time zone, user_id integer, user_username varchar, user_password varchar, user_fullname varchar, user_created_on timestamp with time zone, user_email varchar, user_acct_status integer, folder_size integer)");
 			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
@@ -238,7 +238,7 @@ public class FolderDBDao implements FolderDao {
 		Connection conn = null;
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("select * from getFolderByOwnerIdFolderName(?,?) as f(folder_id integer, folder_name varchar, owner_id integer, description text, last_updated timestamp with time zone, user_id integer, username varchar, password varchar, fullname varchar, created_on timestamp with time zone, email varchar, acct_status integer, folder_size integer)");
+			stmt = conn.prepareStatement("select * from getFolderByOwnerIdFolderName(?,?) as f(folder_id integer, folder_name varchar, owner_id integer, description text, last_updated timestamp with time zone, user_id integer, user_username varchar, user_password varchar, user_fullname varchar, user_created_on timestamp with time zone, user_email varchar, user_acct_status integer, folder_size integer)");
 			stmt.setInt(1, owner.getId());
 			stmt.setString(2, folderName);
 			ResultSet rs = stmt.executeQuery();
