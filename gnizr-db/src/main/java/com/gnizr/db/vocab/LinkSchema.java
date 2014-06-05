@@ -18,9 +18,9 @@ package com.gnizr.db.vocab;
 
 public interface LinkSchema {
 	public static final String TABLE_NAME = "link";
-	public static final String ID = TABLE_NAME + ".id";
-	public static final String MIME_TYPE_ID = TABLE_NAME + ".mime_type_id";
-	public static final String URL = TABLE_NAME + ".url";
-	public static final String URL_HASH = TABLE_NAME + ".url_hash";
-	public static final String COUNT =  "count";
+	public static final String ID = TABLE_NAME + "id";
+	public static final String MIME_TYPE_ID = TABLE_NAME + "mime_type_id";
+	public static final String URL = TABLE_NAME + "url";
+	public static final String URL_HASH = TABLE_NAME + "url_hash";
+	public static final String COUNT =  "cnt";
 }

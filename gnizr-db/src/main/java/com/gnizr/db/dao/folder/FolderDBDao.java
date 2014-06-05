@@ -174,11 +174,10 @@ public class FolderDBDao implements FolderDao {
 		Connection conn = null;
 		try {
 			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("select * from pageFoldersByOwnerId(?,?,?,?)");
+			cStmt = conn.prepareCall("select * from pageFoldersByOwnerId(?,?,?) as f(folder_id integer, folder_name varchar, owner_id integer, description text, last_updated timestamp with time zone, user_id integer, user_username varchar, user_password varchar, user_fullname varchar, user_created_on timestamp with time zone, user_email varchar, user_acct_status integer, folder_size integer, totalCount integer)");
 			cStmt.setInt(1, owner.getId());
 			cStmt.setInt(2, offset);
 			cStmt.setInt(3, count);
-			cStmt.registerOutParameter(4, Types.INTEGER);
 			ResultSet rs = cStmt.executeQuery();
 			int size = 0;
 			while (rs.next()) {
@@ -403,20 +402,19 @@ public class FolderDBDao implements FolderDao {
 		Connection conn = null;
 		try {
 			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("call pageBookmarksByFolderId(?,?,?,?,?,?);");
+			cStmt = conn.prepareCall("select * from pageBookmarksByFolderId(?,?,?,?,?) as f(bookmark_id integer, bookmark_user_id integer, bookmark_link_id integer, bookmark_title text, bookmark_notes text, bookmark_created_on timestamp with time zone, bookmark_last_updated timestamp with time zone, user_id integer, user_username varchar, user_password varchar, user_fullname varchar, user_created_on timestamp with time zone, user_email varchar, user_acct_status integer, link_id integer, link_mime_type_id integer, link_url text, link_url_hash varchar, bookmark_tags text, bookmark_folders text, link_cnt integer, totalCount integer)");
 			cStmt.setInt(1, folder.getId());
 			cStmt.setInt(2, offset);
 			cStmt.setInt(3, count);
-			cStmt.registerOutParameter(4, Types.INTEGER);
-			cStmt.setInt(5, sortBy);
-			cStmt.setInt(6, order);
+			cStmt.setInt(4, sortBy);
+			cStmt.setInt(5, order);
 			ResultSet rs = cStmt.executeQuery();
-			int size = cStmt.getInt(4);
-			if (size < 0) {
-				size = 0;
-			}
+			int size = 0;
 			while (rs.next()) {
-				Bookmark bookmark = BookmarkDBDao.createBookmarkObject2(rs);
+				if (size == 0) {
+					size = rs.getInt("totalCount");
+				}
+			    Bookmark bookmark = BookmarkDBDao.createBookmarkObject2(rs);
 				bmarks.add(bookmark);
 			}
 			result = new DaoResult<Bookmark>(bmarks, size);

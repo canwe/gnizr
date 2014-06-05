@@ -28,16 +28,14 @@ import com.gnizr.db.dao.User;
 import com.gnizr.web.action.AbstractAction;
 import com.gnizr.web.action.LoggedInUserAware;
 
-public class ListUserFolders extends AbstractAction implements
-		LoggedInUserAware {
+public class ListUserFolders extends AbstractAction implements LoggedInUserAware {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -4239420574088500210L;
 
-	private static final Logger logger = Logger
-			.getLogger(ListUserFolders.class);
+	private static final Logger logger = Logger.getLogger(ListUserFolders.class);
 
 	// action parameters
 	private String username;
@@ -103,7 +101,7 @@ public class ListUserFolders extends AbstractAction implements
 	public String doListBookmarkFolders() throws Exception {
 		logger.debug("doListBookmarkFolders");
 		resolveUser();
-		if(user == null){
+		if (user == null) {
 			return LOGIN;
 		}
 		if (url != null) {
@@ -112,12 +110,10 @@ public class ListUserFolders extends AbstractAction implements
 					setOffset(0);
 				}
 				if (getCount() <= 0) {
-					int t = folderManager
-							.pageContainedInFolder(user, url, 0, 0).getSize();
+					int t = folderManager.pageContainedInFolder(user, url, 0, Integer.MAX_VALUE).getSize();
 					setCount(t);
 				}
-				DaoResult<Folder> result = folderManager.pageContainedInFolder(
-						user, url, getOffset(), getCount());
+				DaoResult<Folder> result = folderManager.pageContainedInFolder(user, url, getOffset(), getCount());
 				numberOfFolders = result.getSize();
 				folders = result.getResult();
 			} catch (Exception e) {
@@ -142,11 +138,10 @@ public class ListUserFolders extends AbstractAction implements
 				setOffset(0);
 			}
 			if (getCount() <= 0) {
-				int t = folderManager.pageUserFolders(user, 0, 0).getSize();
+				int t = folderManager.pageUserFolders(user, 0, Integer.MAX_VALUE).getSize();
 				setCount(t);
 			}
-			DaoResult<Folder> result = folderManager.pageUserFolders(user,
-					getOffset(), getCount());
+			DaoResult<Folder> result = folderManager.pageUserFolders(user, getOffset(), getCount());
 			numberOfFolders = result.getSize();
 			folders = result.getResult();
 		} catch (Exception e) {

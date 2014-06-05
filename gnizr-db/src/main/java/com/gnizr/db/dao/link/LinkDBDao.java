@@ -128,6 +128,36 @@ public class LinkDBDao implements LinkDao{
 		return links;
 	}
 
+	public static Link createLinkObject(String tableAlias, ResultSet rs) throws SQLException {
+		return createNamedLinkObject(tableAlias, rs, true);
+	}
+
+	public static Link createNamedLinkObject(String tableAlias, ResultSet rs, boolean noColumnRef) throws SQLException {
+		if (rs == null) return null;
+
+		String idCol = tableAlias + "." + LinkSchema.ID;
+		String urlCol = tableAlias + "." + LinkSchema.URL;
+		String urlHashCol = tableAlias + "." + LinkSchema.URL_HASH;
+		String countCol = tableAlias + "." + LinkSchema.COUNT;
+		String mimeTypeIdCol = tableAlias + "." + LinkSchema.MIME_TYPE_ID;
+
+		if (noColumnRef) {
+			idCol = idCol.replaceAll("\\.", "_");
+			urlCol = urlCol.replaceAll("\\.", "_");
+			urlHashCol = urlHashCol.replaceAll("\\.", "_");
+			countCol = countCol.replaceAll("\\.", "_");
+			mimeTypeIdCol = mimeTypeIdCol.replaceAll("\\.", "_");
+		}
+
+		Link link = new Link();
+		link.setId(rs.getInt(idCol));
+		link.setUrl(rs.getString(urlCol));
+		link.setMimeTypeId(rs.getInt(mimeTypeIdCol));
+		link.setCount(rs.getInt(countCol));
+		link.setUrlHash(rs.getString(urlHashCol));
+		return link;
+	}
+
 	public static Link createLinkObject(ResultSet rs) throws SQLException {
 		if(rs == null) return null;
 		Link aLink = new Link();

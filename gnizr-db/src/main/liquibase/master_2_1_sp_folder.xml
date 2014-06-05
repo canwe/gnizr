@@ -62,61 +62,41 @@
 
             ---------------------------------------------------------------
             -- PROCEDURE: pageFoldersByOwnerId
-            --CREATE OR REPLACE FUNCTION pageFoldersByOwnerId (IN ownerId integer, IN off integer, IN cnt integer) RETURNS SETOF RECORD AS $c$
-            --DECLARE
-            --  totalCount integer;
-            --BEGIN
-            --  SELECT COUNT(*) into totalCount
-            --  FROM folder as f, "user" AS own
-            --  WHERE f.owner_id = ownerId AND f.owner_id = own.id;
+            CREATE OR REPLACE FUNCTION pageFoldersByOwnerId (IN ownerId integer, IN off integer, IN cnt integer) RETURNS SETOF RECORD AS $c$
+            DECLARE
+              totalCount integer;
+            BEGIN
+              SELECT COUNT(*) into totalCount
+              FROM folder as f, "user" AS own
+              WHERE f.owner_id = ownerId AND f.owner_id = own.id;
 
-            --  RETURN QUERY SELECT totalCount, *, folderSize(f.id) as folder_size
-            --  FROM folder as f, "user" AS own
-            --  WHERE f.owner_id = ownerId AND f.owner_id = own.id
-            --  ORDER BY f.folder_name
-            --  LIMIT cnt OFFSET off;
-            --END;
-            --$c$ LANGUAGE plpgsql;
+              RETURN QUERY SELECT f.*, own.*, folderSize(f.id) as folder_size, totalCount
+              FROM folder as f, "user" AS own
+              WHERE f.owner_id = ownerId AND f.owner_id = own.id
+              ORDER BY f.folder_name
+              LIMIT cnt OFFSET off;
+            END;
+            $c$ LANGUAGE plpgsql;
 
             ---------------------------------------------------------------
             -- PROCEDURE: pageBookmarksByFolderId
             -- INPUT: folderId, offset, count
             -- OUTPUT: totalCount
-            --CREATE OR REPLACE FUNCTION pageBookmarksByFolderId (IN folderId integer, IN offset integer, IN count integer, OUT totalCount integer, IN sortBy integer, IN orderFlag integer)
-            --BEGIN
-            --SET @offset = offset;
-            --SET @count = count;
-            --SET @folderId = folderId;
-            --SET @qry = CONCAT("
-            --SELECT SQL_CALC_FOUND_ROWS *, bookmarkTags(bookmark.id) AS tags,
-            --bookmarkInFolders(bookmark.id) AS folders,
-            --linkCount(link.id) AS count
-            --FROM link, "user", bookmark, bookmark_folder
-            --WHERE bookmark_folder.folder_id = ? AND
-            --bookmark_folder.bookmark_id = bookmark.id AND
-            --bookmark.link_id = link.id AND
-            --bookmark.user_id = user.id
-            --");
+            CREATE OR REPLACE FUNCTION pageBookmarksByFolderId (IN folderId integer, IN off integer, IN lim integer, IN sortBy integer, IN orderFlag integer) RETURNS SETOF RECORD AS $c$
+            DECLARE
+              totalCount integer;
+            BEGIN
+              SELECT COUNT(*) into totalCount
+              FROM link as L, "user" as U, bookmark as B, bookmark_folder as BF
+              WHERE BF.folder_id = folderId AND BF.bookmark_id = B.id AND B.link_id = L.id AND B.user_id = U.id;
 
-            --IF (sortBy = 1) THEN
-            --SET @qry = CONCAT(@qry," ORDER BY bookmark.created_on ");
-            --ELSEIF (sortBy = 2) THEN
-            --SET @qry = CONCAT(@qry," ORDER BY bookmark.last_updated ");
-            --ELSE
-            --SET @qry = CONCAT(@qry," ORDER BY bookmark_folder.last_updated ");
-            --END IF;
-
-            --IF(orderFlag = 1) THEN
-            --SET @qry = CONCAT(@qry, " DESC LIMIT ?,?");
-            --ELSE
-            --SET @qry = CONCAT(@qry, " ASC LIMIT ?,?");
-            --END IF;
-
-            --PREPARE STMT FROM @qry;
-            --EXECUTE STMT USING @folderId, @offset, @count;
-            --SELECT FOUND_ROWS() INTO totalCount;
-            --END;
-            --$c$ LANGUAGE plpgsql;
+              RETURN QUERY SELECT B.*, U.*, L.*, bookmarkTags(B.id) AS tags, bookmarkInFolders(B.id) AS folders, linkCount(L.id) AS cnt, totalCount
+              FROM link as L, "user" as U, bookmark as B, bookmark_folder as BF
+              WHERE BF.folder_id = folderId AND BF.bookmark_id = B.id AND B.link_id = L.id AND B.user_id = U.id
+              ORDER BY B.created_on
+              LIMIT lim OFFSET off;
+            END;
+            $c$ LANGUAGE plpgsql;
 
             ---------------------------------------------------------------
             -- PROCEDURE: pageBookmarksByFolderIdTagId

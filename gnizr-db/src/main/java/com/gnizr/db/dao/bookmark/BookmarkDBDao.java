@@ -29,6 +29,8 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import com.gnizr.db.vocab.LinkSchema;
+import com.gnizr.db.vocab.UserSchema;
 import org.apache.log4j.Logger;
 
 import com.gnizr.db.dao.Bookmark;
@@ -111,6 +113,53 @@ public class BookmarkDBDao implements BookmarkDao{
 		return deleted;
 	}
 
+	public static Bookmark createBookmarkObject(String tableAlias, ResultSet rs) throws SQLException {
+		return createNamedBookmarkObject(tableAlias, rs, true);
+	}
+
+	public static Bookmark createNamedBookmarkObject(String tableAlias, ResultSet rs, boolean noColumnRef) throws SQLException {
+		if (rs == null) return null;
+
+		String idCol = tableAlias + "." + BookmarkSchema.ID;
+		String titleCol = tableAlias + "." + BookmarkSchema.TITLE;
+		String notesCol = tableAlias + "." + BookmarkSchema.NOTES;
+		String lastUpdatedCol = tableAlias + "." + BookmarkSchema.LAST_UPDATED;
+		String createdOnCol = tableAlias + "." + BookmarkSchema.CREATED_ON;
+		String tagsCol = tableAlias + "." + BookmarkSchema.TAGS;
+		String foldersCol = tableAlias + "." + BookmarkSchema.FOLDERS;
+
+		if (noColumnRef) {
+			idCol = idCol.replaceAll("\\.", "_");
+			titleCol = titleCol.replaceAll("\\.", "_");
+			notesCol = notesCol.replaceAll("\\.", "_");
+			lastUpdatedCol = lastUpdatedCol.replaceAll("\\.", "_");
+			createdOnCol = createdOnCol.replaceAll("\\.", "_");
+			tagsCol = tagsCol.replaceAll("\\.", "_");
+			foldersCol = foldersCol.replaceAll("\\.", "_");
+		}
+
+		Bookmark bookmark = new Bookmark();
+		bookmark.setId(rs.getInt(idCol));
+		bookmark.setTitle(rs.getString(titleCol));
+		bookmark.setNotes(rs.getString(notesCol));
+		bookmark.setLastUpdated(rs.getDate(lastUpdatedCol));
+		bookmark.setCreatedOn(rs.getDate(createdOnCol));
+
+		String tags = rs.getString(tagsCol);
+		if(tags == null){
+			tags = "";
+		}
+		bookmark.setTags(tags);
+
+		String folders = rs.getString(foldersCol);
+		if(folders == null){
+			folders = "";
+		}
+		bookmark.setFolders(folders);
+
+		return bookmark;
+	}
+
 	public static Bookmark createBookmarkObject(ResultSet rs) throws SQLException {
 		if(rs == null) return null;
 		Bookmark bmark = new Bookmark();
@@ -142,12 +191,12 @@ public class BookmarkDBDao implements BookmarkDao{
 
 	public static Bookmark createBookmarkObject2(ResultSet rs) throws SQLException {
 		if(rs == null) return null;
-		Bookmark bmark = createBookmarkObject(rs);
+		Bookmark bmark = createBookmarkObject(BookmarkSchema.TABLE_NAME, rs);
 		
-		User u = UserDBDao.createUserObject(rs);
+		User u = UserDBDao.createUserObject(UserSchema.TABLE_NAME, rs);
 		bmark.setUser(u);
 		
-		Link l = LinkDBDao.createLinkObject(rs);
+		Link l = LinkDBDao.createLinkObject(LinkSchema.TABLE_NAME, rs);
 		bmark.setLink(l);
 		
 		return bmark;
