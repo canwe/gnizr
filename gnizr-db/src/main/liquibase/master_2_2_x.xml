@@ -29,7 +29,22 @@
             (9,'subscribe','gn','gnizr do feed subscribe','system',1),
             (10,'wikiped','gn','reference wikipedia','reference',-1),
             (11,'icd10','gn','reference ICD10','reference',-1);
-		</sql>
+
+            DELETE FROM mime_type_admin;
+            INSERT INTO mime_type_admin(id,mime_type,label) VALUES
+            (0000,'Unknown','Unknown'),
+            (1001,'text/xml','XML'),
+            (1002,'text/plain','Plain Text'),
+            (1003,'text/html','HTML'),
+            (2001,'image/jpeg','JPEG'),
+            (2002,'image/png','PNG'),
+            (2003,'image/tiff','TIFF'),
+            (2004,'image/gif','GIF'),
+            (3001,'application/rss+xml','RSS'),
+            (3002,'application/rdf+xml','RDF'),
+            (3003,'application/owl+xml','OWL');
+
+        </sql>
 	</changeSet>
 
 </databaseChangeLog>

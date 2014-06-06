@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog logicalFilePath="classpath:/master_2_1_sp_bookmark.xml"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+
+    <changeSet id="sp-bookmark" author="vrebesbyrd@gmail.com">
+        <sql splitStatements="false">
+            ---------------------------------------------------------------
+            -- PROCEDURE: createBookmark
+            CREATE OR REPLACE FUNCTION createBookmark(IN userId integer, IN linkId integer, IN ttl TEXT, IN nts TEXT, IN co timestamp with time zone, IN lu timestamp with time zone, IN tags TEXT) RETURNS integer AS $c$
+            DECLARE
+              newid integer;
+            BEGIN
+              SELECT b.id INTO newid FROM bookmark as b WHERE b.link_id = linkId AND b.user_id = userId;
+              INSERT INTO bookmark(user_id,link_id,title,notes,created_on,last_updated) VALUES (userId,linkId,ttl,nts,co,lu) RETURNING id INTO newid;
+              INSERT INTO search_idx(bookmark_id, text, tags) VALUES (newid, ttl||','||nts, tags);
+              RETURN newid;
+            END;
+            $c$ LANGUAGE plpgsql;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog logicalFilePath="classpath:/master_2_1_sp_link.xml"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+
+    <changeSet id="sp-link" author="vrebesbyrd@gmail.com">
+        <sql splitStatements="false">
+            ---------------------------------------------------------------
+            -- PROCEDURE: createLink
+            CREATE OR REPLACE FUNCTION createLink(IN uurl TEXT, IN mimeTypeId integer) RETURNS integer AS $c$
+            DECLARE
+              newid integer;
+            BEGIN
+              INSERT INTO link(url, mime_type_id, url_hash) VALUES (uurl, mimeTypeId, md5(uurl)) RETURNING id INTO newid;
+              RETURN newid;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: updateLink
+            CREATE OR REPLACE FUNCTION updateLink(lid integer, lurl TEXT, mimeTypeId integer) RETURNS void AS $c$
+            BEGIN
+              UPDATE link as l SET l.url = lurl, l.mime_type_id = mimeTypeId, l.url_hash=md5(lurl) WHERE l.id = lid;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: findLinkUrlHash
+            CREATE OR REPLACE FUNCTION findLinkUrlHash(urlHash VARCHAR(45)) RETURNS SETOF RECORD AS $c$
+            DECLARE
+              bcnt integer;
+            BEGIN
+              SELECT count(*) into bcnt
+              FROM bookmark as b
+              WHERE b.link_id in (select l.id from link as l where l.url_hash=urlHash);
+
+              RETURN QUERY SELECT b.*, l.*, bcnt
+              FROM link as l LEFT JOIN bookmark as b ON l.id = b.link_id
+              WHERE l.url_hash=urlHash;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: findLinkUrl
+            CREATE OR REPLACE FUNCTION findLinkUrl(uurl TEXT) RETURNS SETOF RECORD AS $c$
+            DECLARE
+              bcnt integer;
+            BEGIN
+              SELECT count(*) into bcnt
+              FROM bookmark as b
+              WHERE b.link_id in (select l.id from link as l where l.url_hash=md5(uurl));
+
+              RETURN QUERY SELECT b.*, l.*, bcnt
+              FROM link as l LEFT JOIN bookmark as b ON l.id = b.link_id
+              WHERE l.url_hash=md5(uurl);
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: getLink
+            CREATE OR REPLACE FUNCTION getLink(lid integer) RETURNS SETOF RECORD AS $c$
+            DECLARE
+             bcnt integer;
+            BEGIN
+              SELECT count(*) into bcnt
+              FROM bookmark as b
+              WHERE b.link_id = lid;
+
+              RETURN QUERY SELECT b.*, l.*, bcnt
+              FROM link as l LEFT JOIN bookmark as b ON l.id=b.link_id
+              WHERE l.id=lid;
+            END;
+            $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: deleteLink
+            CREATE OR REPLACE FUNCTION deleteLink(lid integer) RETURNS void AS $c$
+            BEGIN
+              DELETE FROM link as l WHERE l.id=lid;
+            END;
+            $c$ LANGUAGE plpgsql;
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

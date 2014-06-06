@@ -16,54 +16,48 @@
  */
 package com.gnizr.db.dao.link;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.sql.DataSource;
-
-import org.apache.log4j.Logger;
-
 import com.gnizr.db.dao.DBUtil;
 import com.gnizr.db.dao.Link;
 import com.gnizr.db.vocab.LinkSchema;
+import org.apache.log4j.Logger;
 
-public class LinkDBDao implements LinkDao{
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@SuppressWarnings("JpaQueryApiInspection")
+public class LinkDBDao implements LinkDao {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 3670309014246507954L;
 
 	private static final Logger logger = Logger.getLogger(LinkDBDao.class.getName());
 	private DataSource dataSource;
-	
-	
-	public LinkDBDao(DataSource ds){
+
+
+	public LinkDBDao(DataSource ds) {
 		logger.debug("created LinkDBDao. dataSource=" + ds.toString());
 		this.dataSource = ds;
 	}
+
 	public int createLink(Link link) {
-		logger.debug("input: link="+link);
+		logger.debug("input: link=" + link);
 		Connection conn = null;
 		CallableStatement cStmt = null;
 		int id = -1;
 		try {
 			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("{call createLink(?,?,?)}");
-			cStmt.setString(1,link.getUrl());
-			cStmt.setInt(2,link.getMimeTypeId());
-			cStmt.registerOutParameter(3,Types.INTEGER);
-			cStmt.execute();
-			id = cStmt.getInt(3);
+			cStmt = conn.prepareCall("select * from createLink(?,?)");
+			cStmt.setString(1, link.getUrl());
+			cStmt.setInt(2, link.getMimeTypeId());
+			ResultSet rs = cStmt.executeQuery();
+			id = rs.next() ? rs.getInt(1) : id;
 		} catch (Exception e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, cStmt);
 			} catch (SQLException e) {
@@ -80,15 +74,15 @@ public class LinkDBDao implements LinkDao{
 		boolean deleted = false;
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call deleteLink(?)");
-			stmt.setLong(1,id);
-			if(stmt.executeUpdate() > 0){
+			stmt = conn.prepareStatement("select * from deleteLink(?)");
+			stmt.setLong(1, id);
+			if (stmt.executeUpdate() > 0) {
 				logger.debug("# row deleted=" + stmt.getUpdateCount());
 				deleted = true;
 			}
 		} catch (SQLException e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
@@ -103,24 +97,24 @@ public class LinkDBDao implements LinkDao{
 		List<Link> links = new ArrayList<Link>();
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{				
+		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call findLinkUrl(?)");
-			stmt.setString(1,url);
+			stmt = conn.prepareStatement("select * from findLinkUrl(?) as f(bookmark_id integer, bookmark_user_id integer, bookmark_link_id integer, bookmark_title text, bookmark_notes text, bookmark_created_on timestamp with time zone, bookmark_last_updated timestamp with time zone, link_id integer, link_mime_type_id integer, link_url text, link_url_hash varchar, link_cnt integer)");
+			stmt.setString(1, url);
 			ResultSet rs = stmt.executeQuery();
-			while(rs.next()){
+			while (rs.next()) {
 				Link aLink = createLinkObject(rs);
 				links.add(aLink);
 				logger.debug("found: " + aLink);
 			}
-			if(links.size() == 0){
+			if (links.size() == 0) {
 				logger.debug("found no matching links");
 			}
-		}catch(SQLException e){		
+		} catch (SQLException e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -159,7 +153,7 @@ public class LinkDBDao implements LinkDao{
 	}
 
 	public static Link createLinkObject(ResultSet rs) throws SQLException {
-		if(rs == null) return null;
+		if (rs == null) return null;
 		Link aLink = new Link();
 		aLink.setId(rs.getInt(LinkSchema.ID));
 		aLink.setUrl(rs.getString(LinkSchema.URL));
@@ -168,27 +162,28 @@ public class LinkDBDao implements LinkDao{
 		aLink.setCount(rs.getInt(LinkSchema.COUNT));
 		return aLink;
 	}
+
 	public Link getLink(int id) {
-		logger.debug("getLink: id="+id);
+		logger.debug("getLink: id=" + id);
 		Link aLink = null;
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{						
+		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call getLink(?);");
-			stmt.setLong(1,id);
+			stmt = conn.prepareStatement("select * from getLink(?) as f(bookmark_id integer, bookmark_user_id integer, bookmark_link_id integer, bookmark_title text, bookmark_notes text, bookmark_created_on timestamp with time zone, bookmark_last_updated timestamp with time zone, link_id integer, link_mime_type_id integer, link_url text, link_url_hash varchar, link_cnt integer)");
+			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
-			if(rs.next()){
+			if (rs.next()) {
 				aLink = createLinkObject(rs);
 				logger.debug("found: " + aLink);
-			}else{
+			} else {
 				logger.debug("found no matching links");
 			}
-		}catch(Exception e){		
+		} catch (Exception e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -197,262 +192,61 @@ public class LinkDBDao implements LinkDao{
 	}
 
 	public boolean updateLink(Link link) {
-		logger.debug("input: link="+link);
+		logger.debug("input: link=" + link);
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		boolean isChanged = false;
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call updateLink(?,?,?)");
-			stmt.setLong(1,link.getId());
-			stmt.setString(2,link.getUrl());
-			stmt.setInt(3,link.getMimeTypeId());			
+			stmt = conn.prepareStatement("select * from updateLink(?,?,?)");
+			stmt.setInt(1, link.getId());
+			stmt.setString(2, link.getUrl());
+			stmt.setInt(3, link.getMimeTypeId());
 			stmt.execute();
-			if(stmt.getUpdateCount()>0){
-				logger.debug("updateCount="+stmt.getUpdateCount());
+			if (stmt.getUpdateCount() > 0) {
+				logger.debug("updateCount=" + stmt.getUpdateCount());
 				isChanged = true;
 			}
-		stmt.getResultSet();
+			stmt.getResultSet();
 		} catch (SQLException e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
-		}		
+		}
 		return isChanged;
 	}
-	/*
-	public List<Link> pageLink(Tag tag, int offset, int count) {
-		logger.debug("pageLink, input: tag="+tag
-				+",offset="+offset+",count="+count);
-		Connection conn = null;
-		PreparedStatement stmt = null;
-		List<Link> links = new ArrayList<Link>();
-		try {
-			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call pageLinkTagId(?,?,?)");
-			stmt.setLong(1,tag.getId());
-			stmt.setLong(2,offset);
-			stmt.setInt(3,count);
-			ResultSet rs = stmt.executeQuery();
-			while(rs.next()){
-				Link aLink = createLinkObject(rs);
-				logger.debug("found link="+aLink);
-				links.add(aLink);
-			}
-		} catch (SQLException e) {
-			logger.fatal(e);
-		}finally{
-			try {
-				DBUtil.cleanup(conn, stmt);
-			} catch (SQLException e) {
-				logger.fatal(e);
-			}
-		}		
-		return links;
-	}
-	*/
-	/*
-	public int getLinkCount(Tag tag) {
-		logger.debug("getLinkCount, input: tag="+tag);
-		Connection conn = null;
-		CallableStatement cStmt = null;
-		int count = -1;
-		try {
-			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("{call getLinkCountTagId(?,?)}");
-			cStmt.setLong(1,tag.getId());
-			cStmt.registerOutParameter(2,Types.INTEGER);
-			cStmt.execute();
-			count = cStmt.getInt(2);
-		} catch (SQLException e) {
-			logger.fatal(e);
-		} finally{
-			try {
-				DBUtil.cleanup(conn, cStmt);
-			} catch (SQLException e) {
-				logger.fatal(e);
-			}
-		}
-		return count;
-	}
-	*/
-	/*
-	public Link getLinkViewRecord(int id) {
-		logger.debug("getLinkViewRecord: id="+id);
-		Link aLink = null;
-		PreparedStatement stmt = null;
-		Connection conn = null;
-		try{						
-			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call getLinkViewRecord(?);");
-			stmt.setLong(1,id);
-			ResultSet rs = stmt.executeQuery();
-			if(rs.next()){
-				aLink = createLinkObject(rs);
-				logger.debug("found: " + aLink);
-			}else{
-				logger.debug("found no matching links");
-			}
-		}catch(Exception e){		
-			logger.fatal(e);
-		}finally{
-			try {
-				DBUtil.cleanup(conn,stmt);
-			} catch (SQLException e) {
-				logger.fatal(e);
-			}
-		}
-		return aLink;
-	}
-	*/
+
 	public List<Link> findLinkByUrlHash(String urlHash) {
 		logger.debug("findLinkByUrlHash: url=" + urlHash);
 		List<Link> links = new ArrayList<Link>();
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{				
-			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call findLinkUrlHash(?)");
-			stmt.setString(1,urlHash);
-			ResultSet rs = stmt.executeQuery();
-			while(rs.next()){
-				Link aLink = createLinkObject(rs);
-				links.add(aLink);
-				logger.debug("found: " + aLink);
-			}
-			if(links.size() == 0){
-				logger.debug("found no matching links");
-			}
-		}catch(SQLException e){		
-			logger.fatal(e);
-		}finally{
-			try {
-				DBUtil.cleanup(conn,stmt);
-			} catch (SQLException e) {
-				logger.fatal(e);
-			}
-		}
-		return links;
-	}
-	
-	/*
-	public int getTagSearchResultCount(String searchQuery) {
-		logger.debug("getTagSearchResultCount input: searchQuery="+searchQuery);
-		Connection conn = null;
-		CallableStatement cStmt = null;
-		int count = -1;
 		try {
 			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("{call getLinkCountTagSearch(?,?)}");
-			cStmt.setString(1,searchQuery);
-			cStmt.registerOutParameter(2,Types.INTEGER);
-			cStmt.execute();
-			count = cStmt.getInt(2);
-		} catch (SQLException e) {
-			logger.fatal(e);
-		} finally{
-			try {
-				DBUtil.cleanup(conn, cStmt);
-			} catch (SQLException e) {
-				logger.fatal(e);
-			}
-		}
-		return count;
-	}
-	*/
-	/*
-	public List<Link> pageTagSearch(String searchQuery, int offset, int count) {
-		logger.debug("pageTagSearch: searchQuery=" + searchQuery +", offset="+offset+",count="+count);
-		List<Link> links = new ArrayList<Link>();
-		PreparedStatement stmt = null;
-		Connection conn = null;
-		try{				
-			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call pageLinkTagSearch(?,?,?)");
-			stmt.setString(1,searchQuery);
-			stmt.setInt(2,offset);
-			stmt.setInt(3,count);
+			stmt = conn.prepareStatement("select * from findLinkUrlHash(?) as f(bookmark_id integer, bookmark_user_id integer, bookmark_link_id integer, bookmark_title text, bookmark_notes text, bookmark_created_on timestamp with time zone, bookmark_last_updated timestamp with time zone, link_id integer, link_mime_type_id integer, link_url text, link_url_hash varchar, link_cnt integer)");
+			stmt.setString(1, urlHash);
 			ResultSet rs = stmt.executeQuery();
-			while(rs.next()){
+			while (rs.next()) {
 				Link aLink = createLinkObject(rs);
 				links.add(aLink);
 				logger.debug("found: " + aLink);
 			}
-			if(links.size() == 0){
+			if (links.size() == 0) {
 				logger.debug("found no matching links");
 			}
-		}catch(SQLException e){		
+		} catch (SQLException e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
 		}
 		return links;
 	}
-		*/
-	/*
-	public int getTextSearchResultCount(String searchQuery) {
-		logger.debug("getTextSearchResultCount input: searchQuery="+searchQuery);
-		Connection conn = null;
-		CallableStatement cStmt = null;
-		int count = -1;
-		try {
-			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("{call getLinkCountTextSearch(?,?)}");
-			cStmt.setString(1,searchQuery);
-			cStmt.registerOutParameter(2,Types.INTEGER);
-			cStmt.execute();
-			count = cStmt.getInt(2);
-		} catch (SQLException e) {
-			logger.fatal(e);
-		} finally{
-			try {
-				DBUtil.cleanup(conn, cStmt);
-			} catch (SQLException e) {
-				logger.fatal(e);
-			}
-		}
-		return count;
-	}
-	*/
-	/*
-	public List<Link> pageTextSearch(String searchQuery, int offset, int count) {
-		logger.debug("pageTextSearch: searchQuery=" + searchQuery +", offset="+offset+",count="+count);
-		List<Link> links = new ArrayList<Link>();
-		PreparedStatement stmt = null;
-		Connection conn = null;
-		try{				
-			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call pageLinkTextSearch(?,?,?)");
-			stmt.setString(1,searchQuery);
-			stmt.setInt(2,offset);
-			stmt.setInt(3,count);
-			ResultSet rs = stmt.executeQuery();
-			while(rs.next()){
-				Link aLink = createLinkObject(rs);
-				links.add(aLink);
-				logger.debug("found: " + aLink);
-			}
-			if(links.size() == 0){
-				logger.debug("found no matching links");
-			}
-		}catch(SQLException e){		
-			logger.fatal(e);
-		}finally{
-			try {
-				DBUtil.cleanup(conn,stmt);
-			} catch (SQLException e) {
-				logger.fatal(e);
-			}
-		}
-		return links;
-	}
-	*/
 }
