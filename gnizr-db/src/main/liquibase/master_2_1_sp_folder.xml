@@ -23,10 +23,10 @@
             CREATE OR REPLACE FUNCTION updateFolder(IN fid integer, IN ownerId integer, IN fName VARCHAR(45), IN descr TEXT, IN lu timestamp with time zone) RETURNS void AS $c$
             BEGIN
               UPDATE folder as f SET
-                f.owner_id = ownerId,
-                f.folder_name = fName,
-                f.description = descr,
-                f.last_updated = lu
+                owner_id = ownerId,
+                folder_name = fName,
+                description = descr,
+                last_updated = lu
               WHERE f.id = fid;
             END;
             $c$ LANGUAGE plpgsql;

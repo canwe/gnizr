@@ -2,7 +2,7 @@ A new user account has been created, but requires your approval.
 
   Username: ${username}
   Email: ${email}
-  CreatedOn: ${createdOn?datetime?string.short_long}
+  CreatedOn: ${createdOn?datetime?string}
 
 1) Login as 'gnizr' -- the Super User.
 

@@ -20,6 +20,7 @@ import com.gnizr.db.dao.*;
 import com.gnizr.db.dao.bookmark.BookmarkDBDao;
 import com.gnizr.db.dao.link.LinkDBDao;
 import com.gnizr.db.dao.user.UserDBDao;
+import com.gnizr.db.vocab.BookmarkSchema;
 import com.gnizr.db.vocab.ForUserSchema;
 import org.apache.log4j.Logger;
 
@@ -178,7 +179,7 @@ public class ForUserDBDao implements ForUserDao {
 		boolean updated = false;
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call updateForUser(?,?,?,?,?)");
+			stmt = conn.prepareStatement("select * from updateForUser(?,?,?,?,?)");
 			stmt.setInt(1, forUser.getId());
 			stmt.setInt(2, forUser.getForUser().getId());
 			stmt.setInt(3, forUser.getBookmark().getId());
@@ -285,7 +286,7 @@ public class ForUserDBDao implements ForUserDao {
 		forUser.setMessage(rs.getString(ForUserSchema.MESSAGE));
 		forUser.setCreatedOn(rs.getTimestamp(ForUserSchema.CREATED_ON));
 
-		Bookmark bm = BookmarkDBDao.createBookmarkObject(rs);
+		Bookmark bm = BookmarkDBDao.createBookmarkObject(BookmarkSchema.TABLE_NAME, rs);
 		Link bmLink = LinkDBDao.createLinkObject(rs);
 		User buser = UserDBDao.createUserObject("buser", rs);
 		bm.setLink(bmLink);

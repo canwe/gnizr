@@ -18,6 +18,16 @@
               RETURN newid;
             END;
             $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: getBookmark
+            CREATE OR REPLACE FUNCTION getBookmark(bid integer) RETURNS SETOF RECORD AS $c$
+            BEGIN
+              RETURN QUERY SELECT b.*, u.*, l.*, bookmarkTags(b.id) as tags, bookmarkInFolders(b.id) as folders, linkCount(l.id) as cnt
+              FROM bookmark as b, link as l, "user" as u
+              WHERE b.id=bid AND b.link_id = l.id AND b.user_id = u.id;
+            END;
+            $c$ LANGUAGE plpgsql;
         </sql>
     </changeSet>
 

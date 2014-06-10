@@ -103,7 +103,7 @@ public class LinkDBDao implements LinkDao {
 			stmt.setString(1, url);
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
-				Link aLink = createLinkObject(rs);
+				Link aLink = createLinkObject(LinkSchema.TABLE_NAME, rs);
 				links.add(aLink);
 				logger.debug("found: " + aLink);
 			}
@@ -174,7 +174,7 @@ public class LinkDBDao implements LinkDao {
 			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
-				aLink = createLinkObject(rs);
+				aLink = createLinkObject(LinkSchema.TABLE_NAME, rs);
 				logger.debug("found: " + aLink);
 			} else {
 				logger.debug("found no matching links");
@@ -231,7 +231,7 @@ public class LinkDBDao implements LinkDao {
 			stmt.setString(1, urlHash);
 			ResultSet rs = stmt.executeQuery();
 			while (rs.next()) {
-				Link aLink = createLinkObject(rs);
+				Link aLink = createLinkObject(LinkSchema.TABLE_NAME, rs);
 				links.add(aLink);
 				logger.debug("found: " + aLink);
 			}

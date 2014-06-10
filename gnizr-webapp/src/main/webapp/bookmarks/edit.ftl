@@ -121,7 +121,7 @@
 </div>
 <div class="right">
 <#if (editBookmark.lastUpdated)?exists>
-<span id="bookmarkLastUpdated">Last updated: ${editBookmark.lastUpdated?string.short_long}</span>
+<span id="bookmarkLastUpdated">Last updated: ${editBookmark.lastUpdated?date}</span>
 </#if> 
   <@ww.submit id="submitSaveBookmark" cssClass="btn saveSubmit" value="Save" theme="simple"/>
   <@ww.submit id="submitSaveBookmarkAndEdit" name="saveAndContinueEdit" cssClass="btn saveSubmit" value="Save and Continue Editing" theme="simple"/>

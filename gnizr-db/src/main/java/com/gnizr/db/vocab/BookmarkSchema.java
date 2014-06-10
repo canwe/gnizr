@@ -18,14 +18,14 @@ package com.gnizr.db.vocab;
 
 public interface BookmarkSchema {
 	public static final String TABLE_NAME = "bookmark";
-	public static final String ID = TABLE_NAME + "id";
-	public static final String USER_ID = TABLE_NAME + "user_id";
-	public static final String LINK_ID = TABLE_NAME + "link_id";
-	public static final String TITLE = TABLE_NAME + "title";
-	public static final String NOTES = TABLE_NAME + "notes";
-	public static final String CREATED_ON = TABLE_NAME + "created_on";
-	public static final String LAST_UPDATED = TABLE_NAME + "last_updated";
-	public static final String IS_ARCHIVED = TABLE_NAME + "is_archived";
+	public static final String ID = "id";
+	public static final String USER_ID = "user_id";
+	public static final String LINK_ID = "link_id";
+	public static final String TITLE = "title";
+	public static final String NOTES = "notes";
+	public static final String CREATED_ON = "created_on";
+	public static final String LAST_UPDATED = "last_updated";
+	public static final String IS_ARCHIVED = "is_archived";
 	public static final String TAGS = "tags";
 	public static final String FOLDERS = "folders";
 }

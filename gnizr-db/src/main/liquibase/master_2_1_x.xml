@@ -102,19 +102,19 @@
             BEGIN
               IF CHAR_LENGTH(password) > 0 THEN
                 UPDATE "user" as U SET
-                U.username = uname,
-                U.password = MD5(pwd),
-                U.fullname = fname,
-                U.email = e_mail,
-                U.created_on = cOn,
-                U.acct_status = st WHERE U.id=uid;
+                username = uname,
+                password = MD5(pwd),
+                fullname = fname,
+                email = e_mail,
+                created_on = cOn,
+                acct_status = st WHERE U.id=uid;
               ELSE
                 UPDATE "user" as U SET
-                U.username = uname,
-                U.fullname = fname,
-                U.email = e_mail,
-                U.created_on = cOn,
-                U.acct_status = st WHERE U.id=id;
+                username = uname,
+                fullname = fname,
+                email = e_mail,
+                created_on = cOn,
+                acct_status = st WHERE U.id=uid;
               END IF;
             END;
             $c$ LANGUAGE plpgsql;
@@ -253,11 +253,11 @@
                                                          card integer) RETURNS void AS $c$
             BEGIN
               UPDATE tag_prpt as tp SET
-                tp.name = n,
-                tp.ns_prefix = ns_pr,
-                tp.description = descr,
-                tp.prpt_type = prpt_t,
-                tp.cardinality = card
+                name = n,
+                ns_prefix = ns_pr,
+                description = descr,
+                prpt_type = prpt_t,
+                cardinality = card
               WHERE tp.id=tid;
             END;
             $c$ LANGUAGE plpgsql;
@@ -305,9 +305,11 @@
             DECLARE
               tags TEXT;
             BEGIN
-              SELECT string_agg(DISTINCT t.tag, ' ' ORDER BY bti.position) INTO tags
+              SELECT string_agg(DISTINCT t.tag, ' ') INTO tags
               FROM tag as t, bookmark_tag_idx as bti
-              WHERE bti.bookmark_id = bookmarkId AND bti.count > 0 AND bti.tag_id = t.id;
+              WHERE bti.bookmark_id = bookmarkId AND bti.count > 0 AND bti.tag_id = t.id
+              GROUP BY t.tag
+              ORDER BY t.tag;
               RETURN tags;
             END;
             $c$ LANGUAGE plpgsql;
@@ -333,9 +335,11 @@
             DECLARE
               fnames TEXT;
             BEGIN
-              SELECT string_agg(DISTINCT f.folder_name, ',' ORDER BY f.folder_name) INTO fnames
+              SELECT string_agg(DISTINCT f.folder_name, ',') INTO fnames
               FROM folder as f, bookmark_folder as bf
-              WHERE bf.bookmark_id = bookmarkId AND bf.folder_id = f.id;
+              WHERE bf.bookmark_id = bookmarkId AND bf.folder_id = f.id
+              GROUP BY f.folder_name
+              ORDER BY f.folder_name;
               RETURN fnames;
             END;
             $c$ LANGUAGE plpgsql;
@@ -421,11 +425,11 @@
                                             IN createdOn timestamp with time zone) RETURNS void AS $c$
             BEGIN
               UPDATE for_user as fu SET
-                fu.for_user_id=userId,
-                fu.bookmark_id=bmid,
-                fu.message=msg,
-                fu.created_on=createdOn
-              WHERE for_user.id=fuid;
+                for_user_id=userId,
+                bookmark_id=bmid,
+                message=msg,
+                created_on=createdOn
+              WHERE fu.id=fuid;
             END;
             $c$ LANGUAGE plpgsql;
 

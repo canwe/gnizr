@@ -209,7 +209,7 @@ public class BookmarkDBDao implements BookmarkDao {
 		Connection conn = null;
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call getBookmark(?);");
+			stmt = conn.prepareStatement("select * from getBookmark(?) as f(bookmark_id integer, bookmark_user_id integer, bookmark_link_id integer, bookmark_title text, bookmark_notes text, bookmark_created_on timestamp with time zone, bookmark_last_updated timestamp with time zone, user_id integer, user_username varchar, user_password varchar, user_fullname varchar, user_created_on timestamp with time zone, user_email varchar, user_acct_status integer, link_id integer, link_mime_type_id integer, link_url text, link_url_hash varchar, bookmark_tags text, bookmark_folders text, link_cnt integer)");
 			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
@@ -232,25 +232,23 @@ public class BookmarkDBDao implements BookmarkDao {
 
 	public int getBookmarkCount(User user) {
 		logger.debug("getBookmarkCount, input: user=" + user);
-		DaoResult<Bookmark> result = pageBookmarks(user, 0, 0);
+		DaoResult<Bookmark> result = pageBookmarks(user, 0, Integer.MAX_VALUE);
 		return result.getSize();
 	}
 
 	public int getBookmarkCount(Link link) {
 		logger.debug("getBookmarkCount, input: link=" + link);
-		DaoResult<Bookmark> result = pageBookmarks(link, 0, 0);
+		DaoResult<Bookmark> result = pageBookmarks(link, 0, Integer.MAX_VALUE);
 		return result.getSize();
 	}
 
 	public DaoResult<Bookmark> pageBookmarks(User user, int offset, int count) {
-		logger.debug("pageBookmarks, input: user=" + user
-				+ ",offset=" + offset + ",count=" + count);
+		logger.debug("pageBookmarks, input: user=" + user + ",offset=" + offset + ",count=" + count);
 		return pageBookmarks(user, offset, count, BookmarkDao.SORT_BY_CREATED_ON, BookmarkDao.DESCENDING);
 	}
 
 	public DaoResult<Bookmark> pageBookmarks(Link link, int offset, int count) {
-		logger.debug("pageBookmark, input: link=" + link
-				+ ",offset=" + offset + ",count=" + count);
+		logger.debug("pageBookmark, input: link=" + link + ",offset=" + offset + ",count=" + count);
 		Connection conn = null;
 		CallableStatement stmt = null;
 		DaoResult<Bookmark> result = null;
@@ -286,8 +284,7 @@ public class BookmarkDBDao implements BookmarkDao {
 	}
 
 	public DaoResult<Bookmark> pageBookmarks(Tag tag, int offset, int count) {
-		logger.debug("pageBookmarks, input: tag=" + tag
-				+ ",offset=" + offset + ",count=" + count);
+		logger.debug("pageBookmarks, input: tag=" + tag + ",offset=" + offset + ",count=" + count);
 		Connection conn = null;
 		CallableStatement cStmt = null;
 		DaoResult<Bookmark> result = null;
@@ -323,8 +320,7 @@ public class BookmarkDBDao implements BookmarkDao {
 	}
 
 	public DaoResult<Bookmark> pageBookmarks(User user, Tag tag, int offset, int count) {
-		logger.debug("pageBookmark, input: user=" + user + ",tag=" + tag
-				+ ",offset=" + offset + ",count=" + count);
+		logger.debug("pageBookmark, input: user=" + user + ",tag=" + tag + ",offset=" + offset + ",count=" + count);
 		return pageBookmarks(user, tag, offset, count, BookmarkDao.SORT_BY_CREATED_ON, BookmarkDao.DESCENDING);
 	}
 

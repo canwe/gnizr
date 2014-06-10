@@ -21,7 +21,7 @@
             -- PROCEDURE: updateLink
             CREATE OR REPLACE FUNCTION updateLink(lid integer, lurl TEXT, mimeTypeId integer) RETURNS void AS $c$
             BEGIN
-              UPDATE link as l SET l.url = lurl, l.mime_type_id = mimeTypeId, l.url_hash=md5(lurl) WHERE l.id = lid;
+              UPDATE link as l SET mime_type_id = mimeTypeId, url_hash=md5(lurl) WHERE l.id = lid;
             END;
             $c$ LANGUAGE plpgsql;
 
