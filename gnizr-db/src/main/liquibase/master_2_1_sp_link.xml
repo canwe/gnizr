@@ -14,6 +14,9 @@
             BEGIN
               INSERT INTO link(url, mime_type_id, url_hash) VALUES (uurl, mimeTypeId, md5(uurl)) RETURNING id INTO newid;
               RETURN newid;
+            EXCEPTION WHEN unique_violation THEN
+              SELECT l.id INTO newid FROM link as l WHERE l.url = uurl AND l.mime_type_id = mimeTypeId AND l.url_hash = md5(uurl);
+              RETURN newid;
             END;
             $c$ LANGUAGE plpgsql;
 

@@ -144,7 +144,7 @@ public class EditBookmark extends AbstractAction implements LoggedInUserAware {
 		Bookmark bm = null;
 		if(id > 0){
 			bm = new Bookmark(id);
-			if(fetchGeometryMarkers(bm) == true){
+			if(fetchGeometryMarkers(bm)){
 				return SUCCESS;
 			}else{
 				return ERROR;
@@ -190,11 +190,11 @@ public class EditBookmark extends AbstractAction implements LoggedInUserAware {
 				}				
 			}	
 			for(PointMarker cpt: curPtMarkers){
-				if(addedPtMarkerIds.contains(cpt.getId()) == false){
+				if(!addedPtMarkerIds.contains(cpt.getId())){
 					rmvPtMarkers.add(cpt);
 				}
 			}
-			if(rmvPtMarkers.isEmpty() == false){
+			if(!rmvPtMarkers.isEmpty()){
 				bookmarkManager.removePointMarkers(bm,rmvPtMarkers);
 			}
 			return true;
@@ -218,7 +218,7 @@ public class EditBookmark extends AbstractAction implements LoggedInUserAware {
 		if (result == SUCCESS) {
 			if (editBookmark != null && editBookmark.getId() > 0) {
 				try {
-					if (bookmarkManager.deleteBookmark(editBookmark) == false) {
+					if (!bookmarkManager.deleteBookmark(editBookmark)) {
 						addActionError("Unable to delete bookmark: " + url);
 						return ERROR;
 					}
@@ -229,7 +229,7 @@ public class EditBookmark extends AbstractAction implements LoggedInUserAware {
 				}
 			}
 		}
-		if(result == SUCCESS && isSaveAndClose() == true){
+		if(result == SUCCESS && isSaveAndClose()){
 			result = "close";
 		}
 		return result;
@@ -260,7 +260,7 @@ public class EditBookmark extends AbstractAction implements LoggedInUserAware {
 				try {
 					boolean isOkay = bookmarkManager
 							.updateBookmark(editBookmark);
-					if (isOkay == false) {
+					if (!isOkay) {
 						return ERROR;
 					}		
 					editBookmark = bookmarkManager.getBookmark(editBookmark.getId());
@@ -294,8 +294,8 @@ public class EditBookmark extends AbstractAction implements LoggedInUserAware {
 			
 			// gets a fresh copy of the bookmark that has just been saved 
 			editBookmark = bookmarkManager.getBookmark(bmid);
-			boolean ok = folderManager.addToMyBookmarks(loggedInUser,editBookmark);
-			if(ok == false){
+			boolean ok = folderManager.addToMyBookmarks(loggedInUser, editBookmark);
+			if(!ok){
 				logger.error("unable add bookmark to my bookmarks folder. bmark:" + editBookmark);
 			}
 		} catch (Exception e) {
@@ -339,16 +339,16 @@ public class EditBookmark extends AbstractAction implements LoggedInUserAware {
 		}
 		
 		if(result == SUCCESS){
-			if(doUpdateGeometryMarkers(getEditBookmark()) == false){
+			if(!doUpdateGeometryMarkers(getEditBookmark())){
 				result = ERROR;
 			}
 		}
 		
 		if(getSaveAndContinueEdit() != null){
 			return INPUT;
-		}else if(result == SUCCESS && isRedirect() == true){
+		}else if(result == SUCCESS && isRedirect()){
 			return REDIRECT;
-		}else if(result == SUCCESS && isSaveAndClose() == true){
+		}else if(result == SUCCESS && isSaveAndClose()){
 			return "close";
 		}else{
 			return result;

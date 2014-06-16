@@ -12,8 +12,10 @@
             DECLARE
               newid integer;
             BEGIN
-              SELECT f.id INTO newid FROM folder as f WHERE f.owner_id = userId AND f.folder_name = fname;
               INSERT INTO folder(owner_id,folder_name,description,last_updated) VALUES (userId,fname,descr,lu) RETURNING id INTO newid;
+              RETURN newid;
+            EXCEPTION WHEN unique_violation THEN
+              SELECT f.id INTO newid FROM folder as f WHERE f.owner_id = userId AND f.folder_name = fname;
               RETURN newid;
             END;
             $c$ LANGUAGE plpgsql;
@@ -151,9 +153,7 @@
             -- PROCEDURE: addBookmarkToFolder
             -- INPUT: folderId,bookmarkId,lastUpdated
             -- OUTPUT: NONE
-            --CREATE OR REPLACE FUNCTION addBookmarkToFolder(IN folderId integer,
-            --IN bookmarkId integer,
-            --IN lastUpdated timestamp with time zone)
+            --CREATE OR REPLACE FUNCTION addBookmarkToFolder(IN folderId integer, IN bookmarkId integer, IN lastUpdated timestamp with time zone)
             --BEGIN
             --DECLARE `Constraint Violation` CONDITION FOR SQLSTATE '23000';
             --DECLARE EXIT HANDLER FOR `Constraint Violation` ROLLBACK;

@@ -135,14 +135,14 @@ public class FolderManager implements Serializable{
 	}
 	
 	public boolean[] addToMyBookmarks(User user, List<Bookmark> bookmarks2add) throws NoSuchUserException {
-		return  this.addBookmarks(user,MY_BOOKMARKS_LABEL, bookmarks2add);
+		return this.addBookmarks(user, MY_BOOKMARKS_LABEL, bookmarks2add);
 	}
 	
 	public boolean addToMyBookmarks(User user, Bookmark bookmark) throws NoSuchUserException {
 		List<Bookmark> bmarks = new ArrayList<Bookmark>();
 		if(bookmark != null){
 			bmarks.add(bookmark);
-			boolean[] opOkay = this.addBookmarks(user,MY_BOOKMARKS_LABEL, bmarks);
+			boolean[] opOkay = this.addBookmarks(user, MY_BOOKMARKS_LABEL, bmarks);
 			return opOkay[0];
 		}
 		throw new NullPointerException("bookmark is null");

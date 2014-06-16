@@ -37,8 +37,7 @@ public class ListUserFolderContent extends AbstractPagingAction implements Logge
 	 */
 	private static final long serialVersionUID = -5840539687808914729L;
 
-	private static final Logger logger = Logger
-			.getLogger(ListUserFolderContent.class);
+	private static final Logger logger = Logger.getLogger(ListUserFolderContent.class);
 
 	// action parameters
 	private String username;

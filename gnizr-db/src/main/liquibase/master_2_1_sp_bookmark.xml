@@ -12,9 +12,11 @@
             DECLARE
               newid integer;
             BEGIN
-              SELECT b.id INTO newid FROM bookmark as b WHERE b.link_id = linkId AND b.user_id = userId;
               INSERT INTO bookmark(user_id,link_id,title,notes,created_on,last_updated) VALUES (userId,linkId,ttl,nts,co,lu) RETURNING id INTO newid;
               INSERT INTO search_idx(bookmark_id, text, tags) VALUES (newid, ttl||','||nts, tags);
+              RETURN newid;
+            EXCEPTION WHEN unique_violation THEN
+              SELECT b.id INTO newid FROM bookmark as b WHERE b.link_id = linkId AND b.user_id = userId;
               RETURN newid;
             END;
             $c$ LANGUAGE plpgsql;
