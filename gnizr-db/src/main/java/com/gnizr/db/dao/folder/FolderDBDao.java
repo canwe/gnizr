@@ -72,7 +72,7 @@ public class FolderDBDao implements FolderDao {
 		boolean[] opOkay = new boolean[bookmarks.size()];
 		try {
 			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("{call addBookmarkToFolder(?,?,?)};");
+			cStmt = conn.prepareCall("select * from addBookmarkToFolder(?,?,?)");
 			Timestamp tsmp = new Timestamp(timestamp.getTime());
 			for (Bookmark bm : bookmarks) {
 				cStmt.setInt(1, folder.getId());
@@ -82,11 +82,7 @@ public class FolderDBDao implements FolderDao {
 			}
 			int result[] = cStmt.executeBatch();
 			for (int i = 0; i < result.length; i++) {
-				if (result[i] >= 0) {
-					opOkay[i] = true;
-				} else {
-					opOkay[i] = false;
-				}
+				opOkay[i] = result[i] >= 0;
 			}
 		} catch (SQLException e) {
 			logger.fatal(e);

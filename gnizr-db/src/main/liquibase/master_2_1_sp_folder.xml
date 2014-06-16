@@ -153,33 +153,24 @@
             -- PROCEDURE: addBookmarkToFolder
             -- INPUT: folderId,bookmarkId,lastUpdated
             -- OUTPUT: NONE
-            --CREATE OR REPLACE FUNCTION addBookmarkToFolder(IN folderId integer, IN bookmarkId integer, IN lastUpdated timestamp with time zone)
-            --BEGIN
-            --DECLARE `Constraint Violation` CONDITION FOR SQLSTATE '23000';
-            --DECLARE EXIT HANDLER FOR `Constraint Violation` ROLLBACK;
+            CREATE OR REPLACE FUNCTION addBookmarkToFolder(IN folderId integer, IN bookmarkId integer, IN lastUpdated timestamp with time zone) RETURNS void AS $c$
+            BEGIN
+              --DECLARE `Constraint Violation` CONDITION FOR SQLSTATE '23000';
+              --DECLARE EXIT HANDLER FOR `Constraint Violation` ROLLBACK;
 
-            --START TRANSACTION;
-            --INSERT INTO bookmark_folder(folder_id,bookmark_id,last_updated)
-            --VALUES (folderId,bookmarkId,lastUpdated);
+              INSERT INTO bookmark_folder(folder_id,bookmark_id,last_updated) VALUES (folderId,bookmarkId,lastUpdated);
 
-            --- initialize records that don't exsit in the table.
-            --INSERT INTO folder_tag_idx(folder_id,tag_id,count)
-            --SELECT folderId, bookmark_tag_idx.tag_id, 0 FROM bookmark_tag_idx
-            --WHERE bookmark_tag_idx.bookmark_id = bookmarkId AND
-            --bookmark_tag_idx.tag_id NOT IN (
-            --SELECT folder_tag_idx.tag_id FROM folder_tag_idx
-            --WHERE folder_tag_idx.folder_id = folderId);
+              --initialize records that don't exist in the table.
+              INSERT INTO folder_tag_idx(folder_id,tag_id,"count")
+              SELECT folderId, bti.tag_id, 0 FROM bookmark_tag_idx as bti
+              WHERE bti.bookmark_id = bookmarkId AND bti.tag_id NOT IN
+              (SELECT fti.tag_id FROM folder_tag_idx as fti WHERE fti.folder_id = folderId);
 
-            --UPDATE folder_tag_idx
-            --SET folder_tag_idx.count = folder_tag_idx.count + 1
-            --WHERE folder_tag_idx.folder_id = folderId AND
-            --folder_tag_idx.tag_id IN (
-            --SELECT bookmark_tag_idx.tag_id FROM bookmark_tag_idx
-            --WHERE bookmark_tag_idx.bookmark_id = bookmarkId AND
-            --bookmark_tag_idx.count > 0);
-            --COMMIT;
-            --END;
-            --$c$ LANGUAGE plpgsql;
+              UPDATE folder_tag_idx SET "count" = "count" + 1
+              WHERE folder_id = folderId AND tag_id IN
+              (SELECT bti.tag_id FROM bookmark_tag_idx as bti WHERE bti.bookmark_id = bookmarkId AND bti."count" > 0);
+            END;
+            $c$ LANGUAGE plpgsql;
 
             ---------------------------------------------------------------
             -- PROCEDURE: removeBookmarkFromFolder
