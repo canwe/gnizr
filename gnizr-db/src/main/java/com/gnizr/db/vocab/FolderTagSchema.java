@@ -18,7 +18,7 @@ package com.gnizr.db.vocab;
 
 public interface FolderTagSchema {
 	public static final String TABLE_NAME = "folder_tag_idx";
-	public static final String COUNT = TABLE_NAME + ".count";
-	public static final String FOLDER_ID = TABLE_NAME + ".folder_id";
-	public static final String TAG_ID = TABLE_NAME + ".tag_id";
+	public static final String COUNT = TABLE_NAME + "_count";
+	public static final String FOLDER_ID = TABLE_NAME + "_folder_id";
+	public static final String TAG_ID = TABLE_NAME + "_tag_id";
 }

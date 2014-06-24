@@ -31,6 +31,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import com.gnizr.db.vocab.TagSchema;
 import org.apache.log4j.Logger;
 
 import com.gnizr.db.dao.Bookmark;
@@ -434,20 +435,19 @@ public class FolderDBDao implements FolderDao {
 		Connection conn = null;
 		try {
 			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("call pageBookmarksByFolderIdTagId(?,?,?,?,?,?,?);");
+			cStmt = conn.prepareCall("select * from pageBookmarksByFolderIdTagId(?,?,?,?,?,?) as f(bookmark_id integer, bookmark_user_id integer, bookmark_link_id integer, bookmark_title text, bookmark_notes text, bookmark_created_on timestamp with time zone, bookmark_last_updated timestamp with time zone, bookmark_folder_id integer, bookmark_folder_bookmark_id integer, bookmark_folder_folder_id integer, bookmark_folder_last_updated timestamp with time zone, bookmark_tag_idx_id integer, bookmark_tag_idx_bookmark_id integer, bookmark_tag_idx_tag_id integer, bookmark_tag_idx_count integer, bookmark_tag_idx_position int2, user_id integer, user_username varchar, user_password varchar, user_fullname varchar, user_created_on timestamp with time zone, user_email varchar, user_acct_status integer, link_id integer, link_mime_type_id integer, link_url text, link_url_hash varchar, bookmark_tags text, bookmark_folders text, link_cnt integer, totalCount integer)");
 			cStmt.setInt(1, folder.getId());
 			cStmt.setInt(2, tag.getId());
 			cStmt.setInt(3, offset);
 			cStmt.setInt(4, count);
-			cStmt.registerOutParameter(5, Types.INTEGER);
-			cStmt.setInt(6, sortBy);
-			cStmt.setInt(7, order);
+			cStmt.setInt(5, sortBy);
+			cStmt.setInt(6, order);
 			ResultSet rs = cStmt.executeQuery();
-			int size = cStmt.getInt(5);
-			if (size < 0) {
-				size = 0;
-			}
+			int size = 0;
 			while (rs.next()) {
+				if (size == 0) {
+					size = rs.getInt("totalCount");
+				}
 				Bookmark bookmark = BookmarkDBDao.createBookmarkObject2(rs);
 				bmarks.add(bookmark);
 			}
@@ -498,7 +498,7 @@ public class FolderDBDao implements FolderDao {
 		Connection conn = null;
 		try {
 			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("call findAllTagsInFolder(?,?,?,?);");
+			cStmt = conn.prepareCall("select * from findAllTagsInFolder(?,?,?,?) as f(tag_id integer, tag_tag varchar, tag_count integer, folder_tag_idx_folder_id integer, folder_tag_idx_tag_id integer, folder_tag_idx_count integer)");
 			cStmt.setInt(1, folder.getId());
 			cStmt.setInt(2, minFreq);
 			cStmt.setInt(3, sortBy);
@@ -506,12 +506,12 @@ public class FolderDBDao implements FolderDao {
 			ResultSet rs = cStmt.executeQuery();
 			while (rs.next()) {
 				FolderTag ft = new FolderTag();
-				Tag t = TagDBDao.createTagObject(rs);
+				Tag t = TagDBDao.createNamedTagObject(TagSchema.TABLE_NAME, rs);
 				ft.setTag(t);
 				ft.setCount(rs.getInt(FolderTagSchema.COUNT));
 				folderTags.add(ft);
 			}
-			if (folderTags.isEmpty() == false) {
+			if (!folderTags.isEmpty()) {
 				setFolderOnFolderTags(folderTags, folder);
 			}
 		} catch (Exception e) {
@@ -562,7 +562,7 @@ public class FolderDBDao implements FolderDao {
 				}
 				folderTags.add(ft);
 			}
-			if (tagGroups.isEmpty() == false) {
+			if (!tagGroups.isEmpty()) {
 				for (List<FolderTag> ftags : tagGroups.values()) {
 					setFolderOnFolderTags(ftags, folder);
 				}

@@ -48,39 +48,39 @@ import com.gnizr.db.vocab.LinkTagIdxSchema;
 import com.gnizr.db.vocab.TagSchema;
 import com.gnizr.db.vocab.UserTagIdxSchema;
 
-public class TagDBDao implements TagDao{
+public class TagDBDao implements TagDao {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -7006296066378980411L;
 
 	private static final Logger logger = Logger.getLogger(TagDBDao.class.getName());
-		
+
 	private DataSource dataSource;
-	
-	public TagDBDao(DataSource ds){
-		logger.debug("created TagDBDao. dataSource="+ds.toString());
+
+	public TagDBDao(DataSource ds) {
+		logger.debug("created TagDBDao. dataSource=" + ds.toString());
 		this.dataSource = ds;
 	}
 
 	public int createLinkTag(LinkTag tag) {
-		logger.debug("input: linkTag="+tag);
+		logger.debug("input: linkTag=" + tag);
 		Connection conn = null;
 		CallableStatement cStmt = null;
 		int id = -1;
 		try {
 			conn = dataSource.getConnection();
 			cStmt = conn.prepareCall("{call createLinkTag(?,?,?,?)}");
-			cStmt.setInt(1,tag.getLink().getId());
-			cStmt.setInt(2,tag.getTag().getId());
-			cStmt.setInt(3,tag.getCount());
-			cStmt.registerOutParameter(4,Types.INTEGER);
+			cStmt.setInt(1, tag.getLink().getId());
+			cStmt.setInt(2, tag.getTag().getId());
+			cStmt.setInt(3, tag.getCount());
+			cStmt.registerOutParameter(4, Types.INTEGER);
 			cStmt.execute();
 			id = cStmt.getInt(4);
 		} catch (Exception e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, cStmt);
 			} catch (SQLException e) {
@@ -91,21 +91,21 @@ public class TagDBDao implements TagDao{
 	}
 
 	public int createTag(Tag tag) {
-		logger.debug("input: tag="+tag);
+		logger.debug("input: tag=" + tag);
 		Connection conn = null;
 		CallableStatement cStmt = null;
 		int id = -1;
 		try {
 			conn = dataSource.getConnection();
 			cStmt = conn.prepareCall("{call createTag(?,?,?)}");
-			cStmt.setString(1,tag.getLabel());
-			cStmt.setInt(2,tag.getCount());
-			cStmt.registerOutParameter(3,Types.INTEGER);
+			cStmt.setString(1, tag.getLabel());
+			cStmt.setInt(2, tag.getCount());
+			cStmt.registerOutParameter(3, Types.INTEGER);
 			cStmt.execute();
 			id = cStmt.getInt(3);
 		} catch (Exception e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, cStmt);
 			} catch (SQLException e) {
@@ -116,22 +116,22 @@ public class TagDBDao implements TagDao{
 	}
 
 	public int createUserTag(UserTag tag) {
-		logger.debug("input: userTag="+tag);
+		logger.debug("input: userTag=" + tag);
 		Connection conn = null;
 		CallableStatement cStmt = null;
 		int id = -1;
 		try {
 			conn = dataSource.getConnection();
 			cStmt = conn.prepareCall("{call createUserTag(?,?,?,?)}");
-			cStmt.setInt(1,tag.getUser().getId());
-			cStmt.setInt(2,tag.getTag().getId());
-			cStmt.setInt(3,tag.getCount());
-			cStmt.registerOutParameter(4,Types.INTEGER);
+			cStmt.setInt(1, tag.getUser().getId());
+			cStmt.setInt(2, tag.getTag().getId());
+			cStmt.setInt(3, tag.getCount());
+			cStmt.registerOutParameter(4, Types.INTEGER);
 			cStmt.execute();
 			id = cStmt.getInt(4);
 		} catch (Exception e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, cStmt);
 			} catch (SQLException e) {
@@ -149,14 +149,14 @@ public class TagDBDao implements TagDao{
 		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call deleteLinkTag(?)}");
-			stmt.setInt(1,id);
-			if(stmt.executeUpdate() > 0){
+			stmt.setInt(1, id);
+			if (stmt.executeUpdate() > 0) {
 				logger.debug("# row deleted=" + stmt.getUpdateCount());
 				deleted = true;
 			}
 		} catch (SQLException e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
@@ -174,14 +174,14 @@ public class TagDBDao implements TagDao{
 		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call deleteTag(?)}");
-			stmt.setInt(1,id);
-			if(stmt.executeUpdate() > 0){
+			stmt.setInt(1, id);
+			if (stmt.executeUpdate() > 0) {
 				logger.debug("# row deleted=" + stmt.getUpdateCount());
 				deleted = true;
 			}
 		} catch (SQLException e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
@@ -199,14 +199,14 @@ public class TagDBDao implements TagDao{
 		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call deleteUserTag(?)}");
-			stmt.setInt(1,id);
-			if(stmt.executeUpdate() > 0){
+			stmt.setInt(1, id);
+			if (stmt.executeUpdate() > 0) {
 				logger.debug("# row deleted=" + stmt.getUpdateCount());
 				deleted = true;
 			}
 		} catch (SQLException e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
@@ -215,30 +215,30 @@ public class TagDBDao implements TagDao{
 		}
 		return deleted;
 	}
-	
+
 	public List<Tag> findTag(String tag) {
 		logger.debug("input: tag=" + tag);
 		List<Tag> tags = new ArrayList<Tag>();
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{				
+		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call findTag(?)}");
-			stmt.setString(1,tag);
+			stmt.setString(1, tag);
 			ResultSet rs = stmt.executeQuery();
-			while(rs.next()){
+			while (rs.next()) {
 				Tag aTag = createTagObject(rs);
 				tags.add(aTag);
 				logger.debug("found: " + aTag);
 			}
-			if(tags.size() == 0){
+			if (tags.size() == 0) {
 				logger.debug("found no matching tags");
 			}
-		}catch(SQLException e){		
+		} catch (SQLException e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -247,29 +247,29 @@ public class TagDBDao implements TagDao{
 	}
 
 	public List<LinkTag> findLinkTag(Link link, Tag tag) {
-		logger.debug("input: link="+link+",tag=" + tag);
+		logger.debug("input: link=" + link + ",tag=" + tag);
 		List<LinkTag> tags = new ArrayList<LinkTag>();
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{				
+		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call findLinkTag(?,?)}");
-			stmt.setInt(1,link.getId());
-			stmt.setInt(2,tag.getId());
+			stmt.setInt(1, link.getId());
+			stmt.setInt(2, tag.getId());
 			ResultSet rs = stmt.executeQuery();
-			while(rs.next()){
+			while (rs.next()) {
 				LinkTag aTag = createLinkTagObject(rs);
 				tags.add(aTag);
 				logger.debug("found: " + aTag);
 			}
-			if(tags.size() == 0){
+			if (tags.size() == 0) {
 				logger.debug("found no matching link tags");
 			}
-		}catch(SQLException e){		
+		} catch (SQLException e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -278,29 +278,29 @@ public class TagDBDao implements TagDao{
 	}
 
 	public List<UserTag> findUserTag(User user, Tag tag) {
-		logger.debug("input: user="+user+",tag=" + tag);
+		logger.debug("input: user=" + user + ",tag=" + tag);
 		List<UserTag> tags = new ArrayList<UserTag>();
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{				
+		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call findUserTag(?,?)}");
-			stmt.setInt(1,user.getId());
-			stmt.setInt(2,tag.getId());
+			stmt.setInt(1, user.getId());
+			stmt.setInt(2, tag.getId());
 			ResultSet rs = stmt.executeQuery();
-			while(rs.next()){
+			while (rs.next()) {
 				UserTag aTag = createUserTagObject(rs);
 				tags.add(aTag);
 				logger.debug("found: " + aTag);
 			}
-			if(tags.size() == 0){
+			if (tags.size() == 0) {
 				logger.debug("found no matching user tags");
 			}
-		}catch(SQLException e){		
+		} catch (SQLException e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -309,26 +309,26 @@ public class TagDBDao implements TagDao{
 	}
 
 	public LinkTag getLinkTag(int id) {
-		logger.debug("input: id="+id);
+		logger.debug("input: id=" + id);
 		LinkTag tag = null;
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{						
+		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call getLinkTag(?)}");
-			stmt.setInt(1,id);
+			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
-			if(rs.next()){
+			if (rs.next()) {
 				tag = createLinkTagObject(rs);
 				logger.debug("found: " + tag);
-			}else{
+			} else {
 				logger.debug("found no matching linkTag");
 			}
-		}catch(Exception e){		
+		} catch (Exception e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -337,41 +337,41 @@ public class TagDBDao implements TagDao{
 	}
 
 	public static LinkTag createLinkTagObject(ResultSet rs) throws SQLException {
-		if(rs == null) return null;
+		if (rs == null) return null;
 		LinkTag linkTag = new LinkTag();
 		linkTag.setId(rs.getInt(LinkTagIdxSchema.ID));
 		linkTag.setCount(rs.getInt(LinkTagIdxSchema.COUNT));
-		
+
 		Tag t = createTagObject(rs);
 		linkTag.setTag(t);
-		
+
 		Link l = LinkDBDao.createLinkObject(rs);
 		linkTag.setLink(l);
-		
+
 		return linkTag;
 	}
 
 	public Tag getTag(int id) {
-		logger.debug("input: id="+id);
+		logger.debug("input: id=" + id);
 		Tag tag = null;
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{						
+		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call getTag(?)}");
-			stmt.setInt(1,id);
+			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
-			if(rs.next()){
+			if (rs.next()) {
 				tag = createTagObject(rs);
 				logger.debug("found: " + tag);
-			}else{
+			} else {
 				logger.debug("found no matching tag");
 			}
-		}catch(Exception e){		
+		} catch (Exception e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -380,57 +380,57 @@ public class TagDBDao implements TagDao{
 	}
 
 	public static Tag createTagObject(ResultSet rs) throws SQLException {
-		if(rs == null) return null;
+		if (rs == null) return null;
 		Tag tag = new Tag();
 		tag.setId(rs.getInt(TagSchema.ID));
 		tag.setLabel(rs.getString(TagSchema.TAG));
 		tag.setCount(rs.getInt(TagSchema.COUNT));
 		return tag;
 	}
-	
-	public static Tag createNamedTagObject(String tblAliasName, ResultSet rs) throws SQLException{
+
+	public static Tag createNamedTagObject(String tblAliasName, ResultSet rs) throws SQLException {
 		return createNamedTagObject(tblAliasName, rs, false);
 	}
-	
-	public static Tag createNamedTagObject(String tblAliasName, ResultSet rs, boolean noColumnRef) throws SQLException{
-		if(rs == null) return null;
-		String idCol = tblAliasName+TagSchema.ID_COL;
+
+	public static Tag createNamedTagObject(String tblAliasName, ResultSet rs, boolean noColumnRef) throws SQLException {
+		if (rs == null) return null;
+		String idCol = tblAliasName + TagSchema.ID_COL;
 		String tagCol = tblAliasName + TagSchema.TAG_COL;
-		String countCol = tblAliasName +TagSchema.COUNT_COL;
-		if(noColumnRef == true){
+		String countCol = tblAliasName + TagSchema.COUNT_COL;
+		if (noColumnRef) {
 			idCol = idCol.replaceAll("\\.", "_");
 			tagCol = tagCol.replaceAll("\\.", "_");
 			countCol = countCol.replaceAll("\\.", "_");
-		}		
+		}
 		Tag tag = new Tag();
 		tag.setId(rs.getInt(idCol));
 		tag.setLabel(rs.getString(tagCol));
 		tag.setCount(rs.getInt(countCol));
 		return tag;
 	}
-	
-	
+
+
 	public UserTag getUserTag(int id) {
-		logger.debug("input: id="+id);
+		logger.debug("input: id=" + id);
 		UserTag tag = null;
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{						
+		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call getUserTag(?)}");
-			stmt.setInt(1,id);
+			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
-			if(rs.next()){
+			if (rs.next()) {
 				tag = createUserTagObject(rs);
 				logger.debug("found: " + tag);
-			}else{
+			} else {
 				logger.debug("found no matching userTag");
 			}
-		}catch(Exception e){		
+		} catch (Exception e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -439,181 +439,181 @@ public class TagDBDao implements TagDao{
 	}
 
 	public static UserTag createUserTagObject(String idCol, ResultSet rs) throws SQLException {
-		if(rs == null) return null;
+		if (rs == null) return null;
 		UserTag userTag = new UserTag();
-		if(idCol != null){
+		if (idCol != null) {
 			userTag.setId(rs.getInt(idCol));
-		}else{
-			userTag.setId(rs.getInt(UserTagIdxSchema.ID));	
+		} else {
+			userTag.setId(rs.getInt(UserTagIdxSchema.ID));
 		}
 		userTag.setCount(rs.getInt(UserTagIdxSchema.COUNT));
-		
+
 		Tag t = createTagObject(rs);
 		userTag.setTag(t);
-		
+
 		User u = UserDBDao.createUserObject(rs);
 		userTag.setUser(u);
-		
+
 		return userTag;
 	}
-	
-	public static UserTag createNamedUserTagObject(String userTagTblAlias, String tagTblAlias, String userTblAlias, ResultSet rs) throws SQLException{
-		return createNamedUserTagObject(userTagTblAlias, tagTblAlias, userTblAlias, rs,false);
+
+	public static UserTag createNamedUserTagObject(String userTagTblAlias, String tagTblAlias, String userTblAlias, ResultSet rs) throws SQLException {
+		return createNamedUserTagObject(userTagTblAlias, tagTblAlias, userTblAlias, rs, false);
 	}
-	
-	public static UserTag createNamedUserTagObject(String userTagTblAlias, String tagTblAlias, String userTblAlias, ResultSet rs, boolean noColumnRef) throws SQLException{
-		if(rs == null) return null;
-		UserTag userTag = new UserTag();		
+
+	public static UserTag createNamedUserTagObject(String userTagTblAlias, String tagTblAlias, String userTblAlias, ResultSet rs, boolean noColumnRef) throws SQLException {
+		if (rs == null) return null;
+		UserTag userTag = new UserTag();
 		Tag tag = createNamedTagObject(tagTblAlias, rs, noColumnRef);
 		userTag.setTag(tag);
-		User user = UserDBDao.createNamedUserObject(userTblAlias, rs, noColumnRef);		
-		userTag.setUser(user);		
-		
-		String idCol = userTagTblAlias+UserTagIdxSchema.ID_COL;
-		String countCol = userTagTblAlias+UserTagIdxSchema.COUNT_COL;
-		if(noColumnRef == true){
-			idCol = idCol.replaceAll("\\.","_");
-			countCol = countCol.replaceAll("\\.","_");
-		}		
+		User user = UserDBDao.createNamedUserObject(userTblAlias, rs, noColumnRef);
+		userTag.setUser(user);
+
+		String idCol = userTagTblAlias + UserTagIdxSchema.ID_COL;
+		String countCol = userTagTblAlias + UserTagIdxSchema.COUNT_COL;
+		if (noColumnRef) {
+			idCol = idCol.replaceAll("\\.", "_");
+			countCol = countCol.replaceAll("\\.", "_");
+		}
 		userTag.setId(rs.getInt(idCol));
 		userTag.setCount(rs.getInt(countCol));
-		return userTag;	
+		return userTag;
 	}
-	
-	
+
+
 	public static UserTag createUserTagObject(ResultSet rs) throws SQLException {
 		return createUserTagObject(null, rs);
 	}
 
-	public static BookmarkTag createBookmarkTagObject(ResultSet rs) throws SQLException{
-		if(rs == null) return null;
+	public static BookmarkTag createBookmarkTagObject(ResultSet rs) throws SQLException {
+		if (rs == null) return null;
 		BookmarkTag bookmarkTag = new BookmarkTag();
 		bookmarkTag.setId(rs.getInt(BookmarkTagIdxSchema.ID));
 		bookmarkTag.setCount(rs.getInt(BookmarkTagIdxSchema.COUNT));
 		bookmarkTag.setPosition(rs.getInt(BookmarkTagIdxSchema.POSITION));
-		
+
 		Tag tag = createTagObject(rs);
 		bookmarkTag.setTag(tag);
-		
+
 		Bookmark bookmark = BookmarkDBDao.createBookmarkObject2(rs);
 		bookmarkTag.setBookmark(bookmark);
-				
+
 		return bookmarkTag;
 	}
-	
+
 	public boolean updateLinkTag(LinkTag tag) {
-		logger.debug("input: linkTag="+tag);
+		logger.debug("input: linkTag=" + tag);
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		boolean isChanged = false;
 		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call updateLinkTag(?,?,?,?)}");
-			stmt.setInt(1,tag.getId());
-			stmt.setInt(2,tag.getLink().getId());
-			stmt.setInt(3,tag.getTag().getId());
-			stmt.setInt(4,tag.getCount());
+			stmt.setInt(1, tag.getId());
+			stmt.setInt(2, tag.getLink().getId());
+			stmt.setInt(3, tag.getTag().getId());
+			stmt.setInt(4, tag.getCount());
 			stmt.execute();
-			if(stmt.getUpdateCount()>0){
-				logger.debug("updateCount="+stmt.getUpdateCount());
+			if (stmt.getUpdateCount() > 0) {
+				logger.debug("updateCount=" + stmt.getUpdateCount());
 				isChanged = true;
 			}
-		stmt.getResultSet();
+			stmt.getResultSet();
 		} catch (SQLException e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
-		}		
+		}
 		return isChanged;
 	}
 
 	public boolean updateTag(Tag tag) {
-		logger.debug("input: tag="+tag);
+		logger.debug("input: tag=" + tag);
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		boolean isChanged = false;
 		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call updateTag(?,?,?)}");
-			stmt.setInt(1,tag.getId());
-			stmt.setString(2,tag.getLabel());
-			stmt.setInt(3,tag.getCount());
+			stmt.setInt(1, tag.getId());
+			stmt.setString(2, tag.getLabel());
+			stmt.setInt(3, tag.getCount());
 			stmt.execute();
-			if(stmt.getUpdateCount()>0){
-				logger.debug("updateCount="+stmt.getUpdateCount());
+			if (stmt.getUpdateCount() > 0) {
+				logger.debug("updateCount=" + stmt.getUpdateCount());
 				isChanged = true;
 			}
-		stmt.getResultSet();
+			stmt.getResultSet();
 		} catch (SQLException e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
-		}		
+		}
 		return isChanged;
 	}
 
 	public boolean updateUserTag(UserTag tag) {
-		logger.debug("input: tag="+tag);
+		logger.debug("input: tag=" + tag);
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		boolean isChanged = false;
 		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call updateUserTag(?,?,?,?)}");
-			stmt.setInt(1,tag.getId());
-			stmt.setInt(2,tag.getUser().getId());
-			stmt.setInt(3,tag.getTag().getId());
-			stmt.setInt(4,tag.getCount());
+			stmt.setInt(1, tag.getId());
+			stmt.setInt(2, tag.getUser().getId());
+			stmt.setInt(3, tag.getTag().getId());
+			stmt.setInt(4, tag.getCount());
 			stmt.execute();
-			if(stmt.getUpdateCount()>0){
-				logger.debug("updateCount="+stmt.getUpdateCount());
+			if (stmt.getUpdateCount() > 0) {
+				logger.debug("updateCount=" + stmt.getUpdateCount());
 				isChanged = true;
 			}
-		stmt.getResultSet();
+			stmt.getResultSet();
 		} catch (SQLException e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
-		}		
+		}
 		return isChanged;
 	}
-	
-	
+
+
 	public List<UserTag> findUserTag(User user) {
-		logger.debug("input: user="+user);
+		logger.debug("input: user=" + user);
 		List<UserTag> tags = new ArrayList<UserTag>();
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{				
+		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call findUserTagAll(?)}");
-			stmt.setInt(1,user.getId());
+			stmt.setInt(1, user.getId());
 			ResultSet rs = stmt.executeQuery();
-			while(rs.next()){
+			while (rs.next()) {
 				UserTag aTag = createUserTagObject(rs);
 				tags.add(aTag);
 				logger.debug("found: " + aTag);
 			}
-			if(tags.size() == 0){
+			if (tags.size() == 0) {
 				logger.debug("found no matching user tags");
 			}
-		}catch(SQLException e){		
+		} catch (SQLException e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -623,107 +623,107 @@ public class TagDBDao implements TagDao{
 
 
 	public List<LinkTag> findLinkTag(Link link, int minFreq) {
-		logger.debug("findLinkTag: link="+link +",minFreq="+minFreq);
+		logger.debug("findLinkTag: link=" + link + ",minFreq=" + minFreq);
 		List<LinkTag> tags = new ArrayList<LinkTag>();
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{				
+		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call findLinkTagMinFreq(?,?)}");
-			stmt.setInt(1,link.getId());
-			stmt.setInt(2,minFreq);
+			stmt.setInt(1, link.getId());
+			stmt.setInt(2, minFreq);
 			ResultSet rs = stmt.executeQuery();
-			while(rs.next()){
+			while (rs.next()) {
 				LinkTag aTag = createLinkTagObject(rs);
 				tags.add(aTag);
 				logger.debug("found: " + aTag);
 			}
-			if(tags.size() == 0){
+			if (tags.size() == 0) {
 				logger.debug("found no matching link tags");
 			}
-		}catch(SQLException e){		
+		} catch (SQLException e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
 		}
 		return tags;
 	}
-	
-	public List<Tag> findTag(int topN){
-		logger.debug("findTag: topN="+topN);
-		return findTag(topN,TagDao.SORT_FREQ);
+
+	public List<Tag> findTag(int topN) {
+		logger.debug("findTag: topN=" + topN);
+		return findTag(topN, TagDao.SORT_FREQ);
 	}
 
 	public List<Tag> findTag(int topN, int sortBy) {
-		logger.debug("findTag: topN="+topN +",sortBy="+sortBy);
+		logger.debug("findTag: topN=" + topN + ",sortBy=" + sortBy);
 		List<Tag> tags = new ArrayList<Tag>();
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{				
+		try {
 			conn = dataSource.getConnection();
-			if(sortBy == SORT_ALPH){
+			if (sortBy == SORT_ALPH) {
 				stmt = conn.prepareCall("{call findTagTopNSortByAlpha(?)}");
-			}else{
+			} else {
 				stmt = conn.prepareCall("{call findTagTopNSortByFreq(?)}");
 			}
-			stmt.setInt(1,topN);
+			stmt.setInt(1, topN);
 			ResultSet rs = stmt.executeQuery();
-			while(rs.next()){
+			while (rs.next()) {
 				Tag aTag = createTagObject(rs);
 				tags.add(aTag);
 				logger.debug("found: " + aTag);
 			}
-			if(tags.size() == 0){
+			if (tags.size() == 0) {
 				logger.debug("found no matching link tags");
 			}
-		}catch(SQLException e){		
+		} catch (SQLException e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
 		}
 		return tags;
 	}
-	
-	public List<UserTag> findUserTag(User user, int minFreq){
-		return findUserTag(user, minFreq,TagDao.SORT_ALPH);
+
+	public List<UserTag> findUserTag(User user, int minFreq) {
+		return findUserTag(user, minFreq, TagDao.SORT_ALPH);
 	}
 
 	public List<UserTag> findUserTag(User user, int minFreq, int sortBy) {
-		logger.debug("findUserTag: user="+user+",minFreq="+minFreq+",sortBy="+sortBy);
+		logger.debug("findUserTag: user=" + user + ",minFreq=" + minFreq + ",sortBy=" + sortBy);
 		List<UserTag> tags = new ArrayList<UserTag>();
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{				
+		try {
 			conn = dataSource.getConnection();
-			if(TagDao.SORT_FREQ == sortBy){
+			if (TagDao.SORT_FREQ == sortBy) {
 				stmt = conn.prepareCall("{call findUserTagMinFreqSortFreq(?,?)}");
-			}else{
+			} else {
 				stmt = conn.prepareCall("{call findUserTagMinFreqSortAlph(?,?)}");
 			}
-			stmt.setInt(1,user.getId());
-			stmt.setInt(2,minFreq);
+			stmt.setInt(1, user.getId());
+			stmt.setInt(2, minFreq);
 			ResultSet rs = stmt.executeQuery();
-			while(rs.next()){
+			while (rs.next()) {
 				UserTag aTag = createUserTagObject(rs);
 				tags.add(aTag);
 				logger.debug("found: " + aTag);
 			}
-			if(tags.size() == 0){
+			if (tags.size() == 0) {
 				logger.debug("found no matching user tags");
 			}
-		}catch(SQLException e){		
+		} catch (SQLException e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -732,23 +732,23 @@ public class TagDBDao implements TagDao{
 	}
 
 	public int createBookmarkTag(BookmarkTag tag) {
-		logger.debug("createBookmarkTag: bookmarkTag="+tag);
+		logger.debug("createBookmarkTag: bookmarkTag=" + tag);
 		Connection conn = null;
 		CallableStatement cStmt = null;
 		int id = -1;
 		try {
 			conn = dataSource.getConnection();
 			cStmt = conn.prepareCall("{call createBookmarkTag(?,?,?,?,?)}");
-			cStmt.setInt(1,tag.getBookmark().getId());
-			cStmt.setInt(2,tag.getTag().getId());			
-			cStmt.setInt(3,tag.getCount());
-			cStmt.setInt(4,tag.getPosition());
-			cStmt.registerOutParameter(5,Types.INTEGER);
+			cStmt.setInt(1, tag.getBookmark().getId());
+			cStmt.setInt(2, tag.getTag().getId());
+			cStmt.setInt(3, tag.getCount());
+			cStmt.setInt(4, tag.getPosition());
+			cStmt.registerOutParameter(5, Types.INTEGER);
 			cStmt.execute();
 			id = cStmt.getInt(5);
 		} catch (Exception e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, cStmt);
 			} catch (SQLException e) {
@@ -766,14 +766,14 @@ public class TagDBDao implements TagDao{
 		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call deleteBookmarkTag(?)}");
-			stmt.setInt(1,id);
-			if(stmt.executeUpdate() > 0){
+			stmt.setInt(1, id);
+			if (stmt.executeUpdate() > 0) {
 				logger.debug("# row deleted=" + stmt.getUpdateCount());
 				deleted = true;
 			}
 		} catch (SQLException e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
@@ -784,26 +784,26 @@ public class TagDBDao implements TagDao{
 	}
 
 	public BookmarkTag getBookmarkTag(int id) {
-		logger.debug("getBookmarkTag: id="+id);
+		logger.debug("getBookmarkTag: id=" + id);
 		BookmarkTag tag = null;
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{						
+		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call getBookmarkTag(?)}");
-			stmt.setInt(1,id);
+			stmt.setInt(1, id);
 			ResultSet rs = stmt.executeQuery();
-			if(rs.next()){
+			if (rs.next()) {
 				tag = createBookmarkTagObject(rs);
 				logger.debug("found: " + tag);
-			}else{
+			} else {
 				logger.debug("found no matching bookmarkTag");
 			}
-		}catch(Exception e){		
+		} catch (Exception e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -812,57 +812,57 @@ public class TagDBDao implements TagDao{
 	}
 
 	public boolean updateBookmarkTag(BookmarkTag tag) {
-		logger.debug("updateBookmarkTag: bookmarkTag="+tag);
+		logger.debug("updateBookmarkTag: bookmarkTag=" + tag);
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		boolean isChanged = false;
 		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call updateBookmarkTag(?,?,?,?,?)}");
-			stmt.setInt(1,tag.getId());
-			stmt.setInt(2,tag.getBookmark().getId());
-			stmt.setInt(3,tag.getTag().getId());
-			stmt.setInt(4,tag.getCount());
-			stmt.setInt(5,tag.getPosition());
+			stmt.setInt(1, tag.getId());
+			stmt.setInt(2, tag.getBookmark().getId());
+			stmt.setInt(3, tag.getTag().getId());
+			stmt.setInt(4, tag.getCount());
+			stmt.setInt(5, tag.getPosition());
 			stmt.execute();
-			if(stmt.getUpdateCount()>0){
-				logger.debug("updateCount="+stmt.getUpdateCount());
+			if (stmt.getUpdateCount() > 0) {
+				logger.debug("updateCount=" + stmt.getUpdateCount());
 				isChanged = true;
 			}
-		stmt.getResultSet();
+			stmt.getResultSet();
 		} catch (SQLException e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
-		}		
+		}
 		return isChanged;
 	}
 
 	public int getBookmarkTagId(Bookmark bookmark, Tag tag) {
-		logger.debug("getBookmarkTagId: bookmark="+bookmark+",tag="+tag);	
+		logger.debug("getBookmarkTagId: bookmark=" + bookmark + ",tag=" + tag);
 		int id = -1;
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{						
+		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call getBookmarkTagId(?,?)}");
-			stmt.setInt(1,bookmark.getId());
-			stmt.setInt(2,tag.getId());
+			stmt.setInt(1, bookmark.getId());
+			stmt.setInt(2, tag.getId());
 			ResultSet rs = stmt.executeQuery();
-			if(rs.next()){
-				id = rs.getInt(BookmarkTagIdxSchema.ID);			
-			}else{
+			if (rs.next()) {
+				id = rs.getInt(BookmarkTagIdxSchema.ID);
+			} else {
 				logger.debug("found no matching bookmarkTag");
 			}
-		}catch(Exception e){		
+		} catch (Exception e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -871,28 +871,28 @@ public class TagDBDao implements TagDao{
 	}
 
 	public List<BookmarkTag> findBookmarkTag(User user) {
-		logger.debug("input: user="+user);
+		logger.debug("input: user=" + user);
 		List<BookmarkTag> tags = new ArrayList<BookmarkTag>();
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{				
+		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call findBookmarkTagUserIdGrouped(?)}");
-			stmt.setInt(1,user.getId());
+			stmt.setInt(1, user.getId());
 			ResultSet rs = stmt.executeQuery();
-			while(rs.next()){
+			while (rs.next()) {
 				BookmarkTag aTag = createBookmarkTagObject(rs);
 				tags.add(aTag);
 				logger.debug("found: " + aTag);
 			}
-			if(tags.size() == 0){
+			if (tags.size() == 0) {
 				logger.debug("found no matching bookmark tags");
 			}
-		}catch(SQLException e){		
+		} catch (SQLException e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -901,28 +901,28 @@ public class TagDBDao implements TagDao{
 	}
 
 	public List<BookmarkTag> findBookmarkTag(Folder folder) {
-		logger.debug("findBookmarkTagFolder: folder="+folder);
+		logger.debug("findBookmarkTagFolder: folder=" + folder);
 		List<BookmarkTag> tags = new ArrayList<BookmarkTag>();
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{				
+		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call findBookmarkTagByFolderId(?)}");
-			stmt.setInt(1,folder.getId());
+			stmt.setInt(1, folder.getId());
 			ResultSet rs = stmt.executeQuery();
-			while(rs.next()){
+			while (rs.next()) {
 				BookmarkTag aTag = createBookmarkTagObject(rs);
 				tags.add(aTag);
 				logger.debug("found: " + aTag);
 			}
-			if(tags.size() == 0){
+			if (tags.size() == 0) {
 				logger.debug("found no matching bookmark tags");
 			}
-		}catch(SQLException e){		
+		} catch (SQLException e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -931,38 +931,38 @@ public class TagDBDao implements TagDao{
 	}
 
 	public boolean[] addTagCountOne(Tag[] tags, User user, Link link, Bookmark bookmark) {
-		logger.debug("addTagCountOne: tags="+tags+",user="+user+",link="+link+",bookmark="+bookmark);
+		logger.debug("addTagCountOne: tags=" + tags + ",user=" + user + ",link=" + link + ",bookmark=" + bookmark);
 		Connection conn = null;
 		CallableStatement stmt = null;
 		boolean[] opOkay = new boolean[tags.length];
 		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call addTagCountOne(?,?,?,?)}");
-			for(Tag tag : tags){
-				stmt.setInt(1,tag.getId());
-				stmt.setInt(2,user.getId());
-				stmt.setInt(3,link.getId());
-				stmt.setInt(4,bookmark.getId());
+			for (Tag tag : tags) {
+				stmt.setInt(1, tag.getId());
+				stmt.setInt(2, user.getId());
+				stmt.setInt(3, link.getId());
+				stmt.setInt(4, bookmark.getId());
 				stmt.addBatch();
 			}
 			int result[] = stmt.executeBatch();
-			for(int i = 0; i < result.length; i++){
-				if(result[i] >= 0){
+			for (int i = 0; i < result.length; i++) {
+				if (result[i] >= 0) {
 					opOkay[i] = true;
-				}else{
+				} else {
 					opOkay[i] = false;
 				}
 			}
-		stmt.getResultSet();
+			stmt.getResultSet();
 		} catch (SQLException e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
-		}		
+		}
 		return opOkay;
 	}
 
@@ -974,31 +974,31 @@ public class TagDBDao implements TagDao{
 		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call subtractTagCountOne(?,?,?,?)}");
-			for(Tag tag: tags){
-				stmt.setInt(1,tag.getId());
-				stmt.setInt(2,user.getId());
-				stmt.setInt(3,link.getId());
-				stmt.setInt(4,bookmark.getId());
+			for (Tag tag : tags) {
+				stmt.setInt(1, tag.getId());
+				stmt.setInt(2, user.getId());
+				stmt.setInt(3, link.getId());
+				stmt.setInt(4, bookmark.getId());
 				stmt.addBatch();
-			}		
+			}
 			int result[] = stmt.executeBatch();
-			for(int i = 0; i < result.length; i++){
-				if(result[i] >= 0){
+			for (int i = 0; i < result.length; i++) {
+				if (result[i] >= 0) {
 					opOkay[i] = true;
-				}else{
+				} else {
 					opOkay[i] = false;
 				}
 			}
-		stmt.getResultSet();
+			stmt.getResultSet();
 		} catch (SQLException e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
-		}		
+		}
 		return opOkay;
 	}
 
@@ -1009,27 +1009,27 @@ public class TagDBDao implements TagDao{
 		List<Bookmark> changedBookmarks = new ArrayList<Bookmark>();
 		try {
 			ResultSet rs = null;
-			conn = dataSource.getConnection();			
+			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call expandTag(?,?,?)}");
-			for(Tag t : toTags){
-				stmt.setInt(1,fromTag.getId());
-				stmt.setInt(2,t.getId());
-				stmt.setInt(3,user.getId());
+			for (Tag t : toTags) {
+				stmt.setInt(1, fromTag.getId());
+				stmt.setInt(2, t.getId());
+				stmt.setInt(3, user.getId());
 				rs = stmt.executeQuery();
-			}			
-			while(rs.next()){
+			}
+			while (rs.next()) {
 				Bookmark bm = BookmarkDBDao.createBookmarkObject2(rs);
 				changedBookmarks.add(bm);
 			}
 		} catch (SQLException e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
-		}		
+		}
 		return changedBookmarks;
 	}
 
@@ -1042,50 +1042,50 @@ public class TagDBDao implements TagDao{
 			ResultSet rs = null;
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call reduceTag(?,?)}");
-			for(Tag t : tags){
-				stmt.setInt(1,t.getId());
-				stmt.setInt(2,user.getId());
+			for (Tag t : tags) {
+				stmt.setInt(1, t.getId());
+				stmt.setInt(2, user.getId());
 				rs = stmt.executeQuery();
-			}			
-			while(rs.next()){
+			}
+			while (rs.next()) {
 				Bookmark bm = BookmarkDBDao.createBookmarkObject2(rs);
 				changeBookmarks.add(bm);
 			}
 		} catch (SQLException e) {
 			logger.fatal(e);
-		} finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
-		}		
+		}
 		return changeBookmarks;
 	}
 
 	public List<BookmarkTag> findBookmarkTagCommunitySearch(String searchQuery) {
-		logger.debug("findBookmarkTagCommunitySearch: searchQuery="+searchQuery);
+		logger.debug("findBookmarkTagCommunitySearch: searchQuery=" + searchQuery);
 		List<BookmarkTag> tags = new ArrayList<BookmarkTag>();
 		PreparedStatement stmt = null;
 		Connection conn = null;
-		try{				
+		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call findBookmarkTagCommunitySearch(?)}");
-			stmt.setString(1,searchQuery);
+			stmt.setString(1, searchQuery);
 			ResultSet rs = stmt.executeQuery();
-			while(rs.next()){
+			while (rs.next()) {
 				BookmarkTag aTag = createBookmarkTagObject(rs);
 				tags.add(aTag);
 				logger.debug("found: " + aTag);
 			}
-			if(tags.size() == 0){
+			if (tags.size() == 0) {
 				logger.debug("found no matching bookmark tags");
 			}
-		}catch(SQLException e){		
+		} catch (SQLException e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
-				DBUtil.cleanup(conn,stmt);
+				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {
 				logger.fatal(e);
 			}
@@ -1099,27 +1099,27 @@ public class TagDBDao implements TagDao{
 		List<LinkTag> tags = new ArrayList<LinkTag>();
 		CallableStatement stmt = null;
 		Connection conn = null;
-		try{
+		try {
 			conn = dataSource.getConnection();
 			stmt = conn.prepareCall("{call pageLinkTagSortByFreq(?,?,?,?)}");
-			stmt.setInt(1,link.getId());
-			stmt.setInt(2,offset);
-			stmt.setInt(3,count);
-			stmt.registerOutParameter(4,Types.INTEGER);
+			stmt.setInt(1, link.getId());
+			stmt.setInt(2, offset);
+			stmt.setInt(3, count);
+			stmt.registerOutParameter(4, Types.INTEGER);
 			ResultSet rs = stmt.executeQuery();
-			while(rs.next()){
-				LinkTag linktag =createLinkTagObject(rs);
+			while (rs.next()) {
+				LinkTag linktag = createLinkTagObject(rs);
 				tags.add(linktag);
 				logger.debug("found: " + linktag);
 			}
 			int size = stmt.getInt(4);
-			if(size < 0){
+			if (size < 0) {
 				size = 0;
 			}
-			result = new DaoResult<LinkTag>(tags,size);
-		}catch (Exception e) {
+			result = new DaoResult<LinkTag>(tags, size);
+		} catch (Exception e) {
 			logger.fatal(e);
-		}finally{
+		} finally {
 			try {
 				DBUtil.cleanup(conn, stmt);
 			} catch (SQLException e) {

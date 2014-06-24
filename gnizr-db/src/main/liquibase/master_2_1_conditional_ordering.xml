@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog logicalFilePath="classpath:/master_2_1_conditional_ordering.xml"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+
+    <changeSet id="conditional_ordering" author="vrebesbyrd@gmail.com">
+        <sql splitStatements="false">
+            <![CDATA[
+            /*
+            * numeric
+            */
+
+            CREATE OR REPLACE FUNCTION pos_unify(numeric)
+            RETURNS numeric[] AS
+            'select array[$1]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION pos_unify(numeric[], numeric)
+            RETURNS numeric[] AS
+            'select $1 || $2'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(numeric)
+            RETURNS numeric[] AS
+            'select array[-1 * $1]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(numeric[], numeric)
+            RETURNS numeric[] AS
+            'select $1 || (-1 * $2)'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            DROP OPERATOR IF EXISTS public.@< (NONE, numeric);
+            CREATE OPERATOR public.@< (
+            rightarg = numeric,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@< (numeric[], numeric);
+            CREATE OPERATOR public.@< (
+            leftarg = numeric[],
+            rightarg = numeric,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (NONE, numeric);
+            CREATE OPERATOR public.@> (
+            rightarg = numeric,
+            procedure = neg_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (numeric[], numeric);
+            CREATE OPERATOR public.@> (
+            leftarg = numeric[],
+            rightarg = numeric,
+            procedure = neg_unify
+            );
+
+            /*
+            * real
+            */
+
+            CREATE OR REPLACE FUNCTION pos_unify(real)
+            RETURNS numeric[] AS
+            'select array[$1::numeric]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION pos_unify(numeric[], real)
+            RETURNS numeric[] AS
+            'select $1 || $2::numeric'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(real)
+            RETURNS numeric[] AS
+            'select array[-1 * $1::numeric]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(numeric[], real)
+            RETURNS numeric[] AS
+            'select $1 || (-1 * $2::numeric)'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            DROP OPERATOR IF EXISTS public.@< (NONE, real);
+            CREATE OPERATOR public.@< (
+            rightarg = real,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@< (numeric[], real);
+            CREATE OPERATOR public.@< (
+            leftarg = numeric[],
+            rightarg = real,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (NONE, real);
+            CREATE OPERATOR public.@> (
+            rightarg = real,
+            procedure = neg_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (numeric[], real);
+            CREATE OPERATOR public.@> (
+            leftarg = numeric[],
+            rightarg = real,
+            procedure = neg_unify
+            );
+
+            /*
+            * double precision
+            */
+
+            CREATE OR REPLACE FUNCTION pos_unify(double precision)
+            RETURNS numeric[] AS
+            'select array[$1::numeric]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION pos_unify(numeric[], double precision)
+            RETURNS numeric[] AS
+            'select $1 || $2::numeric'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(double precision)
+            RETURNS numeric[] AS
+            'select array[-1 * $1::numeric]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(numeric[], double precision)
+            RETURNS numeric[] AS
+            'select $1 || (-1 * $2::numeric)'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            DROP OPERATOR IF EXISTS public.@< (NONE, double precision);
+            CREATE OPERATOR public.@< (
+            rightarg = double precision,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@< (numeric[], double precision);
+            CREATE OPERATOR public.@< (
+            leftarg = numeric[],
+            rightarg = double precision,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (NONE, double precision);
+            CREATE OPERATOR public.@> (
+            rightarg = double precision,
+            procedure = neg_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (numeric[], double precision);
+            CREATE OPERATOR public.@> (
+            leftarg = numeric[],
+            rightarg = double precision,
+            procedure = neg_unify
+            );
+
+            /*
+            * smallint
+            */
+
+            CREATE OR REPLACE FUNCTION pos_unify(smallint)
+            RETURNS numeric[] AS
+            'select array[$1::numeric]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION pos_unify(numeric[], smallint)
+            RETURNS numeric[] AS
+            'select $1 || $2::numeric'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(smallint)
+            RETURNS numeric[] AS
+            'select array[-1 * $1::numeric]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(numeric[], smallint)
+            RETURNS numeric[] AS
+            'select $1 || (-1 * $2::numeric)'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            DROP OPERATOR IF EXISTS public.@< (NONE, smallint);
+            CREATE OPERATOR public.@< (
+            rightarg = smallint,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@< (numeric[], smallint);
+            CREATE OPERATOR public.@< (
+            leftarg = numeric[],
+            rightarg = smallint,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (NONE, smallint);
+            CREATE OPERATOR public.@> (
+            rightarg = smallint,
+            procedure = neg_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (numeric[], smallint);
+            CREATE OPERATOR public.@> (
+            leftarg = numeric[],
+            rightarg = smallint,
+            procedure = neg_unify
+            );
+
+            /*
+            * integer
+            */
+
+            CREATE OR REPLACE FUNCTION pos_unify(integer)
+            RETURNS numeric[] AS
+            'select array[$1::numeric]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION pos_unify(numeric[], integer)
+            RETURNS numeric[] AS
+            'select $1 || $2::numeric'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(integer)
+            RETURNS numeric[] AS
+            'select array[-1 * $1::numeric]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(numeric[], integer)
+            RETURNS numeric[] AS
+            'select $1 || (-1 * $2::numeric)'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            DROP OPERATOR IF EXISTS public.@< (NONE, integer);
+            CREATE OPERATOR public.@< (
+            rightarg = integer,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@< (numeric[], integer);
+            CREATE OPERATOR public.@< (
+            leftarg = numeric[],
+            rightarg = integer,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (NONE, integer);
+            CREATE OPERATOR public.@> (
+            rightarg = integer,
+            procedure = neg_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (numeric[], integer);
+            CREATE OPERATOR public.@> (
+            leftarg = numeric[],
+            rightarg = integer,
+            procedure = neg_unify
+            );
+
+            /*
+            * bigint
+            */
+
+            CREATE OR REPLACE FUNCTION pos_unify(bigint)
+            RETURNS numeric[] AS
+            'select array[$1::numeric]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION pos_unify(numeric[], bigint)
+            RETURNS numeric[] AS
+            'select $1 || $2::numeric'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(bigint)
+            RETURNS numeric[] AS
+            'select array[-1 * $1::numeric]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(numeric[], bigint)
+            RETURNS numeric[] AS
+            'select $1 || (-1 * $2::numeric)'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            DROP OPERATOR IF EXISTS public.@< (NONE, bigint);
+            CREATE OPERATOR public.@< (
+            rightarg = bigint,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@< (numeric[], bigint);
+            CREATE OPERATOR public.@< (
+            leftarg = numeric[],
+            rightarg = bigint,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (NONE, bigint);
+            CREATE OPERATOR public.@> (
+            rightarg = bigint,
+            procedure = neg_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (numeric[], bigint);
+            CREATE OPERATOR public.@> (
+            leftarg = numeric[],
+            rightarg = bigint,
+            procedure = neg_unify
+            );
+
+            /*
+            * timestamp with time zone
+            */
+
+            CREATE OR REPLACE FUNCTION pos_unify(timestamp with time zone)
+            RETURNS numeric[] AS
+            'select array[extract(epoch from $1)::numeric]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION pos_unify(numeric[], timestamp with time zone)
+            RETURNS numeric[] AS
+            'select $1 || extract(epoch from $2)::numeric'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(timestamp with time zone)
+            RETURNS numeric[] AS
+            'select array[-1 * extract(epoch from $1)::numeric]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(numeric[], timestamp with time zone)
+            RETURNS numeric[] AS
+            'select $1 || (-1 * extract(epoch from $2)::numeric)'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            DROP OPERATOR IF EXISTS public.@< (NONE, timestamp with time zone);
+            CREATE OPERATOR public.@< (
+            rightarg = timestamp with time zone,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@< (numeric[], timestamp with time zone);
+            CREATE OPERATOR public.@< (
+            leftarg = numeric[],
+            rightarg = timestamp with time zone,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (NONE, timestamp with time zone);
+            CREATE OPERATOR public.@> (
+            rightarg = timestamp with time zone,
+            procedure = neg_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (numeric[], timestamp with time zone);
+            CREATE OPERATOR public.@> (
+            leftarg = numeric[],
+            rightarg = timestamp with time zone,
+            procedure = neg_unify
+            );
+
+            /*
+            * timestamp without time zone
+            */
+
+            CREATE OR REPLACE FUNCTION pos_unify(timestamp without time zone)
+            RETURNS numeric[] AS
+            'select array[extract(epoch from $1)::numeric]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION pos_unify(numeric[], timestamp without time zone)
+            RETURNS numeric[] AS
+            'select $1 || extract(epoch from $2)::numeric'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(timestamp without time zone)
+            RETURNS numeric[] AS
+            'select array[-1 * extract(epoch from $1)::numeric]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(numeric[], timestamp without time zone)
+            RETURNS numeric[] AS
+            'select $1 || (-1 * extract(epoch from $2)::numeric)'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            DROP OPERATOR IF EXISTS public.@< (NONE, timestamp without time zone);
+            CREATE OPERATOR public.@< (
+            rightarg = timestamp without time zone,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@< (numeric[], timestamp without time zone);
+            CREATE OPERATOR public.@< (
+            leftarg = numeric[],
+            rightarg = timestamp without time zone,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (NONE, timestamp without time zone);
+            CREATE OPERATOR public.@> (
+            rightarg = timestamp without time zone,
+            procedure = neg_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (numeric[], timestamp without time zone);
+            CREATE OPERATOR public.@> (
+            leftarg = numeric[],
+            rightarg = timestamp without time zone,
+            procedure = neg_unify
+            );
+
+            /*
+            * interval
+            */
+
+            CREATE OR REPLACE FUNCTION pos_unify(interval)
+            RETURNS numeric[] AS
+            'select array[extract(epoch from $1)::numeric]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION pos_unify(numeric[], interval)
+            RETURNS numeric[] AS
+            'select $1 || extract(epoch from $2)::numeric'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(interval)
+            RETURNS numeric[] AS
+            'select array[-1 * extract(epoch from $1)::numeric]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(numeric[], interval)
+            RETURNS numeric[] AS
+            'select $1 || (-1 * extract(epoch from $2)::numeric)'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            DROP OPERATOR IF EXISTS public.@< (NONE, interval);
+            CREATE OPERATOR public.@< (
+            rightarg = interval,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@< (numeric[], interval);
+            CREATE OPERATOR public.@< (
+            leftarg = numeric[],
+            rightarg = interval,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (NONE, interval);
+            CREATE OPERATOR public.@> (
+            rightarg = interval,
+            procedure = neg_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (numeric[], interval);
+            CREATE OPERATOR public.@> (
+            leftarg = numeric[],
+            rightarg = interval,
+            procedure = neg_unify
+            );
+
+            /*
+            * boolean
+            */
+
+            CREATE OR REPLACE FUNCTION pos_unify(boolean)
+            RETURNS numeric[] AS
+            'select array[case when $1 then 1 else 0 end::numeric]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION pos_unify(numeric[], boolean)
+            RETURNS numeric[] AS
+            'select $1 || case when $2 then 1 else 0 end::numeric'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(boolean)
+            RETURNS numeric[] AS
+            'select array[-1 * case when $1 then 1 else 0 end::numeric]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(numeric[], boolean)
+            RETURNS numeric[] AS
+            'select $1 || (-1 * case when $2 then 1 else 0 end::numeric)'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            DROP OPERATOR IF EXISTS public.@< (NONE, boolean);
+            CREATE OPERATOR public.@< (
+            rightarg = boolean,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@< (numeric[], boolean);
+            CREATE OPERATOR public.@< (
+            leftarg = numeric[],
+            rightarg = boolean,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (NONE, boolean);
+            CREATE OPERATOR public.@> (
+            rightarg = boolean,
+            procedure = neg_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (numeric[], boolean);
+            CREATE OPERATOR public.@> (
+            leftarg = numeric[],
+            rightarg = boolean,
+            procedure = neg_unify
+            );
+            ]]>
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

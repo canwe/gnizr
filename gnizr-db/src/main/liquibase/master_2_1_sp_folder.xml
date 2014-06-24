@@ -6,6 +6,7 @@
 
     <changeSet id="sp-folder" author="vrebesbyrd@gmail.com">
         <sql splitStatements="false">
+            <![CDATA[
             ---------------------------------------------------------------
             -- PROCEDURE: createFolder
             CREATE OR REPLACE FUNCTION createFolder(IN userId integer, IN fname VARCHAR(45), IN descr TEXT, IN lu timestamp with time zone) RETURNS integer AS $c$
@@ -104,50 +105,29 @@
             -- PROCEDURE: pageBookmarksByFolderIdTagId
             -- INPUT: folderId, offset, count, sortBy, orderFlag
             -- OUTPUT: totalCount
-            --CREATE OR REPLACE FUNCTION pageBookmarksByFolderIdTagId(IN folderId integer,
-            --IN tagId integer,
-            --IN offset integer,
-            --IN count integer,
-            --OUT totalCount integer,
-            --IN sortBy integer,
-            --IN orderFlag integer)
-            --BEGIN
-            --SET @offset = offset;
-            --SET @count = count;
-            --SET @folderId = folderId;
-            --SET @tagId = tagId;
-            --SET @qry = CONCAT("
-            --SELECT SQL_CALC_FOUND_ROWS *, bookmarkTags(bookmark.id) AS tags,
-            --bookmarkInFolders(bookmark.id) AS folders,
-            --linkCount(link.id) AS count
-            --FROM link, user, bookmark, bookmark_folder, bookmark_tag_idx
-            --WHERE bookmark_folder.folder_id = ? AND
-            --bookmark_folder.bookmark_id = bookmark.id AND
-            --bookmark_tag_idx.tag_id = ? AND
-            --bookmark_tag_idx.count > 0 AND
-            --bookmark_tag_idx.bookmark_id = bookmark.id AND
-            --bookmark.link_id = link.id AND
-            --bookmark.user_id = user.id
-            --");
+            CREATE OR REPLACE FUNCTION pageBookmarksByFolderIdTagId(IN folderId integer, IN tagId integer, IN off integer, IN lim integer, IN sortBy integer, IN orderFlag integer) RETURNS SETOF RECORD AS $c$
+            DECLARE
+              totalCount integer;
+            BEGIN
+              SELECT COUNT(*) into totalCount
+              FROM link as l, user as u, bookmark as b, bookmark_folder as bf, bookmark_tag_idx as bti
+              WHERE bf.folder_id = folderId AND bf.bookmark_id = b.id AND bti.tag_id = tagId AND bti."count" > 0 AND bti.bookmark_id = b.id AND b.link_id = l.id AND b.user_id = u.id;
 
-            --IF (sortBy = 1) THEN
-            --SET @qry = CONCAT(@qry," ORDER BY bookmark.created_on ");
-            --ELSEIF (sortBy = 2) THEN
-            --SET @qry = CONCAT(@qry," ORDER BY bookmark.last_updated ");
-            --ELSE
-            --SET @qry = CONCAT(@qry," ORDER BY bookmark_folder.last_updated ");
-            --END IF;
-
-            --IF(orderFlag = 1) THEN
-            --SET @qry = CONCAT(@qry, " DESC LIMIT ?,?");
-            --ELSE
-            --SET @qry = CONCAT(@qry, " ASC LIMIT ?,?");
-            --END IF;
-            --PREPARE STMT FROM @qry;
-            --EXECUTE STMT USING @folderId, @tagId, @offset, @count;
-            --SELECT FOUND_ROWS() INTO totalCount;
-            --END;
-            --$c$ LANGUAGE plpgsql;
+              RETURN QUERY SELECT B.*, BF.*, BTI.*, U.*, L.*,  bookmarkTags(bookmark.id) AS tags, bookmarkInFolders(bookmark.id) AS folders, linkCount(link.id) AS count, totalCount
+              FROM link as L, user as U, bookmark as B, bookmark_folder as BF, bookmark_tag_idx as BTI
+              WHERE BF.folder_id = folderId AND BF.bookmark_id = B.id AND BTI.tag_id = tagId AND BTI."count" > 0 AND BTI.bookmark_id = B.id AND B.link_id = L.id AND B.user_id = U.id
+              ORDER BY
+                CASE WHEN sortBy = 1 AND orderFlag = 1 THEN @>B.createdOn
+                     WHEN sortBy = 1 AND orderFlag = 2 THEN @<B.createdOn
+                     WHEN sortBy = 2 AND orderFlag = 1 THEN @>B.last_updated
+                     WHEN sortBy = 2 AND orderFlag = 2 THEN @<B.last_updated
+                     WHEN sortBy != 1 AND sortBy != 2 AND orderFlag = 2 THEN @<BF.last_updated
+                     WHEN sortBy != 1 AND sortBy != 2 AND orderFlag = 1 THEN @>BF.last_updated
+                     ELSE BF.last_updated
+                END
+              LIMIT lim OFFSET off;
+            END;
+            $c$ LANGUAGE plpgsql;
 
             ---------------------------------------------------------------
             -- PROCEDURE: addBookmarkToFolder
@@ -155,20 +135,19 @@
             -- OUTPUT: NONE
             CREATE OR REPLACE FUNCTION addBookmarkToFolder(IN folderId integer, IN bookmarkId integer, IN lastUpdated timestamp with time zone) RETURNS void AS $c$
             BEGIN
-              --DECLARE `Constraint Violation` CONDITION FOR SQLSTATE '23000';
-              --DECLARE EXIT HANDLER FOR `Constraint Violation` ROLLBACK;
-
               INSERT INTO bookmark_folder(folder_id,bookmark_id,last_updated) VALUES (folderId,bookmarkId,lastUpdated);
 
               --initialize records that don't exist in the table.
               INSERT INTO folder_tag_idx(folder_id,tag_id,"count")
               SELECT folderId, bti.tag_id, 0 FROM bookmark_tag_idx as bti
               WHERE bti.bookmark_id = bookmarkId AND bti.tag_id NOT IN
-              (SELECT fti.tag_id FROM folder_tag_idx as fti WHERE fti.folder_id = folderId);
+              (SELECT ft.tag_id FROM folder_tag_idx as ft WHERE ft.folder_id = folderId);
 
               UPDATE folder_tag_idx SET "count" = "count" + 1
               WHERE folder_id = folderId AND tag_id IN
               (SELECT bti.tag_id FROM bookmark_tag_idx as bti WHERE bti.bookmark_id = bookmarkId AND bti."count" > 0);
+            EXCEPTION WHEN unique_violation THEN
+              RETURN;
             END;
             $c$ LANGUAGE plpgsql;
 
@@ -261,38 +240,19 @@
             ---------------------------------------------------------------
             -- PROCEDURE: findAllTagsInFolder
             -- INPUT: folderId, sortBy, minFreq, orderFlag integer
-            -- OUTPUT:
-            --CREATE OR REPLACE FUNCTION findAllTagsInFolder(IN folderId integer,
-            --IN minFreq integer,
-            --IN sortBy integer,
-            --IN orderFlag integer)
-            --BEGIN
-            --SET @folderId = folderId;
-            --SET @minFreq = minFreq;
-            --SET @qry = CONCAT("
-            --SELECT * FROM tag, folder_tag_idx
-            --WHERE folder_tag_idx.folder_id = ? AND
-            --folder_tag_idx.tag_id = tag.id ");
-
-            --SET @qry = CONCAT(@qry, " AND folder_tag_idx.count >= ? ");
-
-            --- 1: sort alphabetically
-            --- 2: sort by usage freq
-            --IF (sortBy = 1) THEN
-            --SET @qry = CONCAT(@qry, " ORDER BY tag.tag ");
-            --ELSE
-            --SET @qry = CONCAT(@qry, " ORDER BY folder_tag_idx.count ");
-            --END IF;
-
-            --IF(orderFlag = 1) THEN
-            --SET @qry = CONCAT(@qry, " DESC ");
-            --ELSE
-            --SET @qry = CONCAT(@qry, " ASC ");
-            --END IF;
-            --PREPARE STMT FROM @qry;
-            --EXECUTE STMT USING @folderId, @minFreq;
-            --END;
-            --$c$ LANGUAGE plpgsql;
+            CREATE OR REPLACE FUNCTION findAllTagsInFolder(IN folderId integer, IN minFreq integer, IN sortBy integer, IN orderFlag integer) RETURNS SETOF RECORD AS $c$
+            BEGIN
+              RETURN QUERY SELECT t.*, fti.* FROM tag as t, folder_tag_idx as fti
+              WHERE fti.folder_id = folderId AND fti.tag_id = t.id AND fti."count" >= minFreq
+              ORDER BY
+                CASE when sortBy = 1 AND orderFlag = 1 then @>t.tag
+                     when sortBy = 1 AND orderFlag != 1 then @<t.tag
+                     when sortBy != 1 AND orderFlag = 1 then @>fti."count"
+                     when sortBy != 1 AND orderFlag != 1 then @<fti."count"
+                     else t.tag
+                END;
+            END;
+            $c$ LANGUAGE plpgsql;
 
             ---------------------------------------------------------------
             -- PROCEDURE: findTagGroupsInFolder
@@ -371,7 +331,7 @@
             --  GROUP BY fti.tag_id;
             --END;
             --$c$ LANGUAGE plpgsql;
-
+            ]]>
         </sql>
     </changeSet>
 
