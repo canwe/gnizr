@@ -243,16 +243,17 @@
             CREATE OR REPLACE FUNCTION findAllTagsInFolder(IN folderId integer, IN minFreq integer, IN sortBy integer, IN orderFlag integer) RETURNS SETOF RECORD AS $c$
             BEGIN
               RETURN QUERY SELECT t.*, fti.* FROM tag as t, folder_tag_idx as fti
-              WHERE fti.folder_id = folderId AND fti.tag_id = t.id AND fti."count" >= minFreq
-              ORDER BY
-                CASE when sortBy = 1 AND orderFlag = 1 then @>t.tag
-                     when sortBy = 1 AND orderFlag != 1 then @<t.tag
-                     when sortBy != 1 AND orderFlag = 1 then @>fti."count"
-                     when sortBy != 1 AND orderFlag != 1 then @<fti."count"
-                     else t.tag
-                END;
+              WHERE fti.folder_id = folderId AND fti.tag_id = t.id AND fti."count" >= minFreq;
             END;
             $c$ LANGUAGE plpgsql;
+            -- ORDER BY
+                -- CASE
+                     -- TODO when sortBy = 1 AND orderFlag = 1 then @>t.tag
+                     -- TODO when sortBy = 1 AND orderFlag != 1 then @<t.tag
+                     -- when sortBy != 1 AND orderFlag = 1 then @>fti."count"
+                     -- when sortBy != 1 AND orderFlag != 1 then @<fti."count"
+                     -- else t.tag
+                -- END;
 
             ---------------------------------------------------------------
             -- PROCEDURE: findTagGroupsInFolder

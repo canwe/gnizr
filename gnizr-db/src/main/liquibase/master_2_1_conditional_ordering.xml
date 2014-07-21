@@ -58,6 +58,79 @@
             );
 
             /*
+            * varchar
+            */
+
+            create or replace function h_bigint(varchar) returns numeric as
+            'select (substr(md5($1),1,16))::bit(64)::bigint::numeric'
+            language 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION h_bigint(a varchar[]) RETURNS numeric[] AS $$
+            DECLARE
+              retVal numeric[];
+              n integer;
+              t varchar;
+            BEGIN
+              n:=0;
+              FOREACH t IN ARRAY a LOOP
+                retVal[n] := h_bigint(t);
+                n:=n+1;
+              END LOOP;
+              RETURN retVal;
+            END; $$
+            LANGUAGE plpgsql;
+
+            CREATE OR REPLACE FUNCTION reverse(varchar) RETURNS varchar AS $$
+            SELECT array_to_string(ARRAY(SELECT substring($1, s.i,1) FROM generate_series(length($1), 1, -1) AS s(i)), '');
+            $$ LANGUAGE SQL IMMUTABLE STRICT;
+
+            CREATE OR REPLACE FUNCTION pos_unify(varchar)
+            RETURNS varchar[] AS
+            'select array[$1]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION pos_unify(varchar[], varchar)
+            RETURNS varchar[] AS
+            'select $1 || $2'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(varchar)
+            RETURNS varchar[] AS
+            'select array[reverse($1)]'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            CREATE OR REPLACE FUNCTION neg_unify(varchar[], varchar)
+            RETURNS varchar[] AS
+            'select $1 || reverse($2)'
+            LANGUAGE 'sql' IMMUTABLE;
+
+            DROP OPERATOR IF EXISTS public.@< (NONE, varchar);
+            CREATE OPERATOR public.@< (
+            rightarg = varchar,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@< (varchar[], varchar);
+            CREATE OPERATOR public.@< (
+            leftarg = varchar[],
+            rightarg = varchar,
+            procedure = pos_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (NONE, varchar);
+            CREATE OPERATOR public.@> (
+            rightarg = varchar,
+            procedure = neg_unify
+            );
+
+            DROP OPERATOR IF EXISTS public.@> (varchar[], varchar);
+            CREATE OPERATOR public.@> (
+            leftarg = varchar[],
+            rightarg = varchar,
+            procedure = neg_unify
+            );
+
+            /*
             * real
             */
 

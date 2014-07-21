@@ -30,6 +30,26 @@
               WHERE b.id=bid AND b.link_id = l.id AND b.user_id = u.id;
             END;
             $c$ LANGUAGE plpgsql;
+
+            ---------------------------------------------------------------
+            -- PROCEDURE: pageBookmarksLinkId
+            -- INPUT: linkId,
+            --        offset,
+            --        count
+            CREATE OR REPLACE FUNCTION pageBookmarksLinkId(linkId integer, off integer, lim integer) RETURNS SETOF RECORD AS $c$
+            DECLARE
+              totalCount integer;
+            BEGIN
+              SELECT COUNT(*) into totalCount
+              FROM bookmark as bmk, link as l, "user" as u
+              WHERE bmk.link_id=linkId AND bmk.user_id = u.id AND bmk.link_id=l.id;
+
+              RETURN QUERY SELECT bmk.*, u.*, l.*, bookmarkTags(bmk.id) as tags, bookmarkInFolders(bmk.id) AS folders, linkCount(l.id) as cnt, totalCount
+              FROM bookmark as bmk, link as l, "user" as u
+              WHERE bmk.link_id=linkId AND bmk.user_id = u.id AND bmk.link_id=l.id
+              ORDER BY bmk.created_on DESC LIMIT lim OFFSET off;
+            END;
+            $c$ LANGUAGE plpgsql;
         </sql>
     </changeSet>
 
