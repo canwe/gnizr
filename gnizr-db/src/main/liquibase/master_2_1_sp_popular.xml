@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog logicalFilePath="classpath:/master_2_1_sp_popular.xml"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+
+    <changeSet id="sp-popular" author="vrebesbyrd@gmail.com">
+        <sql splitStatements="false">
+            <![CDATA[
+            ---------------------------------------------------------------
+            -- PROCEDURE: getPopularBookmarks
+            -- INPUT: inPastDays, count
+            -- OUTPUT: NONE
+            CREATE OR REPLACE FUNCTION getPopularBookmarks(IN startTime timestamp with time zone, IN endTime timestamp with time zone, IN maxCount integer) RETURNS SETOF RECORD AS $c$
+            BEGIN
+              RETURN QUERY SELECT bmk.*, u.*, l.*, bookmarkTags(bmk.id) as tags, null as folders
+              FROM link as l, "user" as u,
+              (SELECT b.*, count(*) as cnt FROM bookmark as b
+               WHERE startTime <= b.last_updated AND b.last_updated < endTime
+               GROUP BY b.link_id
+               ORDER BY cnt DESC LIMIT maxCount) AS bmk
+              WHERE l.id = bmk.link_id AND u.id = bmk.user_id;
+            END;
+            $c$ LANGUAGE plpgsql;
+            ]]>
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

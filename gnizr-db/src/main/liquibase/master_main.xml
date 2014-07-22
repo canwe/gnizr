@@ -8,6 +8,7 @@
 	<include file="master_2_1_conditional_ordering.xml" relativeToChangelogFile="true"/>
 	<include file="master_2_1_x.xml" relativeToChangelogFile="true"/>
     <include file="master_2_1_sp_bookmark.xml" relativeToChangelogFile="true"/>
+    <include file="master_2_1_sp_popular.xml" relativeToChangelogFile="true"/>
     <include file="master_2_1_sp_link.xml" relativeToChangelogFile="true"/>
 	<include file="master_2_1_sp_folder.xml" relativeToChangelogFile="true"/>
     <include file="master_2_2_x.xml" relativeToChangelogFile="true"/>

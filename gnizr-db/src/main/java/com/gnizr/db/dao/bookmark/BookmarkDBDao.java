@@ -290,17 +290,16 @@ public class BookmarkDBDao implements BookmarkDao {
 		List<Bookmark> bmarks = new ArrayList<Bookmark>();
 		try {
 			conn = dataSource.getConnection();
-			cStmt = conn.prepareCall("call pageBookmarksTagId(?,?,?,?);");
+			cStmt = conn.prepareCall("select * from pageBookmarksTagId(?,?,?) as f(bookmark_id integer, bookmark_user_id integer, bookmark_link_id integer, bookmark_title text, bookmark_notes text, bookmark_created_on timestamp with time zone, bookmark_last_updated timestamp with time zone, user_id integer, user_username varchar, user_password varchar, user_fullname varchar, user_created_on timestamp with time zone, user_email varchar, user_acct_status integer, link_id integer, link_mime_type_id integer, link_url text, link_url_hash varchar, bookmark_tags text, bookmark_folders text, link_cnt integer, totalCount integer);");
 			cStmt.setLong(1, tag.getId());
 			cStmt.setLong(2, offset);
 			cStmt.setInt(3, count);
-			cStmt.registerOutParameter(4, Types.INTEGER);
 			ResultSet rs = cStmt.executeQuery();
-			int size = cStmt.getInt(4);
-			if (size < 0) {
-				size = 0;
-			}
+			int size = 0;
 			while (rs.next()) {
+				if (size == 0) {
+					size = rs.getInt("totalCount");
+				}
 				Bookmark b = createBookmarkObject2(rs);
 				logger.debug("found bmark=" + b);
 				bmarks.add(b);
@@ -364,7 +363,7 @@ public class BookmarkDBDao implements BookmarkDao {
 		List<Bookmark> bmarks = new ArrayList<Bookmark>();
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareStatement("call findBookmark(?,?)");
+			stmt = conn.prepareStatement("select * from findBookmark(?,?) as f(bookmark_id integer, bookmark_user_id integer, bookmark_link_id integer, bookmark_title text, bookmark_notes text, bookmark_created_on timestamp with time zone, bookmark_last_updated timestamp with time zone, user_id integer, user_username varchar, user_password varchar, user_fullname varchar, user_created_on timestamp with time zone, user_email varchar, user_acct_status integer, link_id integer, link_mime_type_id integer, link_url text, link_url_hash varchar, bookmark_tags text, bookmark_folders text, link_cnt integer);");
 			stmt.setLong(1, user.getId());
 			stmt.setLong(2, link.getId());
 			ResultSet rs = stmt.executeQuery();
@@ -549,7 +548,7 @@ public class BookmarkDBDao implements BookmarkDao {
 		List<Bookmark> bmarks = new ArrayList<Bookmark>();
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareCall("call getPopularBookmarks(?,?,?)");
+			stmt = conn.prepareCall("select * from getPopularBookmarks(?,?,?) as f(bookmark_id integer, bookmark_user_id integer, bookmark_link_id integer, bookmark_title text, bookmark_notes text, bookmark_created_on timestamp with time zone, bookmark_last_updated timestamp with time zone, user_id integer, user_username varchar, user_password varchar, user_fullname varchar, user_created_on timestamp with time zone, user_email varchar, user_acct_status integer, link_id integer, link_mime_type_id integer, link_url text, link_url_hash varchar, bookmark_tags text, bookmark_folders text);");
 			stmt.setTimestamp(1, new Timestamp(start.getTime()));
 			stmt.setTimestamp(2, new Timestamp(end.getTime()));
 			stmt.setInt(3, maxCount);
