@@ -169,17 +169,17 @@
 </rule>	
 	
 <rule>
-  <from>^/edtpost(\?.*)$</from>
+  <from>^\/edtpost(\?.*)?$</from>
   <to last="true">/bookmark/edit.action</to>
 </rule>	
 
 <rule>
-  <from>^/delpost(\?.*)$</from>
+  <from>^\/delpost(\?.*)?$</from>
   <to last="true">/bookmark/delete.action</to>
 </rule>			
 	
 <rule>
-  <from>^/arcpost(\?.*)</from>
+  <from>^\/arcpost(\?.*)?</from>
   <to last="true">/bookmark/archive.action</to>
 </rule>		
 	
