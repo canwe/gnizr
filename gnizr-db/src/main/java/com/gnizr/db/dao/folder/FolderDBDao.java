@@ -263,7 +263,7 @@ public class FolderDBDao implements FolderDao {
 		int upCnt = 0;
 		try {
 			conn = dataSource.getConnection();
-			cstmt = conn.prepareCall("call removeAllBookmarksFromFolder(?)");
+			cstmt = conn.prepareCall("select * from removeAllBookmarksFromFolder(?)");
 			cstmt.setInt(1, folder.getId());
 			ResultSet rs = cstmt.executeQuery();
 			if (rs.next()) {
@@ -288,7 +288,7 @@ public class FolderDBDao implements FolderDao {
 		boolean[] opOkay = new boolean[bookmarks.size()];
 		try {
 			conn = dataSource.getConnection();
-			cstmt = conn.prepareCall("call removeBookmarkFromFolder(?,?)");
+			cstmt = conn.prepareCall("select * from removeBookmarkFromFolder(?,?)");
 			int folderId = folder.getId();
 			for (Bookmark bm : bookmarks) {
 				cstmt.setInt(1, folderId);
@@ -322,7 +322,7 @@ public class FolderDBDao implements FolderDao {
 		boolean isChanged = false;
 		try {
 			conn = dataSource.getConnection();
-			stmt = conn.prepareCall("{call updateFolder(?,?,?,?,?)}");
+			stmt = conn.prepareCall("{select * from updateFolder(?,?,?,?,?)}");
 			stmt.setInt(1, folder.getId());
 			stmt.setInt(2, folder.getUser().getId());
 			stmt.setString(3, folder.getName());

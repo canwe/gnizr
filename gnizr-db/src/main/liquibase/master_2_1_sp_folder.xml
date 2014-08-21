@@ -155,27 +155,21 @@
             -- PROCEDURE: removeBookmarkFromFolder
             -- INPUT: folderId, bookmarkId
             -- OUTPUT: NONE
-            --CREATE OR REPLACE FUNCTION removeBookmarkFromFolder(IN folderId integer,
-            --IN bookmarkId integer)
-            --BEGIN
-            --START TRANSACTION;
-            --DELETE FROM bookmark_folder WHERE
-            --bookmark_folder.folder_id = folderId AND
-            --bookmark_folder.bookmark_id = bookmarkId;
+            CREATE OR REPLACE FUNCTION removeBookmarkFromFolder(IN folderId integer, IN bookmarkId integer) RETURNS void AS $c$
+            DECLARE
+              rowCnt integer;
+            BEGIN
+              DELETE FROM bookmark_folder as bf WHERE bf.folder_id = folderId AND bf.bookmark_id = bookmarkId;
 
-            --IF (ROW_COUNT() > 0) THEN
-            --UPDATE folder_tag_idx
-            --SET folder_tag_idx.count = folder_tag_idx.count - 1
-            --WHERE folder_tag_idx.folder_id = folderId AND
-            --folder_tag_idx.count > 0 AND
-            --folder_tag_idx.tag_id IN (
-            --SELECT bookmark_tag_idx.tag_id FROM bookmark_tag_idx
-            --WHERE bookmark_tag_idx.bookmark_id = bookmarkId AND
-            --bookmark_tag_idx.count > 0 );
-            --END IF;
-            --COMMIT;
-            --END;
-            --$c$ LANGUAGE plpgsql;
+              GET DIAGNOSTICS rowCnt = ROW_COUNT;
+              IF (rowCnt > 0) THEN
+                UPDATE folder_tag_idx SET
+                  count = count - 1
+                WHERE folder_id = folderId AND count > 0
+                  AND tag_id IN (SELECT bti.tag_id FROM bookmark_tag_idx as bti WHERE bti.bookmark_id = bookmarkId AND bti.count > 0);
+              END IF;
+            END;
+            $c$ LANGUAGE plpgsql;
 
             ---------------------------------------------------------------
             -- PROCEDURE: removeAllBookmarksFromFolder
@@ -190,27 +184,24 @@
             -- PROCEDURE: pageContainedInFolders
             -- INPUT: bookmarkId,offset,count
             -- OUTPUT: totalCount
-            --CREATE OR REPLACE FUNCTION pageContainedInFolders(IN bookmarkId integer,
-            --IN offset integer,
-            --IN count integer,
-            --OUT totalCount integer)
+            --CREATE OR REPLACE FUNCTION pageContainedInFolders(IN bookmarkId integer, IN off integer, IN cnt integer, OUT totalCount integer)
             --BEGIN
-            --SET @offset = offset;
-            --SET @count = count;
-            --SET @bookmarkId = bookmarkId;
-            --PREPARE STMT FROM "
-            --SELECT SQL_CALC_FOUND_ROWS *, folderSize(folder.id) as folder_size
-            --FROM folder, user as own
-            --WHERE folder.id IN
-            --(SELECT bookmark_folder.folder_id
-            --FROM bookmark_folder WHERE
-            --bookmark_folder.bookmark_id = ?) AND
-            --folder.owner_id = own.id
-            --ORDER BY folder.folder_name
-            --LIMIT ?, ?;
-            --";
-            --EXECUTE STMT USING @bookmarkId, @offset, @count;
-            --SELECT FOUND_ROWS() INTO totalCount;
+            --  SET @offset = offset;
+            --  SET @count = count;
+            --  SET @bookmarkId = bookmarkId;
+            --  PREPARE STMT FROM "
+            --  SELECT SQL_CALC_FOUND_ROWS *, folderSize(folder.id) as folder_size
+            --  FROM folder, user as own
+            --  WHERE folder.id IN
+            --  (SELECT bookmark_folder.folder_id
+            --  FROM bookmark_folder WHERE
+            --  bookmark_folder.bookmark_id = ?) AND
+            --  folder.owner_id = own.id
+            --  ORDER BY folder.folder_name
+            --  LIMIT ?, ?;
+            --  ";
+            --  EXECUTE STMT USING @bookmarkId, @offset, @count;
+            --  SELECT FOUND_ROWS() INTO totalCount;
             --END;
             --$c$ LANGUAGE plpgsql;
 
